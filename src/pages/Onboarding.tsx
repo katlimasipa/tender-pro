@@ -36,7 +36,13 @@ export default function Onboarding() {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase.from("companies").insert({
-      owner_id: user.id, ...parsed.data,
+      owner_id: user.id,
+      name: parsed.data.name,
+      registration_number: parsed.data.registration_number || null,
+      vat_number: parsed.data.vat_number || null,
+      contact_email: parsed.data.contact_email || null,
+      contact_phone: parsed.data.contact_phone || null,
+      address: parsed.data.address || null,
     }).select().single();
     if (error) { toast.error(error.message); setLoading(false); return; }
     await supabase.from("profiles").update({ company_id: data.id }).eq("user_id", user.id);
