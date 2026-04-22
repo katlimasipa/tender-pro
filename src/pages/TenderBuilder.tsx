@@ -26,6 +26,7 @@ export default function TenderBuilder() {
 
   const [title, setTitle] = useState("");
   const [tenderNumber, setTenderNumber] = useState("");
+  const [quotationRef, setQuotationRef] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientAddress, setClientAddress] = useState("");
   const [notes, setNotes] = useState("");
@@ -44,6 +45,7 @@ export default function TenderBuilder() {
     supabase.from("tenders").select("*").eq("id", id!).maybeSingle().then(({ data }) => {
       if (!data) return;
       setTitle(data.title); setTenderNumber(data.tender_number || "");
+      setQuotationRef((data as any).quotation_ref || "");
       setClientName(data.client_name || ""); setClientAddress(data.client_address || "");
       setNotes(data.notes || ""); setVatRate(Number(data.vat_rate));
       setVatInclusive(data.vat_inclusive); setItems((data.items as any) || [blankItem()]);
@@ -67,6 +69,7 @@ export default function TenderBuilder() {
       company_id: company?.id || null,
       title: title.trim(),
       tender_number: tenderNumber || null,
+      quotation_ref: quotationRef || null,
       client_name: clientName || null,
       client_address: clientAddress || null,
       notes: notes || null,
@@ -97,7 +100,7 @@ export default function TenderBuilder() {
     try {
       await save();
       const blob = await generateTenderPDF({
-        title, tenderNumber, clientName, clientAddress, notes,
+        title, tenderNumber, quotationRef, clientName, clientAddress, notes,
         vatInclusive, vatRate, items, company,
       });
       const url = URL.createObjectURL(blob);
@@ -142,10 +145,13 @@ export default function TenderBuilder() {
               <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" placeholder="Supply of construction materials — Phase 2" />
             </div>
             <div>
-              <Label>Tender number</Label>
-              <Input value={tenderNumber} onChange={e => setTenderNumber(e.target.value)} className="mt-1.5" />
+              <Label>Quotation No.</Label>
+              <Input value={tenderNumber} onChange={e => setTenderNumber(e.target.value)} className="mt-1.5" placeholder="KGL2026/015" />
             </div>
-            <div />
+            <div>
+              <Label>Quotation Ref.</Label>
+              <Input value={quotationRef} onChange={e => setQuotationRef(e.target.value)} className="mt-1.5" placeholder="RFQJW03SN25" />
+            </div>
             <div>
               <Label>Client name</Label>
               <Input value={clientName} onChange={e => setClientName(e.target.value)} className="mt-1.5" placeholder="City of Cape Town" />
@@ -168,8 +174,7 @@ export default function TenderBuilder() {
               <table className="w-full text-sm">
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>
-                    <th className="px-4 py-3 font-medium w-12">No.</th>
-                    <th className="px-4 py-3 font-medium">Product / Description</th>
+                    <th className="px-4 py-3 font-medium">Description</th>
                     <th className="px-4 py-3 font-medium w-28 text-right">Qty</th>
                     <th className="px-4 py-3 font-medium w-40 text-right">Unit Price (R)</th>
                     <th className="px-4 py-3 font-medium w-40 text-right">Total</th>
@@ -179,7 +184,6 @@ export default function TenderBuilder() {
                 <tbody>
                   {items.map((it, i) => (
                     <tr key={i} className="border-t border-border">
-                      <td className="px-4 py-3 text-muted-foreground tabular-nums">{i + 1}</td>
                       <td className="px-2 py-2">
                         <Input value={it.product} onChange={e => updateItem(i, { product: e.target.value })} placeholder="Item description" className="border-0 bg-transparent focus-visible:bg-secondary/40" />
                       </td>

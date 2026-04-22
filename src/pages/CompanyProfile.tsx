@@ -45,6 +45,7 @@ export default function CompanyProfile() {
       contact_phone: form.contact_phone || null,
       address: form.address || null,
       website: form.website || null,
+      csd_number: form.csd_number || null,
       primary_color: form.primary_color || "#1C382C",
       accent_color: form.accent_color || "#C8932B",
     }).eq("id", company.id);
@@ -193,6 +194,13 @@ export default function CompanyProfile() {
                 <Label>VAT number</Label>
                 <Input value={form.vat_number || ""} onChange={e => setForm({ ...form, vat_number: e.target.value })} className="mt-1.5" />
               </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>CSD number</Label>
+                <Input value={form.csd_number || ""} onChange={e => setForm({ ...form, csd_number: e.target.value })} className="mt-1.5" placeholder="MAAA0893252" />
+              </div>
+              <div />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
