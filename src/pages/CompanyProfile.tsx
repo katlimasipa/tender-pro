@@ -63,7 +63,7 @@ export default function CompanyProfile() {
     if (upErr) { setBusy(null); return toast.error(upErr.message); }
     const { data } = await supabase.storage.from(BUCKETS[kind]).createSignedUrl(path, 60 * 60 * 24 * 365);
     const url = data?.signedUrl;
-    await supabase.from("companies").update({ [COL[kind]]: url }).eq("id", company.id);
+    await supabase.from("companies").update({ [COL[kind]]: url } as any).eq("id", company.id);
     setBusy(null);
     toast.success(`${kind[0].toUpperCase()}${kind.slice(1)} uploaded`);
     refresh();
@@ -71,7 +71,7 @@ export default function CompanyProfile() {
 
   const removeAsset = async (kind: UploadKind) => {
     if (!company) return;
-    await supabase.from("companies").update({ [COL[kind]]: null }).eq("id", company.id);
+    await supabase.from("companies").update({ [COL[kind]]: null } as any).eq("id", company.id);
     refresh();
     toast.success("Removed");
   };
