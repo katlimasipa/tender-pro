@@ -48,6 +48,13 @@ export default function CompanyProfile() {
       csd_number: form.csd_number || null,
       primary_color: form.primary_color || "#1C382C",
       accent_color: form.accent_color || "#C8932B",
+      bank_name: form.bank_name || null,
+      bank_account_name: form.bank_account_name || null,
+      bank_account_number: form.bank_account_number || null,
+      bank_branch_code: form.bank_branch_code || null,
+      bank_account_type: form.bank_account_type || null,
+      bank_swift: form.bank_swift || null,
+      payment_reference: form.payment_reference || null,
     }).eq("id", company.id);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -219,6 +226,48 @@ export default function CompanyProfile() {
             <div>
               <Label>Address</Label>
               <Textarea value={form.address || ""} onChange={e => setForm({ ...form, address: e.target.value })} className="mt-1.5" rows={3} />
+            </div>
+          </div>
+
+          {/* Payment details */}
+          <div className="mt-6 bg-card border border-border rounded-xl p-7 shadow-soft space-y-5">
+            <div>
+              <h2 className="font-display text-xl">Payment details</h2>
+              <p className="text-sm text-muted-foreground mt-1">Banking info shown in a "Payment Details" block on every PDF.</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>Bank name</Label>
+                <Input value={form.bank_name || ""} onChange={e => setForm({ ...form, bank_name: e.target.value })} className="mt-1.5" placeholder="Standard Bank" />
+              </div>
+              <div>
+                <Label>Account holder</Label>
+                <Input value={form.bank_account_name || ""} onChange={e => setForm({ ...form, bank_account_name: e.target.value })} className="mt-1.5" />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>Account number</Label>
+                <Input value={form.bank_account_number || ""} onChange={e => setForm({ ...form, bank_account_number: e.target.value })} className="mt-1.5" />
+              </div>
+              <div>
+                <Label>Branch code</Label>
+                <Input value={form.bank_branch_code || ""} onChange={e => setForm({ ...form, bank_branch_code: e.target.value })} className="mt-1.5" />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>Account type</Label>
+                <Input value={form.bank_account_type || ""} onChange={e => setForm({ ...form, bank_account_type: e.target.value })} className="mt-1.5" placeholder="Cheque / Current" />
+              </div>
+              <div>
+                <Label>SWIFT / BIC (optional)</Label>
+                <Input value={form.bank_swift || ""} onChange={e => setForm({ ...form, bank_swift: e.target.value })} className="mt-1.5" />
+              </div>
+            </div>
+            <div>
+              <Label>Payment reference instruction</Label>
+              <Input value={form.payment_reference || ""} onChange={e => setForm({ ...form, payment_reference: e.target.value })} className="mt-1.5" placeholder="Use quotation number as reference" />
             </div>
             <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving ? "Saving…" : "Save changes"}
