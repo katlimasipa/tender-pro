@@ -251,7 +251,7 @@ export default function CompanyProfile() {
                 <Input value={form.bank_account_number || ""} onChange={e => setForm({ ...form, bank_account_number: e.target.value })} className="mt-1.5" />
               </div>
               <div>
-                <Label>Branch code</Label>
+                <Label>Branch code (optional)</Label>
                 <Input value={form.bank_branch_code || ""} onChange={e => setForm({ ...form, bank_branch_code: e.target.value })} className="mt-1.5" />
               </div>
             </div>
@@ -264,10 +264,6 @@ export default function CompanyProfile() {
                 <Label>SWIFT / BIC (optional)</Label>
                 <Input value={form.bank_swift || ""} onChange={e => setForm({ ...form, bank_swift: e.target.value })} className="mt-1.5" />
               </div>
-            </div>
-            <div>
-              <Label>Payment reference instruction</Label>
-              <Input value={form.payment_reference || ""} onChange={e => setForm({ ...form, payment_reference: e.target.value })} className="mt-1.5" placeholder="Use quotation number as reference" />
             </div>
             <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving ? "Saving…" : "Save changes"}
