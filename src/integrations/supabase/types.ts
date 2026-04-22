@@ -18,6 +18,12 @@ export type Database = {
         Row: {
           accent_color: string | null
           address: string | null
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_account_type: string | null
+          bank_branch_code: string | null
+          bank_name: string | null
+          bank_swift: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
@@ -27,6 +33,7 @@ export type Database = {
           logo_url: string | null
           name: string
           owner_id: string
+          payment_reference: string | null
           primary_color: string | null
           registration_number: string | null
           signature_url: string | null
@@ -37,6 +44,12 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           address?: string | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_account_type?: string | null
+          bank_branch_code?: string | null
+          bank_name?: string | null
+          bank_swift?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -46,6 +59,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           owner_id: string
+          payment_reference?: string | null
           primary_color?: string | null
           registration_number?: string | null
           signature_url?: string | null
@@ -56,6 +70,12 @@ export type Database = {
         Update: {
           accent_color?: string | null
           address?: string | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_account_type?: string | null
+          bank_branch_code?: string | null
+          bank_name?: string | null
+          bank_swift?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -65,6 +85,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           owner_id?: string
+          payment_reference?: string | null
           primary_color?: string | null
           registration_number?: string | null
           signature_url?: string | null
