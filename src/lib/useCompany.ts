@@ -18,6 +18,13 @@ export interface Company {
   primary_color: string | null;
   accent_color: string | null;
   csd_number: string | null;
+  bank_name: string | null;
+  bank_account_name: string | null;
+  bank_account_number: string | null;
+  bank_branch_code: string | null;
+  bank_account_type: string | null;
+  bank_swift: string | null;
+  payment_reference: string | null;
 }
 
 export function useCompany() {
