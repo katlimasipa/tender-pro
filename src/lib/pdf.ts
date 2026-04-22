@@ -289,60 +289,58 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     lastY = Math.max(lastY, ny + 14 + split.length * 13);
   }
 
-  // ========== PAYMENT DETAILS ==========
+  // ========== PAYMENT DETAILS (compact right-aligned box) ==========
   const c = data.company;
   const bankRows: [string, string][] = [];
-  if (c.bank_name) bankRows.push(["Bank", c.bank_name]);
-  if (c.bank_account_name) bankRows.push(["Account Name", c.bank_account_name]);
-  if (c.bank_account_number) bankRows.push(["Account Number", c.bank_account_number]);
-  if (c.bank_branch_code) bankRows.push(["Branch Code", c.bank_branch_code]);
-  if (c.bank_account_type) bankRows.push(["Account Type", c.bank_account_type]);
-  if (c.bank_swift) bankRows.push(["SWIFT / BIC", c.bank_swift]);
-  if (c.payment_reference) bankRows.push(["Reference", c.payment_reference]);
+  if (c.bank_account_name) bankRows.push(["NAME", c.bank_account_name]);
+  if (c.bank_name) bankRows.push(["BANK", c.bank_name]);
+  if (c.bank_account_number) bankRows.push(["ACC NO", c.bank_account_number]);
+  if (c.bank_branch_code) bankRows.push(["BRANCH", c.bank_branch_code]);
+  if (c.bank_account_type) bankRows.push(["TYPE", c.bank_account_type]);
+  if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
+  if (c.payment_reference) bankRows.push(["REF", c.payment_reference]);
 
   if (bankRows.length > 0) {
-    let py = lastY + 28;
-    const blockW = pageW - margin * 2;
-    const rowH = 16;
-    const headerBarH = 22;
-    const blockH = headerBarH + bankRows.length * rowH + 12;
+    const padX = 14;
+    const padY = 12;
+    const titleH = 14;
+    const rowH = 13;
+    const titleText = "BANK ACCOUNT DETAILS:";
 
-    // Page break if needed
-    if (py + blockH > pageH - 140) {
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(10);
+    let maxW = doc.getTextWidth(titleText);
+    bankRows.forEach(([k, v]) => {
+      const w = doc.getTextWidth(`${k}: ${String(v).toUpperCase()}`);
+      if (w > maxW) maxW = w;
+    });
+
+    const boxW = Math.min(maxW + padX * 2, pageW - margin * 2);
+    const boxH = padY + titleH + bankRows.length * rowH + padY - 4;
+    let py = lastY + 24;
+
+    if (py + boxH > pageH - 140) {
       doc.addPage();
       py = margin;
     }
 
-    // Header bar
-    doc.setFillColor(...primary);
-    doc.rect(margin, py, blockW, headerBarH, "F");
-    doc.setFillColor(...accent);
-    doc.rect(margin, py, 4, headerBarH, "F");
-    doc.setTextColor(...onPrimary);
+    const boxX = pageW - margin - boxW;
+
+    doc.setDrawColor(...ink);
+    doc.setLineWidth(0.8);
+    doc.rect(boxX, py, boxW, boxH, "S");
+
     doc.setFont(FONT, "bold");
     doc.setFontSize(10);
-    doc.text("PAYMENT DETAILS", margin + 14, py + 15);
+    doc.setTextColor(...ink);
+    doc.text(titleText, boxX + boxW - padX, py + padY + 2, { align: "right" });
 
-    // Body
-    doc.setDrawColor(...hairline);
-    doc.setLineWidth(0.5);
-    doc.rect(margin, py + headerBarH, blockW, blockH - headerBarH, "S");
-
-    const labelX = margin + 14;
-    const valueX = margin + 150;
     bankRows.forEach((row, i) => {
-      const ry = py + headerBarH + 14 + i * rowH;
-      doc.setFont(FONT, "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(...muted);
-      doc.text(row[0], labelX, ry);
-      doc.setFont(FONT, "bold");
-      doc.setFontSize(10);
-      doc.setTextColor(...ink);
-      doc.text(row[1], valueX, ry);
+      const ry = py + padY + titleH + 4 + i * rowH;
+      doc.text(`${row[0]}: ${String(row[1]).toUpperCase()}`, boxX + boxW - padX, ry, { align: "right" });
     });
 
-    lastY = py + blockH;
+    lastY = py + boxH;
   }
 
   // ========== SIGNATURE ==========
