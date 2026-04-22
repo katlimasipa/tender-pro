@@ -12,6 +12,11 @@ export interface Company {
   contact_phone: string | null;
   address: string | null;
   letterhead_url: string | null;
+  website: string | null;
+  logo_url: string | null;
+  signature_url: string | null;
+  primary_color: string | null;
+  accent_color: string | null;
 }
 
 export function useCompany() {

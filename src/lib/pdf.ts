@@ -25,6 +25,11 @@ export interface PdfData {
     contact_phone?: string | null;
     address?: string | null;
     letterhead_url?: string | null;
+    website?: string | null;
+    logo_url?: string | null;
+    signature_url?: string | null;
+    primary_color?: string | null;
+    accent_color?: string | null;
   };
 }
 
@@ -36,6 +41,16 @@ const loadImage = (url: string): Promise<HTMLImageElement> =>
     img.onerror = reject;
     img.src = url;
   });
+
+const hexToRgb = (hex?: string | null, fallback: [number, number, number] = [28, 56, 44]): [number, number, number] => {
+  if (!hex) return fallback;
+  const m = hex.replace("#", "").match(/.{1,2}/g);
+  if (!m || m.length < 3) return fallback;
+  return [parseInt(m[0], 16), parseInt(m[1], 16), parseInt(m[2], 16)];
+};
+
+const luminance = ([r, g, b]: [number, number, number]) =>
+  (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
 export function computeTotals(items: TenderItem[], vatRate: number, vatInclusive: boolean) {
   const lineSum = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
@@ -53,71 +68,117 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 48;
+  const FONT = "helvetica"; // jsPDF's helvetica is metric-compatible with Arial
 
-  let cursorY = margin;
+  const primary = hexToRgb(data.company.primary_color, [28, 56, 44]);
+  const accent = hexToRgb(data.company.accent_color, [200, 147, 43]);
+  const onPrimary: [number, number, number] = luminance(primary) > 0.6 ? [20, 24, 22] : [250, 248, 242];
+  const onAccent: [number, number, number] = luminance(accent) > 0.6 ? [20, 24, 22] : [250, 248, 242];
+  const ink: [number, number, number] = [22, 26, 24];
+  const muted: [number, number, number] = [110, 116, 112];
+  const hairline: [number, number, number] = [225, 222, 215];
 
-  // Letterhead
-  if (data.company.letterhead_url) {
+  // ========== HEADER BAND ==========
+  const headerH = 110;
+  doc.setFillColor(...primary);
+  doc.rect(0, 0, pageW, headerH, "F");
+  // accent stripe
+  doc.setFillColor(...accent);
+  doc.rect(0, headerH, pageW, 4, "F");
+
+  // Logo (top-left)
+  let textStartX = margin;
+  if (data.company.logo_url) {
     try {
-      const img = await loadImage(data.company.letterhead_url);
-      const maxW = pageW - margin * 2;
-      const ratio = img.height / img.width;
-      const w = Math.min(maxW, 480);
-      const h = w * ratio;
-      doc.addImage(img, "PNG", (pageW - w) / 2, cursorY, w, Math.min(h, 120));
-      cursorY += Math.min(h, 120) + 16;
-    } catch {
-      // skip if letterhead fails
-    }
-  } else {
-    // Fallback: company name banner
-    doc.setFillColor(28, 56, 44); // velvet green
-    doc.rect(0, 0, pageW, 80, "F");
-    doc.setTextColor(245, 240, 225);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text(data.company.name || "Company", margin, 50);
-    cursorY = 100;
-    doc.setTextColor(20, 24, 22);
+      const logo = await loadImage(data.company.logo_url);
+      const maxH = 64;
+      const ratio = logo.width / logo.height;
+      const h = maxH;
+      const w = Math.min(h * ratio, 140);
+      doc.addImage(logo, "PNG", margin, (headerH - h) / 2, w, h);
+      textStartX = margin + w + 18;
+    } catch { /* skip */ }
   }
 
-  // Title block
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(20, 24, 22);
-  doc.text(data.title || "Tender Document", margin, cursorY + 6);
-  cursorY += 24;
+  // Company name + contact (next to logo)
+  doc.setTextColor(...onPrimary);
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(18);
+  doc.text(data.company.name || "Company", textStartX, 44);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(90, 95, 90);
-  if (data.tenderNumber) doc.text(`Tender No: ${data.tenderNumber}`, margin, cursorY);
-  doc.text(`Date: ${formatDate(new Date())}`, pageW - margin, cursorY, { align: "right" });
-  cursorY += 24;
-
-  // Parties
-  doc.setTextColor(20, 24, 22);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("FROM", margin, cursorY);
-  doc.text("TO", pageW / 2, cursorY);
-  cursorY += 14;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  const fromLines = [
-    data.company.name,
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(9);
+  const contactBits = [
     data.company.address,
-    data.company.contact_email,
-    data.company.contact_phone,
-    data.company.vat_number ? `VAT: ${data.company.vat_number}` : null,
-    data.company.registration_number ? `Reg: ${data.company.registration_number}` : null,
+    [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  •  "),
+    data.company.website,
   ].filter(Boolean) as string[];
-  const toLines = [data.clientName, data.clientAddress].filter(Boolean) as string[];
-  fromLines.forEach((l, i) => doc.text(l, margin, cursorY + i * 12));
-  toLines.forEach((l, i) => doc.text(l, pageW / 2, cursorY + i * 12));
-  cursorY += Math.max(fromLines.length, toLines.length, 1) * 12 + 16;
+  contactBits.forEach((line, i) => doc.text(line, textStartX, 60 + i * 12));
 
-  // Table
+  // ========== DOCUMENT TITLE BLOCK ==========
+  let cursorY = headerH + 36;
+  doc.setTextColor(...ink);
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(22);
+  doc.text((data.title || "Tender Document").toUpperCase(), margin, cursorY);
+
+  // Right-aligned meta box
+  const metaX = pageW - margin;
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  doc.text("TENDER NO.", metaX, cursorY - 14, { align: "right" });
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...ink);
+  doc.text(data.tenderNumber || "—", metaX, cursorY, { align: "right" });
+
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  doc.text("DATE", metaX, cursorY + 14, { align: "right" });
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...ink);
+  doc.text(formatDate(new Date()), metaX, cursorY + 28, { align: "right" });
+
+  cursorY += 50;
+
+  // ========== BILL TO ==========
+  doc.setDrawColor(...hairline);
+  doc.setLineWidth(0.5);
+  doc.line(margin, cursorY, pageW - margin, cursorY);
+  cursorY += 18;
+
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  doc.text("PREPARED FOR", margin, cursorY);
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(...ink);
+  const clientLines = [data.clientName || "—", data.clientAddress].filter(Boolean) as string[];
+  clientLines.forEach((l, i) => doc.text(l, margin, cursorY + 16 + i * 13));
+
+  // Right column: VAT/Reg
+  if (data.company.vat_number || data.company.registration_number) {
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...muted);
+    doc.text("ISSUED BY", metaX, cursorY, { align: "right" });
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...ink);
+    const issuer = [
+      data.company.vat_number ? `VAT ${data.company.vat_number}` : null,
+      data.company.registration_number ? `Reg ${data.company.registration_number}` : null,
+    ].filter(Boolean) as string[];
+    issuer.forEach((l, i) => doc.text(l, metaX, cursorY + 16 + i * 13, { align: "right" }));
+  }
+
+  cursorY += 16 + Math.max(clientLines.length, 2) * 13 + 14;
+
+  // ========== TABLE ==========
   const body = data.items.map((it, idx) => [
     String(idx + 1),
     it.product,
@@ -127,70 +188,124 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   ]);
 
   autoTable(doc, {
-    head: [["No.", "Product / Description", "Qty", "Unit Price", "Total"]],
+    head: [["#", "DESCRIPTION", "QTY", "UNIT PRICE", "AMOUNT"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
-    styles: { font: "helvetica", fontSize: 10, cellPadding: 8, textColor: [20, 24, 22] },
-    headStyles: { fillColor: [28, 56, 44], textColor: [245, 240, 225], fontStyle: "bold" },
-    alternateRowStyles: { fillColor: [248, 244, 234] },
+    styles: {
+      font: FONT,
+      fontSize: 10,
+      cellPadding: { top: 9, right: 10, bottom: 9, left: 10 },
+      textColor: ink,
+      lineColor: hairline,
+      lineWidth: 0.5,
+    },
+    headStyles: {
+      fillColor: primary,
+      textColor: onPrimary,
+      fontStyle: "bold",
+      fontSize: 9,
+      cellPadding: { top: 10, right: 10, bottom: 10, left: 10 },
+    },
+    alternateRowStyles: { fillColor: [250, 248, 243] },
     columnStyles: {
-      0: { cellWidth: 36, halign: "center" },
+      0: { cellWidth: 28, halign: "center", textColor: muted },
       2: { halign: "right", cellWidth: 50 },
-      3: { halign: "right", cellWidth: 90 },
-      4: { halign: "right", cellWidth: 100 },
+      3: { halign: "right", cellWidth: 95 },
+      4: { halign: "right", cellWidth: 105, fontStyle: "bold" },
     },
   });
 
-  const lastY = (doc as any).lastAutoTable.finalY + 16;
+  let lastY = (doc as any).lastAutoTable.finalY;
+
+  // ========== TOTALS BLOCK (right side) ==========
   const totals = computeTotals(data.items, data.vatRate, data.vatInclusive);
+  const totalsW = 240;
+  const totalsX = pageW - margin - totalsW;
+  let ty = lastY + 14;
 
-  const labelX = pageW - margin - 200;
-  const valueX = pageW - margin;
+  doc.setFont(FONT, "normal");
   doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Subtotal", labelX, lastY);
-  doc.text(formatZAR(totals.subtotal), valueX, lastY, { align: "right" });
-  doc.text(`VAT (${data.vatRate}%)${data.vatInclusive ? " incl." : ""}`, labelX, lastY + 16);
-  doc.text(formatZAR(totals.vatAmount), valueX, lastY + 16, { align: "right" });
+  doc.setTextColor(...muted);
+  doc.text("Subtotal", totalsX + 12, ty + 14);
+  doc.setTextColor(...ink);
+  doc.text(formatZAR(totals.subtotal), totalsX + totalsW - 12, ty + 14, { align: "right" });
 
-  doc.setDrawColor(28, 56, 44);
-  doc.setLineWidth(0.8);
-  doc.line(labelX, lastY + 24, valueX, lastY + 24);
+  doc.setTextColor(...muted);
+  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (incl.)" : ""}`, totalsX + 12, ty + 32);
+  doc.setTextColor(...ink);
+  doc.text(formatZAR(totals.vatAmount), totalsX + totalsW - 12, ty + 32, { align: "right" });
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Grand Total", labelX, lastY + 40);
-  doc.text(formatZAR(totals.grandTotal), valueX, lastY + 40, { align: "right" });
+  // Grand total bar
+  const gtY = ty + 48;
+  doc.setFillColor(...primary);
+  doc.rect(totalsX, gtY, totalsW, 38, "F");
+  doc.setFillColor(...accent);
+  doc.rect(totalsX, gtY, 4, 38, "F");
+  doc.setTextColor(...onPrimary);
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(10);
+  doc.text("GRAND TOTAL", totalsX + 14, gtY + 16);
+  doc.setFontSize(15);
+  doc.text(formatZAR(totals.grandTotal), totalsX + totalsW - 12, gtY + 25, { align: "right" });
 
-  // Notes
-  let notesY = lastY + 70;
+  lastY = gtY + 38;
+
+  // ========== NOTES ==========
   if (data.notes) {
-    doc.setFont("helvetica", "bold");
+    let ny = lastY + 28;
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...muted);
+    doc.text("NOTES & TERMS", margin, ny);
+    doc.setFont(FONT, "normal");
     doc.setFontSize(10);
-    doc.text("Notes", margin, notesY);
-    doc.setFont("helvetica", "normal");
-    const split = doc.splitTextToSize(data.notes, pageW - margin * 2);
-    doc.text(split, margin, notesY + 14);
-    notesY += 14 + split.length * 12;
+    doc.setTextColor(...ink);
+    const split = doc.splitTextToSize(data.notes, pageW - margin * 2 - totalsW - 24);
+    doc.text(split, margin, ny + 14);
+    lastY = Math.max(lastY, ny + 14 + split.length * 13);
   }
 
-  // Signature
-  const sigY = Math.min(notesY + 40, pageH - 120);
-  doc.setDrawColor(150, 150, 140);
-  doc.line(margin, sigY, margin + 200, sigY);
-  doc.line(pageW - margin - 200, sigY, pageW - margin, sigY);
-  doc.setFontSize(9);
-  doc.setTextColor(110, 115, 110);
-  doc.text("Authorised Signature", margin, sigY + 12);
-  doc.text("Date", pageW - margin - 200, sigY + 12);
+  // ========== SIGNATURE ==========
+  const sigY = Math.min(lastY + 60, pageH - 120);
+  const sigW = 200;
 
-  // Footer
+  // Signature image
+  if (data.company.signature_url) {
+    try {
+      const sig = await loadImage(data.company.signature_url);
+      const ratio = sig.width / sig.height;
+      const h = 40;
+      const w = Math.min(h * ratio, sigW - 20);
+      doc.addImage(sig, "PNG", margin, sigY - h - 4, w, h);
+    } catch { /* skip */ }
+  }
+
+  doc.setDrawColor(...ink);
+  doc.setLineWidth(0.6);
+  doc.line(margin, sigY, margin + sigW, sigY);
+  doc.setFont(FONT, "normal");
   doc.setFontSize(8);
-  doc.setTextColor(130, 135, 130);
-  const footer = [data.company.name, data.company.contact_email, data.company.contact_phone]
-    .filter(Boolean).join("  •  ");
-  doc.text(footer, pageW / 2, pageH - 28, { align: "center" });
+  doc.setTextColor(...muted);
+  doc.text("AUTHORISED SIGNATURE", margin, sigY + 12);
+
+  doc.line(pageW - margin - sigW, sigY, pageW - margin, sigY);
+  doc.text("DATE", pageW - margin - sigW, sigY + 12);
+
+  // ========== FOOTER ==========
+  doc.setDrawColor(...hairline);
+  doc.line(margin, pageH - 48, pageW - margin, pageH - 48);
+  doc.setFontSize(8);
+  doc.setTextColor(...muted);
+  const footer = [
+    data.company.name,
+    data.company.website,
+    data.company.contact_email,
+    data.company.contact_phone,
+  ].filter(Boolean).join("   •   ");
+  doc.text(footer, pageW / 2, pageH - 32, { align: "center" });
+  doc.setTextColor(...accent);
+  doc.text("Thank you for your business", pageW / 2, pageH - 20, { align: "center" });
 
   return doc.output("blob");
 }

@@ -16,43 +16,58 @@ export type Database = {
     Tables: {
       companies: {
         Row: {
+          accent_color: string | null
           address: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
           id: string
           letterhead_url: string | null
+          logo_url: string | null
           name: string
           owner_id: string
+          primary_color: string | null
           registration_number: string | null
+          signature_url: string | null
           updated_at: string
           vat_number: string | null
+          website: string | null
         }
         Insert: {
+          accent_color?: string | null
           address?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           id?: string
           letterhead_url?: string | null
+          logo_url?: string | null
           name: string
           owner_id: string
+          primary_color?: string | null
           registration_number?: string | null
+          signature_url?: string | null
           updated_at?: string
           vat_number?: string | null
+          website?: string | null
         }
         Update: {
+          accent_color?: string | null
           address?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           id?: string
           letterhead_url?: string | null
+          logo_url?: string | null
           name?: string
           owner_id?: string
+          primary_color?: string | null
           registration_number?: string | null
+          signature_url?: string | null
           updated_at?: string
           vat_number?: string | null
+          website?: string | null
         }
         Relationships: []
       }
