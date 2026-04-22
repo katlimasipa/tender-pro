@@ -117,72 +117,87 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   ].filter(Boolean) as string[];
   contactBits.forEach((line, i) => doc.text(line, textStartX, 60 + i * 12));
 
-  // ========== DOCUMENT TITLE BLOCK ==========
+  // ========== DOCUMENT TITLE ==========
   let cursorY = headerH + 36;
   doc.setTextColor(...ink);
   doc.setFont(FONT, "bold");
   doc.setFontSize(22);
-  doc.text((data.title || "Tender Document").toUpperCase(), margin, cursorY);
+  doc.text((data.title || "Quotation").toUpperCase(), margin, cursorY);
 
-  // Right-aligned meta box
-  const metaX = pageW - margin;
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...muted);
-  doc.text("TENDER NO.", metaX, cursorY - 14, { align: "right" });
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(...ink);
-  doc.text(data.tenderNumber || "—", metaX, cursorY, { align: "right" });
+  cursorY += 26;
 
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...muted);
-  doc.text("DATE", metaX, cursorY + 14, { align: "right" });
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(...ink);
-  doc.text(formatDate(new Date()), metaX, cursorY + 28, { align: "right" });
-
-  cursorY += 50;
-
-  // ========== BILL TO ==========
-  doc.setDrawColor(...hairline);
-  doc.setLineWidth(0.5);
-  doc.line(margin, cursorY, pageW - margin, cursorY);
-  cursorY += 18;
+  // ========== INFO BLOCK (mirrors uploaded reference) ==========
+  // Left column: QUOTATION FOR (client)
+  // Right column: Quotation No / Quotation Date
+  const labelGap = 12;
+  const lineGap = 13;
 
   doc.setFont(FONT, "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text("PREPARED FOR", margin, cursorY);
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(...ink);
-  const clientLines = [data.clientName || "—", data.clientAddress].filter(Boolean) as string[];
-  clientLines.forEach((l, i) => doc.text(l, margin, cursorY + 16 + i * 13));
+  doc.text("QUOTATION FOR:", margin, cursorY);
 
-  // Right column: VAT/Reg
-  if (data.company.vat_number || data.company.registration_number) {
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...ink);
+  const clientLines: string[] = [];
+  if (data.clientName) clientLines.push(data.clientName);
+  if (data.clientAddress) {
+    data.clientAddress.split(/\r?\n/).forEach(l => l.trim() && clientLines.push(l.trim()));
+  }
+  if (clientLines.length === 0) clientLines.push("—");
+  clientLines.forEach((l, i) => doc.text(l, margin, cursorY + labelGap + i * lineGap));
+
+  // Right meta lines (label + value on same row)
+  const rightX = pageW - margin;
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...ink);
+  if (data.tenderNumber) {
+    doc.text(`Quotation No : ${data.tenderNumber}`, rightX, cursorY, { align: "right" });
+  }
+  doc.text(`Quotation Date : ${formatDate(new Date())}`, rightX, cursorY + lineGap, { align: "right" });
+
+  // Compute lower edge of the info block
+  const clientBlockBottom = cursorY + labelGap + clientLines.length * lineGap;
+  let refY = clientBlockBottom + 12;
+
+  // QUOTATION REF (left) and CSD NO (right) — bold accent line like reference
+  if (data.quotationRef) {
     doc.setFont(FONT, "bold");
     doc.setFontSize(9);
-    doc.setTextColor(...muted);
-    doc.text("ISSUED BY", metaX, cursorY, { align: "right" });
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(10);
     doc.setTextColor(...ink);
+    doc.text(`QUOTATION REF: ${data.quotationRef}`, margin, refY);
+  }
+  if (data.company.csd_number) {
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...ink);
+    doc.text(`CSD NO: ${data.company.csd_number}`, rightX, refY, { align: "right" });
+  }
+
+  cursorY = refY + 18;
+
+  // Issuer (VAT / Reg) – kept compact under the ref line
+  if (data.company.vat_number || data.company.registration_number) {
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
     const issuer = [
       data.company.vat_number ? `VAT ${data.company.vat_number}` : null,
       data.company.registration_number ? `Reg ${data.company.registration_number}` : null,
-    ].filter(Boolean) as string[];
-    issuer.forEach((l, i) => doc.text(l, metaX, cursorY + 16 + i * 13, { align: "right" }));
+    ].filter(Boolean).join("   •   ");
+    doc.text(issuer, rightX, cursorY, { align: "right" });
   }
 
-  cursorY += 16 + Math.max(clientLines.length, 2) * 13 + 14;
+  // Hairline divider
+  doc.setDrawColor(...hairline);
+  doc.setLineWidth(0.5);
+  doc.line(margin, cursorY + 8, pageW - margin, cursorY + 8);
+  cursorY += 22;
 
   // ========== TABLE ==========
-  const body = data.items.map((it, idx) => [
-    String(idx + 1),
+  const body = data.items.map((it) => [
     it.product,
     String(it.quantity),
     formatZAR(it.unitPrice),
@@ -190,7 +205,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   ]);
 
   autoTable(doc, {
-    head: [["#", "DESCRIPTION", "QTY", "UNIT PRICE", "AMOUNT"]],
+    head: [["DESCRIPTION", "QTY", "UNIT PRICE", "AMOUNT"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
@@ -211,10 +226,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     },
     alternateRowStyles: { fillColor: [250, 248, 243] },
     columnStyles: {
-      0: { cellWidth: 28, halign: "center", textColor: muted },
-      2: { halign: "right", cellWidth: 50 },
-      3: { halign: "right", cellWidth: 95 },
-      4: { halign: "right", cellWidth: 105, fontStyle: "bold" },
+      1: { halign: "right", cellWidth: 50 },
+      2: { halign: "right", cellWidth: 95 },
+      3: { halign: "right", cellWidth: 105, fontStyle: "bold" },
     },
   });
 
