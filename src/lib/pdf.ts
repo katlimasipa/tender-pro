@@ -32,6 +32,13 @@ export interface PdfData {
     primary_color?: string | null;
     accent_color?: string | null;
     csd_number?: string | null;
+    bank_name?: string | null;
+    bank_account_name?: string | null;
+    bank_account_number?: string | null;
+    bank_branch_code?: string | null;
+    bank_account_type?: string | null;
+    bank_swift?: string | null;
+    payment_reference?: string | null;
   };
 }
 
@@ -280,6 +287,62 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     const split = doc.splitTextToSize(data.notes, pageW - margin * 2 - totalsW - 24);
     doc.text(split, margin, ny + 14);
     lastY = Math.max(lastY, ny + 14 + split.length * 13);
+  }
+
+  // ========== PAYMENT DETAILS ==========
+  const c = data.company;
+  const bankRows: [string, string][] = [];
+  if (c.bank_name) bankRows.push(["Bank", c.bank_name]);
+  if (c.bank_account_name) bankRows.push(["Account Name", c.bank_account_name]);
+  if (c.bank_account_number) bankRows.push(["Account Number", c.bank_account_number]);
+  if (c.bank_branch_code) bankRows.push(["Branch Code", c.bank_branch_code]);
+  if (c.bank_account_type) bankRows.push(["Account Type", c.bank_account_type]);
+  if (c.bank_swift) bankRows.push(["SWIFT / BIC", c.bank_swift]);
+  if (c.payment_reference) bankRows.push(["Reference", c.payment_reference]);
+
+  if (bankRows.length > 0) {
+    let py = lastY + 28;
+    const blockW = pageW - margin * 2;
+    const rowH = 16;
+    const headerBarH = 22;
+    const blockH = headerBarH + bankRows.length * rowH + 12;
+
+    // Page break if needed
+    if (py + blockH > pageH - 140) {
+      doc.addPage();
+      py = margin;
+    }
+
+    // Header bar
+    doc.setFillColor(...primary);
+    doc.rect(margin, py, blockW, headerBarH, "F");
+    doc.setFillColor(...accent);
+    doc.rect(margin, py, 4, headerBarH, "F");
+    doc.setTextColor(...onPrimary);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(10);
+    doc.text("PAYMENT DETAILS", margin + 14, py + 15);
+
+    // Body
+    doc.setDrawColor(...hairline);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, py + headerBarH, blockW, blockH - headerBarH, "S");
+
+    const labelX = margin + 14;
+    const valueX = margin + 150;
+    bankRows.forEach((row, i) => {
+      const ry = py + headerBarH + 14 + i * rowH;
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...muted);
+      doc.text(row[0], labelX, ry);
+      doc.setFont(FONT, "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...ink);
+      doc.text(row[1], valueX, ry);
+    });
+
+    lastY = py + blockH;
   }
 
   // ========== SIGNATURE ==========
