@@ -21,6 +21,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          csd_number: string | null
           id: string
           letterhead_url: string | null
           logo_url: string | null
@@ -39,6 +40,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          csd_number?: string | null
           id?: string
           letterhead_url?: string | null
           logo_url?: string | null
@@ -57,6 +59,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          csd_number?: string | null
           id?: string
           letterhead_url?: string | null
           logo_url?: string | null
@@ -116,6 +119,7 @@ export type Database = {
           id: string
           items: Json
           notes: string | null
+          quotation_ref: string | null
           status: string
           subtotal: number
           tender_number: string | null
@@ -135,6 +139,7 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          quotation_ref?: string | null
           status?: string
           subtotal?: number
           tender_number?: string | null
@@ -154,6 +159,7 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          quotation_ref?: string | null
           status?: string
           subtotal?: number
           tender_number?: string | null
