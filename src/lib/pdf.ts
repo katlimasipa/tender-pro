@@ -298,7 +298,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_branch_code) bankRows.push(["BRANCH", c.bank_branch_code]);
   if (c.bank_account_type) bankRows.push(["TYPE", c.bank_account_type]);
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
-  if (c.payment_reference) bankRows.push(["REF", c.payment_reference]);
+  
 
   if (bankRows.length > 0) {
     const padX = 14;
