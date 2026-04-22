@@ -265,10 +265,6 @@ export default function CompanyProfile() {
                 <Input value={form.bank_swift || ""} onChange={e => setForm({ ...form, bank_swift: e.target.value })} className="mt-1.5" />
               </div>
             </div>
-            <div>
-              <Label>Payment reference instruction</Label>
-              <Input value={form.payment_reference || ""} onChange={e => setForm({ ...form, payment_reference: e.target.value })} className="mt-1.5" placeholder="Use quotation number as reference" />
-            </div>
             <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving ? "Saving…" : "Save changes"}
             </Button>
