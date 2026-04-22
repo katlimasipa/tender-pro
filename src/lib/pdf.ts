@@ -11,6 +11,7 @@ export interface TenderItem {
 export interface PdfData {
   title: string;
   tenderNumber?: string;
+  quotationRef?: string;
   clientName?: string;
   clientAddress?: string;
   notes?: string;
@@ -30,6 +31,7 @@ export interface PdfData {
     signature_url?: string | null;
     primary_color?: string | null;
     accent_color?: string | null;
+    csd_number?: string | null;
   };
 }
 

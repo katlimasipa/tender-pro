@@ -17,6 +17,7 @@ export interface Company {
   signature_url: string | null;
   primary_color: string | null;
   accent_color: string | null;
+  csd_number: string | null;
 }
 
 export function useCompany() {
