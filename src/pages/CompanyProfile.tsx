@@ -122,14 +122,14 @@ export default function CompanyProfile() {
 
   return (
     <AppShell>
-      <div className="p-8 md:p-12 max-w-4xl">
+      <div className="p-4 sm:p-8 md:p-12 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-sm text-muted-foreground">Settings</div>
-          <h1 className="font-display text-4xl mt-1">Company profile</h1>
+          <h1 className="font-display text-3xl sm:text-4xl mt-1">Company profile</h1>
           <p className="text-muted-foreground mt-2">These details and brand assets appear on every tender PDF you export.</p>
 
           {/* Brand assets grid */}
-          <div className="mt-10 grid md:grid-cols-3 gap-4">
+          <div className="mt-8 sm:mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             <AssetCard
               kind="logo"
               label="Logo"
@@ -198,7 +198,7 @@ export default function CompanyProfile() {
                 <Input value={form.registration_number || ""} onChange={e => setForm({ ...form, registration_number: e.target.value })} className="mt-1.5" />
               </div>
               <div>
-                <Label>VAT number</Label>
+                <Label>VAT number (optional)</Label>
                 <Input value={form.vat_number || ""} onChange={e => setForm({ ...form, vat_number: e.target.value })} className="mt-1.5" />
               </div>
             </div>

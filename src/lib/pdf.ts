@@ -289,7 +289,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     lastY = Math.max(lastY, ny + 14 + split.length * 13);
   }
 
-  // ========== PAYMENT DETAILS (compact right-aligned box) ==========
+  // ========== BOTTOM-PINNED FOOTER GROUP (signature + bank + footer line) ==========
+  // Always render at the bottom of the LAST page. If they would collide with
+  // existing content, add a new page first.
   const c = data.company;
   const bankRows: [string, string][] = [];
   if (c.bank_account_name) bankRows.push(["NAME", c.bank_account_name]);
@@ -298,56 +300,65 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_branch_code) bankRows.push(["BRANCH", c.bank_branch_code]);
   if (c.bank_account_type) bankRows.push(["TYPE", c.bank_account_type]);
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
-  
 
+  // Pre-measure bank box
+  const padX = 14;
+  const padY = 12;
+  const titleH = 14;
+  const rowH = 13;
+  const titleText = "BANK ACCOUNT DETAILS:";
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(10);
+  let bankBoxW = 0;
+  let bankBoxH = 0;
   if (bankRows.length > 0) {
-    const padX = 14;
-    const padY = 12;
-    const titleH = 14;
-    const rowH = 13;
-    const titleText = "BANK ACCOUNT DETAILS:";
-
-    doc.setFont(FONT, "bold");
-    doc.setFontSize(10);
     let maxW = doc.getTextWidth(titleText);
     bankRows.forEach(([k, v]) => {
       const w = doc.getTextWidth(`${k}: ${String(v).toUpperCase()}`);
       if (w > maxW) maxW = w;
     });
+    bankBoxW = Math.min(maxW + padX * 2, pageW - margin * 2);
+    bankBoxH = padY + titleH + bankRows.length * rowH + padY - 4;
+  }
 
-    const boxW = Math.min(maxW + padX * 2, pageW - margin * 2);
-    const boxH = padY + titleH + bankRows.length * rowH + padY - 4;
-    let py = lastY + 24;
+  // Total bottom block height: bank box + signature lines + footer
+  const sigBlockH = 70;          // signature image + line + label
+  const footerBlockH = 40;       // hairline + 2 lines
+  const gap = 24;
+  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gap + footerBlockH;
 
-    if (py + boxH > pageH - 140) {
-      doc.addPage();
-      py = margin;
-    }
+  // Decide whether we need a new page
+  const minTopForBottomBlock = pageH - bottomBlockH - margin;
+  if (lastY + 24 > minTopForBottomBlock) {
+    doc.addPage();
+  }
 
-    const boxX = pageW - margin - boxW;
+  // Anchor positions from the bottom of the current (last) page
+  const footerHairlineY = pageH - 48;
+  const sigY = footerHairlineY - 18;          // signature line baseline
+  const bottomBlockTopY = sigY - sigBlockH + 30;
 
+  // ----- Bank box (right side) -----
+  if (bankRows.length > 0) {
+    const boxX = pageW - margin - bankBoxW;
+    const boxY = bottomBlockTopY;
     doc.setDrawColor(...ink);
     doc.setLineWidth(0.8);
-    doc.rect(boxX, py, boxW, boxH, "S");
+    doc.rect(boxX, boxY, bankBoxW, bankBoxH, "S");
 
     doc.setFont(FONT, "bold");
     doc.setFontSize(10);
     doc.setTextColor(...ink);
-    doc.text(titleText, boxX + boxW - padX, py + padY + 2, { align: "right" });
+    doc.text(titleText, boxX + bankBoxW - padX, boxY + padY + 2, { align: "right" });
 
     bankRows.forEach((row, i) => {
-      const ry = py + padY + titleH + 4 + i * rowH;
-      doc.text(`${row[0]}: ${String(row[1]).toUpperCase()}`, boxX + boxW - padX, ry, { align: "right" });
+      const ry = boxY + padY + titleH + 4 + i * rowH;
+      doc.text(`${row[0]}: ${String(row[1]).toUpperCase()}`, boxX + bankBoxW - padX, ry, { align: "right" });
     });
-
-    lastY = py + boxH;
   }
 
-  // ========== SIGNATURE ==========
-  const sigY = Math.min(lastY + 60, pageH - 120);
+  // ----- Signature (left) -----
   const sigW = 200;
-
-  // Signature image
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
@@ -357,7 +368,6 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       doc.addImage(sig, "PNG", margin, sigY - h - 4, w, h);
     } catch { /* skip */ }
   }
-
   doc.setDrawColor(...ink);
   doc.setLineWidth(0.6);
   doc.line(margin, sigY, margin + sigW, sigY);
@@ -369,9 +379,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.line(pageW - margin - sigW, sigY, pageW - margin, sigY);
   doc.text("DATE", pageW - margin - sigW, sigY + 12);
 
-  // ========== FOOTER ==========
+  // ----- Footer line -----
   doc.setDrawColor(...hairline);
-  doc.line(margin, pageH - 48, pageW - margin, pageH - 48);
+  doc.line(margin, footerHairlineY, pageW - margin, footerHairlineY);
   doc.setFontSize(8);
   doc.setTextColor(...muted);
   const footer = [
