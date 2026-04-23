@@ -321,11 +321,12 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     bankBoxH = padY + titleH + bankRows.length * rowH + padY - 4;
   }
 
-  // Total bottom block height: bank box + signature lines + footer
+  // Total bottom block height: bank box ABOVE signature + signature + footer
   const sigBlockH = 70;          // signature image + line + label
   const footerBlockH = 40;       // hairline + 2 lines
-  const gap = 24;
-  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gap + footerBlockH;
+  const gapBankToSig = 20;       // gap between bank box and signature line
+  const gapSigToFooter = 24;     // gap between signature labels and footer hairline
+  const bottomBlockH = bankBoxH + gapBankToSig + sigBlockH + gapSigToFooter + footerBlockH;
 
   // Decide whether we need a new page
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
@@ -335,13 +336,12 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Anchor positions from the bottom of the current (last) page
   const footerHairlineY = pageH - 48;
-  const sigY = footerHairlineY - 18;          // signature line baseline
-  const bottomBlockTopY = sigY - sigBlockH + 30;
+  const sigY = footerHairlineY - 18 - gapSigToFooter; // signature line baseline (lifted to leave room)
 
-  // ----- Bank box (right side) -----
+  // ----- Bank box (right side, ABOVE the signature line) -----
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
-    const boxY = bottomBlockTopY;
+    const boxY = sigY - sigBlockH - gapBankToSig - bankBoxH + 30;
     doc.setDrawColor(...ink);
     doc.setLineWidth(0.8);
     doc.rect(boxX, boxY, bankBoxW, bankBoxH, "S");
