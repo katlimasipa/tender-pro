@@ -59,6 +59,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
           className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60">
           <LogOut className="h-4 w-4 mr-2" /> Sign out
         </Button>
+        <div className="px-2 pt-3 text-[11px] text-sidebar-foreground/40">
+          Built by{" "}
+          <a
+            href="https://architeq.co.za"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sidebar-foreground/70 hover:text-sidebar-accent-foreground transition"
+          >
+            Architeq Web Agency
+          </a>
+        </div>
       </div>
     </>
   );
