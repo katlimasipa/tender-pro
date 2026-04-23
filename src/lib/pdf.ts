@@ -310,24 +310,34 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
   // Pre-measure bank box (compact)
-  const padX = 12;
-  const padY = 10;
-  const titleH = 12;
-  const rowH = 11;
+  const padX = 10;
+  const padY = 8;
+  const titleH = 11;
+  const rowH = 10;
+  const labelGapX = 8;
   const titleText = "BANK ACCOUNT DETAILS";
   doc.setFont(FONT, "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(7.5);
   let bankBoxW = 0;
   let bankBoxH = 0;
+  let bankLabelColW = 0;
+  let bankValueColW = 0;
   if (bankRows.length > 0) {
-    let maxW = doc.getTextWidth(titleText);
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(8.5);
-    bankRows.forEach(([k, v]) => {
-      const w = doc.getTextWidth(`${k}: ${String(v).toUpperCase()}`);
-      if (w > maxW) maxW = w;
+    let titleW = doc.getTextWidth(titleText);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(7.5);
+    bankRows.forEach(([k]) => {
+      const w = doc.getTextWidth(`${k}:`);
+      if (w > bankLabelColW) bankLabelColW = w;
     });
-    bankBoxW = Math.min(maxW + padX * 2, pageW - margin * 2 - 220);
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(7.5);
+    bankRows.forEach(([, v]) => {
+      const w = doc.getTextWidth(String(v).toUpperCase());
+      if (w > bankValueColW) bankValueColW = w;
+    });
+    const contentW = Math.max(titleW, bankLabelColW + labelGapX + bankValueColW);
+    bankBoxW = Math.min(contentW + padX * 2, pageW - margin * 2 - 220);
     bankBoxH = padY + titleH + bankRows.length * rowH + padY - 4;
   }
 
@@ -351,27 +361,25 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
     const boxY = sigY - sigBlockH + 6;
-    // soft fill + thin border for elegance
+    // soft fill + accent border
     doc.setFillColor(...softBg);
-    doc.setDrawColor(...hairline);
-    doc.setLineWidth(0.6);
+    doc.setDrawColor(...accent);
+    doc.setLineWidth(0.9);
     doc.rect(boxX, boxY, bankBoxW, bankBoxH, "FD");
-    // accent left bar
-    doc.setFillColor(...accent);
-    doc.rect(boxX, boxY, 2.5, bankBoxH, "F");
 
     doc.setFont(FONT, "bold");
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setTextColor(...muted);
-    doc.text(titleText, boxX + padX + 4, boxY + padY + 2);
+    doc.text(titleText, boxX + padX, boxY + padY + 2);
 
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(7.5);
     doc.setTextColor(...ink);
     bankRows.forEach((row, i) => {
       const ry = boxY + padY + titleH + 4 + i * rowH;
-      doc.text(`${row[0]}:`, boxX + padX + 4, ry);
-      doc.text(String(row[1]).toUpperCase(), boxX + bankBoxW - padX, ry, { align: "right" });
+      doc.setFont(FONT, "bold");
+      doc.text(`${row[0]}:`, boxX + padX, ry);
+      doc.setFont(FONT, "normal");
+      doc.text(String(row[1]).toUpperCase(), boxX + padX + bankLabelColW + labelGapX, ry);
     });
   }
 
@@ -410,11 +418,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     data.company.contact_email,
     data.company.contact_phone,
   ].filter(Boolean).join("   •   ");
-  doc.text(footer, pageW / 2, pageH - 28, { align: "center" });
-  doc.setTextColor(...accent);
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(7.5);
-  doc.text("THANK YOU FOR YOUR BUSINESS", pageW / 2, pageH - 16, { align: "center" });
+  doc.text(footer, pageW / 2, pageH - 22, { align: "center" });
 
   return doc.output("blob");
 }
