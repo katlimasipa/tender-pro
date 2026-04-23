@@ -198,7 +198,7 @@ export default function CompanyProfile() {
                 <Input value={form.registration_number || ""} onChange={e => setForm({ ...form, registration_number: e.target.value })} className="mt-1.5" />
               </div>
               <div>
-                <Label>VAT number</Label>
+                <Label>VAT number (optional)</Label>
                 <Input value={form.vat_number || ""} onChange={e => setForm({ ...form, vat_number: e.target.value })} className="mt-1.5" />
               </div>
             </div>
