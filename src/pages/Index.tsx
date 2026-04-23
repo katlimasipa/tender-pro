@@ -185,7 +185,20 @@ const Index = () => {
             <span className="font-display">FillYourTender</span>
             <span>· Made in South Africa</span>
           </div>
-          <div>© {new Date().getFullYear()} FillYourTender. All rights reserved.</div>
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center">
+            <div>© {new Date().getFullYear()} FillYourTender. All rights reserved.</div>
+            <div>
+              Built by{" "}
+              <a
+                href="https://architeq.co.za"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground font-medium hover:text-accent transition"
+              >
+                Architeq Web Agency
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
