@@ -49,12 +49,12 @@ export default function TendersList() {
 
   return (
     <AppShell>
-      <div className="p-8 md:p-12 max-w-7xl">
+      <div className="p-4 sm:p-8 md:p-12 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-end justify-between flex-wrap gap-4">
             <div>
               <div className="text-sm text-muted-foreground">Documents</div>
-              <h1 className="font-display text-4xl mt-1">Tenders</h1>
+              <h1 className="font-display text-3xl sm:text-4xl mt-1">Tenders</h1>
             </div>
             <Button onClick={() => navigate("/tenders/new")} className="bg-primary hover:bg-primary/90 shadow-elevated">
               <Plus className="h-4 w-4 mr-1.5" /> New Tender
@@ -79,7 +79,7 @@ export default function TendersList() {
               )}
             </div>
           ) : (
-            <div className="mt-8 bg-card border border-border rounded-xl overflow-hidden shadow-soft">
+            <div className="mt-8 bg-card border border-border rounded-xl overflow-hidden shadow-soft overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>

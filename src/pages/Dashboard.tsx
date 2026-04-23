@@ -39,20 +39,20 @@ export default function Dashboard() {
 
   return (
     <AppShell>
-      <div className="p-8 md:p-12 max-w-7xl">
+      <div className="p-4 sm:p-8 md:p-12 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-end justify-between flex-wrap gap-4">
             <div>
               <div className="text-sm text-muted-foreground">Welcome back</div>
-              <h1 className="font-display text-4xl mt-1">{company?.name || "Your dashboard"}</h1>
+              <h1 className="font-display text-3xl sm:text-4xl mt-1 break-words">{company?.name || "Your dashboard"}</h1>
             </div>
             <Button onClick={() => navigate("/tenders/new")} className="bg-primary hover:bg-primary/90 shadow-elevated">
-              <Plus className="h-4 w-4 mr-1.5" /> Create New Tender
+              <Plus className="h-4 w-4 mr-1.5" /> <span className="hidden sm:inline">Create</span> New Tender
             </Button>
           </div>
 
           {/* Stats */}
-          <div className="mt-10 grid md:grid-cols-3 gap-5">
+          <div className="mt-8 sm:mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
             {[
               { label: "Total tenders", value: tenders.length, icon: FileText },
               { label: "Total value quoted", value: formatZAR(totalValue), icon: TrendingUp },
@@ -90,7 +90,7 @@ export default function Dashboard() {
                 </Button>
               </div>
             ) : (
-              <div className="bg-card border border-border rounded-xl overflow-hidden shadow-soft">
+              <div className="bg-card border border-border rounded-xl overflow-hidden shadow-soft overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary/50 text-muted-foreground text-left">
                     <tr>
@@ -119,7 +119,7 @@ export default function Dashboard() {
           </div>
 
           {/* Quick links */}
-          <div className="mt-12 grid md:grid-cols-2 gap-5">
+          <div className="mt-12 grid sm:grid-cols-2 gap-5">
             <Link to="/company" className="group bg-gradient-velvet text-primary-foreground rounded-xl p-7 flex items-center justify-between hover:shadow-elevated transition">
               <div>
                 <Building2 className="h-5 w-5 text-accent" />

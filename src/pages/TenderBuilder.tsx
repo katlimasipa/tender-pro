@@ -117,29 +117,29 @@ export default function TenderBuilder() {
 
   return (
     <AppShell>
-      <div className="p-8 md:p-12 max-w-6xl">
+      <div className="p-4 sm:p-8 md:p-12 max-w-6xl">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <button onClick={() => navigate("/tenders")} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-4">
             <ArrowLeft className="h-3 w-3" /> Back to tenders
           </button>
 
           <div className="flex items-end justify-between flex-wrap gap-4">
-            <div>
+            <div className="min-w-0">
               <div className="text-sm text-muted-foreground">{isNew ? "New" : "Editing"} tender</div>
-              <h1 className="font-display text-4xl mt-1">{title || "Untitled tender"}</h1>
+              <h1 className="font-display text-3xl sm:text-4xl mt-1 break-words">{title || "Untitled tender"}</h1>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={save} disabled={saving}>
-                <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save draft"}
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={save} disabled={saving} className="flex-1 sm:flex-none">
+                <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save"}
               </Button>
-              <Button onClick={exportPDF} disabled={exporting} className="bg-primary hover:bg-primary/90 shadow-elevated">
+              <Button onClick={exportPDF} disabled={exporting} className="bg-primary hover:bg-primary/90 shadow-elevated flex-1 sm:flex-none">
                 <Download className="h-4 w-4 mr-1.5" /> {exporting ? "Generating…" : "Export PDF"}
               </Button>
             </div>
           </div>
 
           {/* Header card */}
-          <div className="mt-8 bg-card border border-border rounded-xl p-7 shadow-soft grid md:grid-cols-2 gap-5">
+          <div className="mt-6 sm:mt-8 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft grid md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
               <Label>Tender title *</Label>
               <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" placeholder="Supply of construction materials — Phase 2" />
@@ -171,7 +171,7 @@ export default function TenderBuilder() {
               </Button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm min-w-[560px]">
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>
                     <th className="px-4 py-3 font-medium">Description</th>
@@ -208,11 +208,11 @@ export default function TenderBuilder() {
             </div>
 
             {/* Totals */}
-            <div className="p-6 border-t border-border bg-secondary/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
+            <div className="p-5 sm:p-6 border-t border-border bg-secondary/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+              <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
                 <div className="flex items-center gap-3">
                   <Switch checked={vatInclusive} onCheckedChange={setVatInclusive} id="vat-inc" />
-                  <Label htmlFor="vat-inc" className="cursor-pointer">VAT inclusive pricing</Label>
+                  <Label htmlFor="vat-inc" className="cursor-pointer text-sm">VAT inclusive</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Label htmlFor="vat-rate" className="text-sm">VAT %</Label>
@@ -228,7 +228,7 @@ export default function TenderBuilder() {
           </div>
 
           {/* Notes */}
-          <div className="mt-6 bg-card border border-border rounded-xl p-7 shadow-soft">
+          <div className="mt-6 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft">
             <Label>Notes / Terms</Label>
             <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} className="mt-1.5" placeholder="Payment terms, delivery schedule, validity period…" />
           </div>
