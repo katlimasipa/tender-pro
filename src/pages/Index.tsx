@@ -20,7 +20,7 @@ const Index = () => {
             <div className="h-8 w-8 rounded-md bg-gradient-velvet grid place-items-center">
               <FileCheck2 className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-semibold tracking-tight">FillYourTender</span>
+            <span className="font-display text-xl font-semibold tracking-tight">Tender Desk</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
@@ -50,7 +50,7 @@ const Index = () => {
               <span className="italic text-primary">beautifully</span> done.
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
-              Stop wrestling with Excel. FillYourTender turns your line items into compliant,
+              Stop wrestling with Excel. Tender Desk turns your line items into compliant,
               branded PDFs — VAT, totals, and letterheads handled automatically.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -112,7 +112,7 @@ const Index = () => {
       {/* Features */}
       <section id="features" className="container py-24 border-t border-border">
         <div className="max-w-2xl">
-          <div className="text-sm text-accent font-medium uppercase tracking-widest">Why FillYourTender</div>
+          <div className="text-sm text-accent font-medium uppercase tracking-widest">Why Tender Desk</div>
           <h2 className="font-display text-4xl md:text-5xl font-semibold mt-3 text-balance">Less paperwork. More winning bids.</h2>
         </div>
         <div className="mt-14 grid md:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
@@ -182,11 +182,11 @@ const Index = () => {
             <div className="h-6 w-6 rounded bg-gradient-velvet grid place-items-center">
               <FileCheck2 className="h-3 w-3 text-primary-foreground" />
             </div>
-            <span className="font-display">FillYourTender</span>
+            <span className="font-display">Tender Desk</span>
             <span>· Made in South Africa</span>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center">
-            <div>© {new Date().getFullYear()} FillYourTender. All rights reserved.</div>
+            <div>© {new Date().getFullYear()} Tender Desk. All rights reserved.</div>
             <div>
               Built by{" "}
               <a

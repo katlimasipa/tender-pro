@@ -58,7 +58,7 @@ export default function Onboarding() {
             <div className="h-8 w-8 rounded-md bg-gradient-velvet grid place-items-center">
               <FileCheck2 className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl">FillYourTender</span>
+            <span className="font-display text-xl">Tender Desk</span>
           </div>
 
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Step 1 of 1</div>

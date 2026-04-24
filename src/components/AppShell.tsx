@@ -23,7 +23,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className="h-8 w-8 rounded-md bg-sidebar-primary grid place-items-center">
           <FileCheck2 className="h-4 w-4 text-sidebar-primary-foreground" />
         </div>
-        <span className="font-display text-lg">FillYourTender</span>
+        <span className="font-display text-lg">Tender Desk</span>
       </Link>
 
       <div className="p-4">
@@ -82,7 +82,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className="h-7 w-7 rounded-md bg-primary grid place-items-center">
             <FileCheck2 className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <span className="font-display text-base">FillYourTender</span>
+          <span className="font-display text-base">Tender Desk</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Open menu">
           <Menu className="h-5 w-5" />
