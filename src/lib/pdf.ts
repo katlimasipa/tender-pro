@@ -321,17 +321,19 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setLineWidth(0.5);
   doc.line(totalsX, ty + 34, totalsX + totalsW, ty + 34);
 
-  // Grand total — flat, typographic
+  // Grand total — outlined, black bold typography
   const gtY = ty + 34;
   const gtH = dense ? 32 : 38;
-  doc.setFillColor(...primary);
-  doc.rect(totalsX, gtY, totalsW, gtH, "F");
-  // accent corner
+  // outlined box (no fill, accent border)
+  doc.setDrawColor(...accent);
+  doc.setLineWidth(1.2);
+  doc.rect(totalsX, gtY, totalsW, gtH, "S");
+  // accent top accent bar
   doc.setFillColor(...accent);
   doc.rect(totalsX, gtY, totalsW, 2, "F");
 
-  doc.setTextColor(...onPrimary);
-  doc.setFont(FONT, "normal");
+  doc.setTextColor(0, 0, 0);
+  doc.setFont(FONT, "bold");
   doc.setFontSize(8);
   doc.text("TOTAL DUE", totalsX + 12, gtY + 16);
   doc.setFont(FONT, "bold");
