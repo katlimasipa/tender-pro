@@ -215,8 +215,8 @@ export default function TenderBuilder() {
                   <Label htmlFor="vat-inc" className="cursor-pointer text-sm">VAT inclusive</Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="vat-rate" className="text-sm">VAT %</Label>
-                  <Input id="vat-rate" type="number" value={vatRate} onChange={e => setVatRate(Number(e.target.value))} className="w-20" />
+                  <Label htmlFor="vat-rate" className={`text-sm ${!vatInclusive ? "text-muted-foreground/50" : ""}`}>VAT %</Label>
+                  <Input id="vat-rate" type="number" value={vatRate} onChange={e => setVatRate(Number(e.target.value))} className="w-20" disabled={!vatInclusive} />
                 </div>
               </div>
               <div className="w-full md:w-72 space-y-1.5 text-sm">
