@@ -69,7 +69,7 @@ const AuthPage = () => {
           <div className="h-8 w-8 rounded-md bg-accent grid place-items-center">
             <FileCheck2 className="h-4 w-4 text-accent-foreground" />
           </div>
-          <span className="font-display text-xl">FillYourTender</span>
+          <span className="font-display text-xl">Tender Desk</span>
         </Link>
         <div className="relative z-10">
           <h2 className="font-display text-5xl leading-tight text-balance">
