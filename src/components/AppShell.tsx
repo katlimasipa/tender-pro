@@ -1,9 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, Building2, LogOut, FileCheck2, Plus, Menu, X } from "lucide-react";
+import { LayoutDashboard, FileText, Building2, LogOut, Plus, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/tender-desk-logo.svg";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -19,11 +20,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const SidebarBody = (
     <>
-      <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2 px-6 h-16 border-b border-sidebar-border">
-        <div className="h-8 w-8 rounded-md bg-sidebar-primary grid place-items-center">
-          <FileCheck2 className="h-4 w-4 text-sidebar-primary-foreground" />
-        </div>
-        <span className="font-display text-lg">Tender Desk</span>
+      <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center px-6 h-16 border-b border-sidebar-border">
+        <img src={logo} alt="Tender Desk" className="h-8 w-auto" />
       </Link>
 
       <div className="p-4">
@@ -78,11 +76,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background md:flex">
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 border-b border-border bg-background/90 backdrop-blur">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-md bg-primary grid place-items-center">
-            <FileCheck2 className="h-3.5 w-3.5 text-primary-foreground" />
-          </div>
-          <span className="font-display text-base">Tender Desk</span>
+        <Link to="/dashboard" className="flex items-center">
+          <img src={logo} alt="Tender Desk" className="h-7 w-auto" />
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Open menu">
           <Menu className="h-5 w-5" />

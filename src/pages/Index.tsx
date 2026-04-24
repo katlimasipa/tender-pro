@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, FileText, Calculator, Sparkles, ShieldCheck, Building2, FileCheck2 } from "lucide-react";
+import { ArrowRight, FileText, Calculator, Sparkles, ShieldCheck, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/tender-desk-logo.svg";
 
 const features = [
   { icon: Calculator, title: "ZAR & VAT, sorted", desc: "Automatic 15% VAT, inclusive or exclusive. Currency formatted in Rands. No spreadsheets." },
@@ -16,11 +17,8 @@ const Index = () => {
       {/* Nav */}
       <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-50">
         <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-md bg-gradient-velvet grid place-items-center">
-              <FileCheck2 className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-semibold tracking-tight">Tender Desk</span>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Tender Desk" className="h-9 w-auto" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
