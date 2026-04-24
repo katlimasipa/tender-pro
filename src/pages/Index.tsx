@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, FileText, Calculator, Sparkles, ShieldCheck, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/tender-desk-logo.svg";
+import ContactSection from "@/components/ContactSection";
 
 const features = [
   { icon: Calculator, title: "ZAR & VAT, sorted", desc: "Automatic 15% VAT, inclusive or exclusive. Currency formatted in Rands. No spreadsheets." },
@@ -24,6 +25,7 @@ const Index = () => {
             <a href="#features" className="hover:text-foreground transition">Features</a>
             <a href="#how" className="hover:text-foreground transition">How it works</a>
             <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
+            <a href="#contact" className="hover:text-foreground transition">Contact</a>
           </nav>
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost" size="sm"><Link to="/auth">Sign in</Link></Button>
@@ -173,6 +175,8 @@ const Index = () => {
           ))}
         </div>
       </section>
+
+      <ContactSection />
 
       <footer className="border-t border-border bg-secondary/30">
         <div className="container py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
