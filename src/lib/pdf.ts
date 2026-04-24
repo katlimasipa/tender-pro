@@ -256,37 +256,43 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const tableFontSize = veryDense ? 8.5 : dense ? 9.5 : 10;
 
   autoTable(doc, {
-    head: [["Description", "Qty", "Unit Price", "Amount"]],
+    head: [["DESCRIPTION", "QTY", "UNIT PRICE", "AMOUNT"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
-    theme: "plain",
+    theme: "grid",
     styles: {
       font: FONT,
       fontSize: tableFontSize,
       cellPadding: { top: cellPadV, right: 10, bottom: cellPadV, left: 10 },
       textColor: ink,
       lineColor: hairline,
-      lineWidth: 0,
+      lineWidth: 0.4,
+      valign: "middle",
     },
     headStyles: {
-      fillColor: paper,
-      textColor: primary,
+      fillColor: primary,
+      textColor: onPrimary,
       fontStyle: "bold",
       fontSize: veryDense ? 7.5 : 8,
-      cellPadding: { top: 6, right: 10, bottom: 8, left: 10 },
+      cellPadding: { top: 8, right: 10, bottom: 8, left: 10 },
       lineColor: primary,
-      lineWidth: { top: 0, right: 0, bottom: 0.8, left: 0 } as any,
+      lineWidth: 0.4,
+      halign: "left",
     },
-    bodyStyles: {
-      lineColor: hairline,
-      lineWidth: { top: 0, right: 0, bottom: 0.4, left: 0 } as any,
+    alternateRowStyles: {
+      fillColor: cream,
     },
     columnStyles: {
       0: { textColor: ink },
       1: { halign: "right", cellWidth: 44, textColor: subInk },
       2: { halign: "right", cellWidth: 92, textColor: subInk },
       3: { halign: "right", cellWidth: 100, fontStyle: "bold", textColor: ink },
+    },
+    didParseCell: (data) => {
+      if (data.section === "head" && data.column.index > 0) {
+        data.cell.styles.halign = "right";
+      }
     },
   });
 
