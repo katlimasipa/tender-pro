@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { z } from "zod";
-import { FileCheck2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import logo from "@/assets/tender-desk-logo.svg";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -65,11 +66,8 @@ const AuthPage = () => {
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       {/* Left — brand panel */}
       <div className="hidden lg:flex relative bg-gradient-velvet text-primary-foreground p-12 flex-col justify-between overflow-hidden grain">
-        <Link to="/" className="flex items-center gap-2 relative z-10">
-          <div className="h-8 w-8 rounded-md bg-accent grid place-items-center">
-            <FileCheck2 className="h-4 w-4 text-accent-foreground" />
-          </div>
-          <span className="font-display text-xl">Tender Desk</span>
+        <Link to="/" className="flex items-center relative z-10">
+          <img src={logo} alt="Tender Desk" className="h-9 w-auto brightness-0 invert" />
         </Link>
         <div className="relative z-10">
           <h2 className="font-display text-5xl leading-tight text-balance">
