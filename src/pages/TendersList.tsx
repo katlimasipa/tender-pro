@@ -79,37 +79,60 @@ export default function TendersList() {
               )}
             </div>
           ) : (
-            <div className="mt-8 bg-card border border-border rounded-xl overflow-hidden shadow-soft overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary/50 text-muted-foreground text-left">
-                  <tr>
-                    <th className="px-5 py-3 font-medium">Title</th>
-                    <th className="px-5 py-3 font-medium">Client</th>
-                    <th className="px-5 py-3 font-medium">Date</th>
-                    <th className="px-5 py-3 font-medium text-right">Total</th>
-                    <th className="w-12" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(t => (
-                    <tr key={t.id} className="border-t border-border hover:bg-secondary/30 group">
-                      <td className="px-5 py-4 cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>
-                        <div className="font-medium">{t.title}</div>
-                        {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{t.client_name || "—"}</td>
-                      <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatDate(t.created_at)}</td>
-                      <td className="px-5 py-4 text-right tabular-nums font-medium cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatZAR(Number(t.grand_total))}</td>
-                      <td className="pr-3">
-                        <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
+            <>
+              {/* Mobile cards */}
+              <div className="mt-6 sm:mt-8 grid gap-3 md:hidden">
+                {filtered.map(t => (
+                  <div key={t.id} className="bg-card border border-border rounded-xl p-4 shadow-soft flex items-start gap-3">
+                    <button onClick={() => navigate(`/tenders/${t.id}`)} className="flex-1 text-left min-w-0">
+                      <div className="font-medium truncate">{t.title}</div>
+                      {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                      <div className="mt-2 text-sm text-muted-foreground truncate">{t.client_name || "—"}</div>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">{formatDate(t.created_at)}</span>
+                        <span className="tabular-nums font-medium text-sm">{formatZAR(Number(t.grand_total))}</span>
+                      </div>
+                    </button>
+                    <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table */}
+              <div className="mt-8 hidden md:block bg-card border border-border rounded-xl overflow-hidden shadow-soft overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-secondary/50 text-muted-foreground text-left">
+                    <tr>
+                      <th className="px-5 py-3 font-medium">Title</th>
+                      <th className="px-5 py-3 font-medium">Client</th>
+                      <th className="px-5 py-3 font-medium">Date</th>
+                      <th className="px-5 py-3 font-medium text-right">Total</th>
+                      <th className="w-12" />
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filtered.map(t => (
+                      <tr key={t.id} className="border-t border-border hover:bg-secondary/30 group">
+                        <td className="px-5 py-4 cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>
+                          <div className="font-medium">{t.title}</div>
+                          {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                        </td>
+                        <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{t.client_name || "—"}</td>
+                        <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatDate(t.created_at)}</td>
+                        <td className="px-5 py-4 text-right tabular-nums font-medium cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatZAR(Number(t.grand_total))}</td>
+                        <td className="pr-3">
+                          <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </motion.div>
       </div>

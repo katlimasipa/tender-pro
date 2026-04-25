@@ -58,7 +58,7 @@ const ContactSection = () => {
 
   return (
     <section id="contact" className="border-t border-border bg-background">
-      <div className="container py-24 grid lg:grid-cols-2 gap-16 items-start">
+      <div className="container py-16 sm:py-24 grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -85,7 +85,7 @@ const ContactSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="rounded-xl border border-border bg-card p-8 shadow-elevated space-y-5"
+          className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-elevated space-y-5"
           noValidate
         >
           <div className="space-y-2">

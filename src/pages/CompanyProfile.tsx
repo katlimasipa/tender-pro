@@ -154,7 +154,7 @@ export default function CompanyProfile() {
           </div>
 
           {/* Brand colours */}
-          <div className="mt-6 bg-card border border-border rounded-xl p-7 shadow-soft">
+          <div className="mt-6 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft">
             <h2 className="font-display text-xl">Brand colours</h2>
             <p className="text-sm text-muted-foreground mt-1">Used for the header band, table header, and totals on every PDF.</p>
             <div className="mt-5 grid sm:grid-cols-2 gap-5">
@@ -186,7 +186,7 @@ export default function CompanyProfile() {
           </div>
 
           {/* Details */}
-          <div className="mt-6 bg-card border border-border rounded-xl p-7 shadow-soft space-y-5">
+          <div className="mt-6 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft space-y-5">
             <h2 className="font-display text-xl">Details</h2>
             <div>
               <Label>Company name</Label>
@@ -230,7 +230,7 @@ export default function CompanyProfile() {
           </div>
 
           {/* Payment details */}
-          <div className="mt-6 bg-card border border-border rounded-xl p-7 shadow-soft space-y-5">
+          <div className="mt-6 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft space-y-5">
             <div>
               <h2 className="font-display text-xl">Payment details</h2>
               <p className="text-sm text-muted-foreground mt-1">Banking info shown in a "Payment Details" block on every PDF.</p>

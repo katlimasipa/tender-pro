@@ -17,9 +17,9 @@ const Index = () => {
     <div className="min-h-screen bg-background grain">
       {/* Nav */}
       <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="Tender Desk" className="h-9 w-auto" />
+        <div className="container flex h-16 items-center justify-between gap-2">
+          <Link to="/" className="flex items-center shrink-0">
+            <img src={logo} alt="Tender Desk" className="h-8 sm:h-9 w-auto" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
@@ -27,8 +27,8 @@ const Index = () => {
             <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
             <a href="#contact" className="hover:text-foreground transition">Contact</a>
           </nav>
-          <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm"><Link to="/auth">Sign in</Link></Button>
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <Button asChild variant="ghost" size="sm" className="hidden xs:inline-flex sm:inline-flex"><Link to="/auth">Sign in</Link></Button>
             <Button asChild size="sm" className="bg-primary hover:bg-primary/90"><Link to="/auth?mode=signup">Get started</Link></Button>
           </div>
         </div>
@@ -37,23 +37,23 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-paper opacity-60 pointer-events-none" />
-        <div className="container relative py-20 md:py-32">
+        <div className="container relative py-14 sm:py-20 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
             className="max-w-4xl"
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground mb-6">
-              <Sparkles className="h-3 w-3 text-accent" /> Built in South Africa, for South African businesses
+              <Sparkles className="h-3 w-3 text-accent shrink-0" /> <span className="truncate">Built in South Africa, for South African businesses</span>
             </div>
-            <h1 className="font-display text-5xl md:text-7xl font-semibold leading-[0.95] text-balance">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-semibold leading-[1.02] sm:leading-[0.95] text-balance">
               Tender documents,<br/>
               <span className="italic text-primary">beautifully</span> done.
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
+            <p className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
               Stop wrestling with Excel. Tender Desk turns your line items into compliant,
               branded PDFs — VAT, totals, and letterheads handled automatically.
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-elevated h-12 px-6">
                 <Link to="/auth?mode=signup">Start creating tenders <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
@@ -66,21 +66,21 @@ const Index = () => {
           {/* Decorative document mock */}
           <motion.div
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.2 }}
-            className="mt-20 mx-auto max-w-4xl"
+            className="mt-12 sm:mt-20 mx-auto max-w-4xl"
           >
             <div className="relative rounded-xl bg-card shadow-elevated border border-border overflow-hidden">
-              <div className="bg-gradient-velvet px-8 py-5 flex items-center justify-between text-primary-foreground">
-                <div>
-                  <div className="text-xs uppercase tracking-widest opacity-70">Tender</div>
-                  <div className="font-display text-xl">Mthembu Construction (Pty) Ltd</div>
+              <div className="bg-gradient-velvet px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-3 text-primary-foreground">
+                <div className="min-w-0">
+                  <div className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">Tender</div>
+                  <div className="font-display text-base sm:text-xl truncate">Mthembu Construction (Pty) Ltd</div>
                 </div>
-                <div className="text-right text-xs opacity-80">
+                <div className="text-right text-[10px] sm:text-xs opacity-80 shrink-0">
                   <div>TEN-2026-0142</div>
                   <div>21 Apr 2026</div>
                 </div>
               </div>
-              <div className="p-8">
-                <table className="w-full text-sm">
+              <div className="p-4 sm:p-8 overflow-x-auto">
+                <table className="w-full text-xs sm:text-sm min-w-[480px]">
                   <thead className="text-left border-b border-border">
                     <tr className="text-muted-foreground"><th className="py-2 font-medium">No.</th><th className="font-medium">Product</th><th className="text-right font-medium">Qty</th><th className="text-right font-medium">Unit</th><th className="text-right font-medium">Total</th></tr>
                   </thead>
@@ -91,13 +91,13 @@ const Index = () => {
                       ["3", "Steel rebar — Y12 grade", "850", "R 92.40", "R 78,540.00"],
                     ].map(r => (
                       <tr key={r[0]} className="border-b border-border/50">
-                        {r.map((c, i) => <td key={i} className={`py-3 ${i >= 2 ? "text-right tabular-nums" : ""}`}>{c}</td>)}
+                        {r.map((c, i) => <td key={i} className={`py-3 pr-2 ${i >= 2 ? "text-right tabular-nums" : ""}`}>{c}</td>)}
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 <div className="mt-6 flex justify-end">
-                  <div className="w-72 space-y-2 text-sm">
+                  <div className="w-full sm:w-72 space-y-2 text-sm">
                     <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span className="tabular-nums">R 349,040.00</span></div>
                     <div className="flex justify-between text-muted-foreground"><span>VAT (15%)</span><span className="tabular-nums">R 52,356.00</span></div>
                     <div className="flex justify-between font-display text-lg pt-2 border-t border-primary"><span>Grand Total</span><span className="tabular-nums">R 401,396.00</span></div>
@@ -110,14 +110,14 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section id="features" className="container py-24 border-t border-border">
+      <section id="features" className="container py-16 sm:py-24 border-t border-border">
         <div className="max-w-2xl">
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Why Tender Desk</div>
-          <h2 className="font-display text-4xl md:text-5xl font-semibold mt-3 text-balance">Less paperwork. More winning bids.</h2>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold mt-3 text-balance">Less paperwork. More winning bids.</h2>
         </div>
-        <div className="mt-14 grid md:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
+        <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
           {features.map((f) => (
-            <div key={f.title} className="bg-card p-8 hover:bg-secondary/40 transition">
+            <div key={f.title} className="bg-card p-6 sm:p-8 hover:bg-secondary/40 transition">
               <f.icon className="h-6 w-6 text-accent" />
               <h3 className="font-display text-xl mt-4">{f.title}</h3>
               <p className="text-muted-foreground mt-2 leading-relaxed">{f.desc}</p>
@@ -128,16 +128,16 @@ const Index = () => {
 
       {/* How */}
       <section id="how" className="bg-secondary/40 border-y border-border">
-        <div className="container py-24">
-          <h2 className="font-display text-4xl md:text-5xl font-semibold max-w-2xl text-balance">Three steps. One polished tender.</h2>
-          <div className="mt-14 grid md:grid-cols-3 gap-8">
+        <div className="container py-16 sm:py-24">
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold max-w-2xl text-balance">Three steps. One polished tender.</h2>
+          <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 md:grid-cols-3 gap-8">
             {[
               { n: "01", t: "Set up your company", d: "Add your registration, VAT number, and upload your letterhead — once." },
               { n: "02", t: "Build your tender", d: "Add line items. Watch totals and VAT calculate in real time." },
               { n: "03", t: "Export & send", d: "One click for a print-ready, branded PDF. Saved to your dashboard." },
             ].map((s) => (
               <div key={s.n}>
-                <div className="font-display text-6xl text-accent">{s.n}</div>
+                <div className="font-display text-5xl sm:text-6xl text-accent">{s.n}</div>
                 <div className="font-display text-2xl mt-2">{s.t}</div>
                 <p className="text-muted-foreground mt-2 leading-relaxed">{s.d}</p>
               </div>
@@ -147,18 +147,18 @@ const Index = () => {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="container py-24">
+      <section id="pricing" className="container py-16 sm:py-24">
         <div className="text-center max-w-2xl mx-auto">
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Pricing</div>
-          <h2 className="font-display text-4xl md:text-5xl font-semibold mt-3">Start free. Scale when you're ready.</h2>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold mt-3">Start free. Scale when you're ready.</h2>
         </div>
-        <div className="mt-14 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
           {[
             { name: "Free", price: "R0", per: "forever", features: ["3 tenders / month", "PDF export", "1 letterhead"], cta: "Start free" },
             { name: "Pro", price: "R249", per: "per month", features: ["Unlimited tenders", "Templates library", "Priority support"], cta: "Go Pro", featured: true },
             { name: "Enterprise", price: "Custom", per: "talk to us", features: ["Multi-user team", "Custom compliance presets", "Dedicated onboarding"], cta: "Contact sales" },
           ].map((p) => (
-            <div key={p.name} className={`rounded-xl border p-8 ${p.featured ? "border-primary bg-card shadow-elevated" : "border-border bg-card/60"}`}>
+            <div key={p.name} className={`rounded-xl border p-6 sm:p-8 ${p.featured ? "border-primary bg-card shadow-elevated" : "border-border bg-card/60"}`}>
               {p.featured && <div className="text-xs text-accent font-medium uppercase tracking-widest mb-2">Most popular</div>}
               <div className="font-display text-2xl">{p.name}</div>
               <div className="mt-4 flex items-baseline gap-1">

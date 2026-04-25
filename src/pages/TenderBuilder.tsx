@@ -164,13 +164,52 @@ export default function TenderBuilder() {
 
           {/* Line items */}
           <div className="mt-6 bg-card border border-border rounded-xl shadow-soft overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="font-display text-xl">Line items</h2>
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+              <h2 className="font-display text-lg sm:text-xl">Line items</h2>
               <Button variant="outline" size="sm" onClick={addItem}>
                 <Plus className="h-4 w-4 mr-1.5" /> Add row
               </Button>
             </div>
-            <div className="overflow-x-auto">
+
+            {/* Mobile: stacked cards */}
+            <div className="md:hidden divide-y divide-border">
+              {items.map((it, i) => (
+                <div key={i} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">Item {i + 1}</span>
+                    <Button variant="ghost" size="icon" onClick={() => removeItem(i)} disabled={items.length === 1}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Description</Label>
+                    <Input value={it.product} onChange={e => updateItem(i, { product: e.target.value })} placeholder="Item description" className="mt-1" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Qty</Label>
+                      <Input type="number" inputMode="decimal" min={0} value={it.quantity === 0 ? "" : it.quantity} placeholder="0"
+                        onChange={e => updateItem(i, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })}
+                        className="mt-1 text-right tabular-nums" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Unit Price (R)</Label>
+                      <Input type="number" inputMode="decimal" min={0} step="0.01" value={it.unitPrice === 0 ? "" : it.unitPrice} placeholder="0.00"
+                        onChange={e => updateItem(i, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })}
+                        className="mt-1 text-right tabular-nums" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center pt-1 text-sm">
+                    <span className="text-muted-foreground">Total</span>
+                    <span className="tabular-nums font-medium">{formatZAR(it.quantity * it.unitPrice)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm min-w-[560px]">
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>
@@ -208,15 +247,15 @@ export default function TenderBuilder() {
             </div>
 
             {/* Totals */}
-            <div className="p-5 sm:p-6 border-t border-border bg-secondary/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-              <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
+            <div className="p-4 sm:p-6 border-t border-border bg-secondary/20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 sm:flex-wrap">
                 <div className="flex items-center gap-3">
                   <Switch checked={vatInclusive} onCheckedChange={setVatInclusive} id="vat-inc" />
                   <Label htmlFor="vat-inc" className="cursor-pointer text-sm">VAT inclusive</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Label htmlFor="vat-rate" className={`text-sm ${!vatInclusive ? "text-muted-foreground/50" : ""}`}>VAT %</Label>
-                  <Input id="vat-rate" type="number" value={vatRate} onChange={e => setVatRate(Number(e.target.value))} className="w-20" disabled={!vatInclusive} />
+                  <Input id="vat-rate" type="number" inputMode="decimal" value={vatRate} onChange={e => setVatRate(Number(e.target.value))} className="w-20" disabled={!vatInclusive} />
                 </div>
               </div>
               <div className="w-full md:w-72 space-y-1.5 text-sm">

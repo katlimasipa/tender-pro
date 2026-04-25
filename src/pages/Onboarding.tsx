@@ -52,7 +52,7 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-background grain">
-      <div className="container max-w-2xl py-16">
+      <div className="container max-w-2xl py-10 sm:py-16">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-2 mb-8">
             <div className="h-8 w-8 rounded-md bg-gradient-velvet grid place-items-center">
@@ -65,7 +65,7 @@ export default function Onboarding() {
           <h1 className="font-display text-4xl mt-2">Tell us about your company</h1>
           <p className="text-muted-foreground mt-2">This appears on every tender PDF you generate. You can change it anytime.</p>
 
-          <form onSubmit={submit} className="mt-10 space-y-5 bg-card border border-border rounded-xl p-8 shadow-soft">
+          <form onSubmit={submit} className="mt-10 space-y-5 bg-card border border-border rounded-xl p-5 sm:p-8 shadow-soft">
             <div>
               <Label>Company name *</Label>
               <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5" placeholder="Mthembu Construction (Pty) Ltd" />
