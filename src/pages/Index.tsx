@@ -37,23 +37,23 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-paper opacity-60 pointer-events-none" />
-        <div className="container relative py-20 md:py-32">
+        <div className="container relative py-14 sm:py-20 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
             className="max-w-4xl"
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground mb-6">
-              <Sparkles className="h-3 w-3 text-accent" /> Built in South Africa, for South African businesses
+              <Sparkles className="h-3 w-3 text-accent shrink-0" /> <span className="truncate">Built in South Africa, for South African businesses</span>
             </div>
-            <h1 className="font-display text-5xl md:text-7xl font-semibold leading-[0.95] text-balance">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-semibold leading-[1.02] sm:leading-[0.95] text-balance">
               Tender documents,<br/>
               <span className="italic text-primary">beautifully</span> done.
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
+            <p className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
               Stop wrestling with Excel. Tender Desk turns your line items into compliant,
               branded PDFs — VAT, totals, and letterheads handled automatically.
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-elevated h-12 px-6">
                 <Link to="/auth?mode=signup">Start creating tenders <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
@@ -66,21 +66,21 @@ const Index = () => {
           {/* Decorative document mock */}
           <motion.div
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.2 }}
-            className="mt-20 mx-auto max-w-4xl"
+            className="mt-12 sm:mt-20 mx-auto max-w-4xl"
           >
             <div className="relative rounded-xl bg-card shadow-elevated border border-border overflow-hidden">
-              <div className="bg-gradient-velvet px-8 py-5 flex items-center justify-between text-primary-foreground">
-                <div>
-                  <div className="text-xs uppercase tracking-widest opacity-70">Tender</div>
-                  <div className="font-display text-xl">Mthembu Construction (Pty) Ltd</div>
+              <div className="bg-gradient-velvet px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-3 text-primary-foreground">
+                <div className="min-w-0">
+                  <div className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">Tender</div>
+                  <div className="font-display text-base sm:text-xl truncate">Mthembu Construction (Pty) Ltd</div>
                 </div>
-                <div className="text-right text-xs opacity-80">
+                <div className="text-right text-[10px] sm:text-xs opacity-80 shrink-0">
                   <div>TEN-2026-0142</div>
                   <div>21 Apr 2026</div>
                 </div>
               </div>
-              <div className="p-8">
-                <table className="w-full text-sm">
+              <div className="p-4 sm:p-8 overflow-x-auto">
+                <table className="w-full text-xs sm:text-sm min-w-[480px]">
                   <thead className="text-left border-b border-border">
                     <tr className="text-muted-foreground"><th className="py-2 font-medium">No.</th><th className="font-medium">Product</th><th className="text-right font-medium">Qty</th><th className="text-right font-medium">Unit</th><th className="text-right font-medium">Total</th></tr>
                   </thead>
@@ -91,13 +91,13 @@ const Index = () => {
                       ["3", "Steel rebar — Y12 grade", "850", "R 92.40", "R 78,540.00"],
                     ].map(r => (
                       <tr key={r[0]} className="border-b border-border/50">
-                        {r.map((c, i) => <td key={i} className={`py-3 ${i >= 2 ? "text-right tabular-nums" : ""}`}>{c}</td>)}
+                        {r.map((c, i) => <td key={i} className={`py-3 pr-2 ${i >= 2 ? "text-right tabular-nums" : ""}`}>{c}</td>)}
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 <div className="mt-6 flex justify-end">
-                  <div className="w-72 space-y-2 text-sm">
+                  <div className="w-full sm:w-72 space-y-2 text-sm">
                     <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span className="tabular-nums">R 349,040.00</span></div>
                     <div className="flex justify-between text-muted-foreground"><span>VAT (15%)</span><span className="tabular-nums">R 52,356.00</span></div>
                     <div className="flex justify-between font-display text-lg pt-2 border-t border-primary"><span>Grand Total</span><span className="tabular-nums">R 401,396.00</span></div>
