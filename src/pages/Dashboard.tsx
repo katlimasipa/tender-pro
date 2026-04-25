@@ -90,31 +90,50 @@ export default function Dashboard() {
                 </Button>
               </div>
             ) : (
-              <div className="bg-card border border-border rounded-xl overflow-hidden shadow-soft overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-secondary/50 text-muted-foreground text-left">
-                    <tr>
-                      <th className="px-5 py-3 font-medium">Title</th>
-                      <th className="px-5 py-3 font-medium">Client</th>
-                      <th className="px-5 py-3 font-medium">Date</th>
-                      <th className="px-5 py-3 font-medium text-right">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recent.map(t => (
-                      <tr key={t.id} className="border-t border-border hover:bg-secondary/30 cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>
-                        <td className="px-5 py-4">
-                          <div className="font-medium">{t.title}</div>
-                          {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
-                        </td>
-                        <td className="px-5 py-4 text-muted-foreground">{t.client_name || "—"}</td>
-                        <td className="px-5 py-4 text-muted-foreground">{formatDate(t.created_at)}</td>
-                        <td className="px-5 py-4 text-right tabular-nums font-medium">{formatZAR(Number(t.grand_total))}</td>
+              <>
+                {/* Mobile cards */}
+                <div className="grid gap-3 md:hidden">
+                  {recent.map(t => (
+                    <button key={t.id} onClick={() => navigate(`/tenders/${t.id}`)}
+                      className="text-left bg-card border border-border rounded-xl p-4 shadow-soft">
+                      <div className="font-medium truncate">{t.title}</div>
+                      {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                      <div className="mt-2 text-sm text-muted-foreground truncate">{t.client_name || "—"}</div>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">{formatDate(t.created_at)}</span>
+                        <span className="tabular-nums font-medium text-sm">{formatZAR(Number(t.grand_total))}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Desktop table */}
+                <div className="hidden md:block bg-card border border-border rounded-xl overflow-hidden shadow-soft overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-secondary/50 text-muted-foreground text-left">
+                      <tr>
+                        <th className="px-5 py-3 font-medium">Title</th>
+                        <th className="px-5 py-3 font-medium">Client</th>
+                        <th className="px-5 py-3 font-medium">Date</th>
+                        <th className="px-5 py-3 font-medium text-right">Total</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {recent.map(t => (
+                        <tr key={t.id} className="border-t border-border hover:bg-secondary/30 cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>
+                          <td className="px-5 py-4">
+                            <div className="font-medium">{t.title}</div>
+                            {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                          </td>
+                          <td className="px-5 py-4 text-muted-foreground">{t.client_name || "—"}</td>
+                          <td className="px-5 py-4 text-muted-foreground">{formatDate(t.created_at)}</td>
+                          <td className="px-5 py-4 text-right tabular-nums font-medium">{formatZAR(Number(t.grand_total))}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
 
