@@ -59,12 +59,12 @@ export default function Dashboard() {
               { label: "Drafts", value: tenders.filter(t => t.status === "draft").length, icon: Receipt },
             ].map((s, i) => (
               <motion.div key={s.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="bg-card border border-border rounded-xl p-6 shadow-soft">
+                className="bg-card border border-border rounded-xl p-5 sm:p-6 shadow-soft">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">{s.label}</div>
                   <s.icon className="h-4 w-4 text-accent" />
                 </div>
-                <div className="font-display text-3xl mt-3 tabular-nums">{s.value}</div>
+                <div className="font-display text-2xl sm:text-3xl mt-3 tabular-nums break-words">{s.value}</div>
               </motion.div>
             ))}
           </div>
