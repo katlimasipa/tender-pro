@@ -43,7 +43,12 @@ const Index = () => {
             className="max-w-4xl"
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground mb-6">
-              <Sparkles className="h-3 w-3 text-accent shrink-0" /> <span className="truncate">Built in South Africa, for South African businesses</span>
+              <span aria-hidden className="inline-flex h-3 w-4 overflow-hidden rounded-[2px] shrink-0 ring-1 ring-border/60">
+                <span className="flex-1 bg-[hsl(140_70%_30%)]" />
+                <span className="flex-1 bg-[hsl(45_95%_55%)]" />
+                <span className="flex-1 bg-[hsl(0_75%_45%)]" />
+              </span>
+              <span className="truncate">Built in South Africa, for South African businesses</span>
             </div>
             <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-semibold leading-[1.02] sm:leading-[0.95] text-balance">
               Tender documents,<br/>
