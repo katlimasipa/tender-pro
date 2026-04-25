@@ -110,14 +110,14 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section id="features" className="container py-24 border-t border-border">
+      <section id="features" className="container py-16 sm:py-24 border-t border-border">
         <div className="max-w-2xl">
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Why Tender Desk</div>
-          <h2 className="font-display text-4xl md:text-5xl font-semibold mt-3 text-balance">Less paperwork. More winning bids.</h2>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold mt-3 text-balance">Less paperwork. More winning bids.</h2>
         </div>
-        <div className="mt-14 grid md:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
+        <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
           {features.map((f) => (
-            <div key={f.title} className="bg-card p-8 hover:bg-secondary/40 transition">
+            <div key={f.title} className="bg-card p-6 sm:p-8 hover:bg-secondary/40 transition">
               <f.icon className="h-6 w-6 text-accent" />
               <h3 className="font-display text-xl mt-4">{f.title}</h3>
               <p className="text-muted-foreground mt-2 leading-relaxed">{f.desc}</p>
@@ -128,16 +128,16 @@ const Index = () => {
 
       {/* How */}
       <section id="how" className="bg-secondary/40 border-y border-border">
-        <div className="container py-24">
-          <h2 className="font-display text-4xl md:text-5xl font-semibold max-w-2xl text-balance">Three steps. One polished tender.</h2>
-          <div className="mt-14 grid md:grid-cols-3 gap-8">
+        <div className="container py-16 sm:py-24">
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold max-w-2xl text-balance">Three steps. One polished tender.</h2>
+          <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 md:grid-cols-3 gap-8">
             {[
               { n: "01", t: "Set up your company", d: "Add your registration, VAT number, and upload your letterhead — once." },
               { n: "02", t: "Build your tender", d: "Add line items. Watch totals and VAT calculate in real time." },
               { n: "03", t: "Export & send", d: "One click for a print-ready, branded PDF. Saved to your dashboard." },
             ].map((s) => (
               <div key={s.n}>
-                <div className="font-display text-6xl text-accent">{s.n}</div>
+                <div className="font-display text-5xl sm:text-6xl text-accent">{s.n}</div>
                 <div className="font-display text-2xl mt-2">{s.t}</div>
                 <p className="text-muted-foreground mt-2 leading-relaxed">{s.d}</p>
               </div>
@@ -147,18 +147,18 @@ const Index = () => {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="container py-24">
+      <section id="pricing" className="container py-16 sm:py-24">
         <div className="text-center max-w-2xl mx-auto">
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Pricing</div>
-          <h2 className="font-display text-4xl md:text-5xl font-semibold mt-3">Start free. Scale when you're ready.</h2>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold mt-3">Start free. Scale when you're ready.</h2>
         </div>
-        <div className="mt-14 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
           {[
             { name: "Free", price: "R0", per: "forever", features: ["3 tenders / month", "PDF export", "1 letterhead"], cta: "Start free" },
             { name: "Pro", price: "R249", per: "per month", features: ["Unlimited tenders", "Templates library", "Priority support"], cta: "Go Pro", featured: true },
             { name: "Enterprise", price: "Custom", per: "talk to us", features: ["Multi-user team", "Custom compliance presets", "Dedicated onboarding"], cta: "Contact sales" },
           ].map((p) => (
-            <div key={p.name} className={`rounded-xl border p-8 ${p.featured ? "border-primary bg-card shadow-elevated" : "border-border bg-card/60"}`}>
+            <div key={p.name} className={`rounded-xl border p-6 sm:p-8 ${p.featured ? "border-primary bg-card shadow-elevated" : "border-border bg-card/60"}`}>
               {p.featured && <div className="text-xs text-accent font-medium uppercase tracking-widest mb-2">Most popular</div>}
               <div className="font-display text-2xl">{p.name}</div>
               <div className="mt-4 flex items-baseline gap-1">
