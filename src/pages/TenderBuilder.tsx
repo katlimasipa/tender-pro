@@ -15,7 +15,7 @@ import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { toast } from "sonner";
 
-const blankItem = (): TenderItem => ({ product: "", quantity: 1, unitPrice: 0 });
+const blankItem = (): TenderItem => ({ product: "", quantity: 0, unitPrice: 0 });
 
 export default function TenderBuilder() {
   const { id } = useParams();
