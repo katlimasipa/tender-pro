@@ -188,10 +188,10 @@ export default function TenderBuilder() {
                         <Input value={it.product} onChange={e => updateItem(i, { product: e.target.value })} placeholder="Item description" className="border-0 bg-transparent focus-visible:bg-secondary/40" />
                       </td>
                       <td className="px-2 py-2">
-                        <Input type="number" min={0} value={it.quantity} onChange={e => updateItem(i, { quantity: Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
+                        <Input type="number" min={0} value={it.quantity === 0 ? "" : it.quantity} placeholder="0" onChange={e => updateItem(i, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
                       </td>
                       <td className="px-2 py-2">
-                        <Input type="number" min={0} step="0.01" value={it.unitPrice} onChange={e => updateItem(i, { unitPrice: Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
+                        <Input type="number" min={0} step="0.01" value={it.unitPrice === 0 ? "" : it.unitPrice} placeholder="0.00" onChange={e => updateItem(i, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums font-medium">
                         {formatZAR(it.quantity * it.unitPrice)}
