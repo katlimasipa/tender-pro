@@ -67,7 +67,7 @@ const AuthPage = () => {
       {/* Left — brand panel */}
       <div className="hidden lg:flex relative bg-gradient-velvet text-primary-foreground p-12 flex-col justify-between overflow-hidden grain">
         <Link to="/" className="flex items-center relative z-10">
-          <img src={logo} alt="Tender Desk" className="h-9 w-auto brightness-0 invert" />
+          <img src={logo} alt="Tender Desk" className="h-9 w-auto" />
         </Link>
         <div className="relative z-10">
           <h2 className="font-display text-5xl leading-tight text-balance">
