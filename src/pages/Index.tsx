@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, FileText, Calculator, Sparkles, ShieldCheck, Building2 } from "lucide-react";
+import { ArrowRight, FileText, Calculator, ShieldCheck, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/tender-desk-logo.svg";
 import ContactSection from "@/components/ContactSection";
