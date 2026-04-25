@@ -250,7 +250,14 @@ export default function TenderBuilder() {
             <div className="p-4 sm:p-6 border-t border-border bg-secondary/20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-5">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 sm:flex-wrap">
                 <div className="flex items-center gap-3">
-                  <Switch checked={vatInclusive} onCheckedChange={setVatInclusive} id="vat-inc" />
+                  <Switch
+                    checked={vatInclusive}
+                    onCheckedChange={(on) => {
+                      setVatInclusive(on);
+                      setVatRate(on ? (vatRate || 15) : 0);
+                    }}
+                    id="vat-inc"
+                  />
                   <Label htmlFor="vat-inc" className="cursor-pointer text-sm">VAT inclusive</Label>
                 </div>
                 <div className="flex items-center gap-2">
