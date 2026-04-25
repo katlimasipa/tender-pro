@@ -17,9 +17,9 @@ const Index = () => {
     <div className="min-h-screen bg-background grain">
       {/* Nav */}
       <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="Tender Desk" className="h-9 w-auto" />
+        <div className="container flex h-16 items-center justify-between gap-2">
+          <Link to="/" className="flex items-center shrink-0">
+            <img src={logo} alt="Tender Desk" className="h-8 sm:h-9 w-auto" />
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
@@ -27,8 +27,8 @@ const Index = () => {
             <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
             <a href="#contact" className="hover:text-foreground transition">Contact</a>
           </nav>
-          <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm"><Link to="/auth">Sign in</Link></Button>
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <Button asChild variant="ghost" size="sm" className="hidden xs:inline-flex sm:inline-flex"><Link to="/auth">Sign in</Link></Button>
             <Button asChild size="sm" className="bg-primary hover:bg-primary/90"><Link to="/auth?mode=signup">Get started</Link></Button>
           </div>
         </div>
