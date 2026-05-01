@@ -25,6 +25,8 @@ export default function TenderBuilder() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
+  const [documentType, setDocumentType] = useState("Quotation");
+  const [customDocType, setCustomDocType] = useState("");
   const [tenderNumber, setTenderNumber] = useState("");
   const [quotationRef, setQuotationRef] = useState("");
   const [clientName, setClientName] = useState("");
