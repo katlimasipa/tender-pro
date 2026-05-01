@@ -160,6 +160,7 @@ export type Database = {
           client_name: string | null
           company_id: string | null
           created_at: string
+          document_type: string
           grand_total: number
           id: string
           items: Json
@@ -180,6 +181,7 @@ export type Database = {
           client_name?: string | null
           company_id?: string | null
           created_at?: string
+          document_type?: string
           grand_total?: number
           id?: string
           items?: Json
@@ -200,6 +202,7 @@ export type Database = {
           client_name?: string | null
           company_id?: string | null
           created_at?: string
+          document_type?: string
           grand_total?: number
           id?: string
           items?: Json
