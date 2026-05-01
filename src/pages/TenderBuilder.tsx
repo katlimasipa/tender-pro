@@ -80,6 +80,7 @@ export default function TenderBuilder() {
       quotation_ref: quotationRef || null,
       client_name: clientName || null,
       client_address: clientAddress || null,
+      document_type: effectiveDocType,
       notes: notes || null,
       vat_rate: vatRate,
       vat_inclusive: vatInclusive,
