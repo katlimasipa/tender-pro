@@ -457,6 +457,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
   const requiredGap = density === "ultra" ? 14 : 20;
+  console.log('PDF DEBUG', { rowCount, density, lastY, requiredGap, minTopForBottomBlock, bottomBlockH, bankBoxH, sigBlockH, willPaginate: lastY + requiredGap > minTopForBottomBlock });
   if (lastY + requiredGap > minTopForBottomBlock) {
     doc.addPage();
     drawFrame();
