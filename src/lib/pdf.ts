@@ -345,7 +345,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const totals = computeTotals(data.items, data.vatRate, data.vatInclusive);
   const totalsW = 240;
   const totalsX = pageW - margin - totalsW;
-  const totalsGap = density === "ultra" ? 10 : 16;
+  const totalsGap = density === "ultra" || density === "veryDense" ? 8 : density === "dense" ? 12 : 16;
   let ty = lastY + totalsGap;
 
   // Subtotal row — bold values
