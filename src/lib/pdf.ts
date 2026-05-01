@@ -96,8 +96,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   let density: "comfortable" | "normal" | "dense" | "veryDense" | "ultra";
   if (rowCount <= 5) density = "comfortable";
   else if (rowCount <= 8) density = "normal";
-  else if (rowCount <= 13) density = "dense";
-  else if (rowCount <= 20) density = "veryDense";
+  else if (rowCount <= 12) density = "dense";
+  else if (rowCount <= 16) density = "veryDense";
   else density = "ultra";
 
   const drawFrame = () => {
