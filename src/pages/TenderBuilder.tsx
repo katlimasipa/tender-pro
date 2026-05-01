@@ -109,7 +109,7 @@ export default function TenderBuilder() {
     try {
       await save();
       const blob = await generateTenderPDF({
-        title, tenderNumber, quotationRef, clientName, clientAddress, notes,
+        title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress, notes,
         vatInclusive, vatRate, items, company,
       });
       const url = URL.createObjectURL(blob);
