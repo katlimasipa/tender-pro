@@ -450,21 +450,21 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     bankBoxH = padY + titleHB + bankRows.length * rowH + padY;
   }
 
-  const sigBlockH = density === "ultra" ? 50 : 60;
-  const footerBlockH = 28;
-  const gapSigToFooter = density === "ultra" ? 14 : 20;
-  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gapSigToFooter + footerBlockH + 10;
+  const tight = density === "ultra" || density === "veryDense" || density === "dense";
+  const sigBlockH = tight ? 48 : 60;
+  const footerBlockH = 26;
+  const gapSigToFooter = tight ? 12 : 18;
+  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gapSigToFooter + footerBlockH + 6;
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
-  const requiredGap = density === "ultra" ? 14 : 20;
-  console.log('PDF DEBUG', { rowCount, density, lastY, requiredGap, minTopForBottomBlock, bottomBlockH, bankBoxH, sigBlockH, willPaginate: lastY + requiredGap > minTopForBottomBlock });
+  const requiredGap = tight ? 10 : 18;
   if (lastY + requiredGap > minTopForBottomBlock) {
     doc.addPage();
     drawFrame();
   }
 
-  const footerHairlineY = pageH - 48;
-  const sigY = footerHairlineY - 18 - gapSigToFooter;
+  const footerHairlineY = pageH - 44;
+  const sigY = footerHairlineY - 14 - gapSigToFooter;
 
   // Bank panel
   if (bankRows.length > 0) {
