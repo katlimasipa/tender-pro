@@ -469,7 +469,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   // Bank panel
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
-    const boxY = sigY - sigBlockH + 4;
+    const boxY = sigY - bankBoxH + 4;
 
     doc.setFillColor(...cream);
     doc.rect(boxX, boxY, bankBoxW, bankBoxH, "F");
