@@ -47,12 +47,18 @@ export default function TenderBuilder() {
     supabase.from("tenders").select("*").eq("id", id!).maybeSingle().then(({ data }) => {
       if (!data) return;
       setTitle(data.title); setTenderNumber(data.tender_number || "");
+      const dt = (data as any).document_type || "Quotation";
+      const presets = ["Quotation", "Specification", "Invoice", "Proposal", "Estimate"];
+      if (presets.includes(dt)) { setDocumentType(dt); setCustomDocType(""); }
+      else { setDocumentType("Other"); setCustomDocType(dt); }
       setQuotationRef((data as any).quotation_ref || "");
       setClientName(data.client_name || ""); setClientAddress(data.client_address || "");
       setNotes(data.notes || ""); setVatRate(Number(data.vat_rate));
       setVatInclusive(data.vat_inclusive); setItems((data.items as any) || [blankItem()]);
     });
   }, [id, isNew]);
+
+  const effectiveDocType = documentType === "Other" ? (customDocType.trim() || "Document") : documentType;
 
   const totals = useMemo(() => computeTotals(items, vatRate, vatInclusive), [items, vatRate, vatInclusive]);
 
