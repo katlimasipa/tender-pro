@@ -418,10 +418,11 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_account_type) bankRows.push(["Type", c.bank_account_type]);
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
+  const tightBank = density === "ultra" || density === "veryDense";
   const padX = 14;
-  const padY = 10;
-  const titleHB = 14;
-  const rowH = 12;
+  const padY = tightBank ? 8 : 10;
+  const titleHB = tightBank ? 12 : 14;
+  const rowH = tightBank ? 10.5 : 12;
   const labelGapX = 12;
   const bankTitle = "BANKING DETAILS";
 
