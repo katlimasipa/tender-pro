@@ -150,24 +150,54 @@ export default function TenderBuilder() {
           {/* Header card */}
           <div className="mt-6 sm:mt-8 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft grid md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
-              <Label>Tender title *</Label>
+              <Label>Document title *</Label>
               <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" placeholder="Supply of construction materials — Phase 2" />
             </div>
             <div>
-              <Label>Quotation No.</Label>
+              <Label>Document type</Label>
+              <select
+                value={documentType}
+                onChange={e => setDocumentType(e.target.value)}
+                className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option>Quotation</option>
+                <option>Specification</option>
+                <option>Invoice</option>
+                <option>Proposal</option>
+                <option>Estimate</option>
+                <option value="Other">Other (custom)…</option>
+              </select>
+              {documentType === "Other" && (
+                <Input
+                  value={customDocType}
+                  onChange={e => setCustomDocType(e.target.value)}
+                  className="mt-2"
+                  placeholder="e.g. Statement of Work"
+                />
+              )}
+            </div>
+            <div>
+              <Label>Document No.</Label>
               <Input value={tenderNumber} onChange={e => setTenderNumber(e.target.value)} className="mt-1.5" placeholder="KGL2026/015" />
             </div>
             <div>
-              <Label>Quotation Ref.</Label>
+              <Label>Reference</Label>
               <Input value={quotationRef} onChange={e => setQuotationRef(e.target.value)} className="mt-1.5" placeholder="RFQJW03SN25" />
             </div>
             <div>
               <Label>Client name</Label>
               <Input value={clientName} onChange={e => setClientName(e.target.value)} className="mt-1.5" placeholder="City of Cape Town" />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label>Client address</Label>
-              <Input value={clientAddress} onChange={e => setClientAddress(e.target.value)} className="mt-1.5" />
+              <Textarea
+                value={clientAddress}
+                onChange={e => setClientAddress(e.target.value)}
+                className="mt-1.5"
+                rows={4}
+                placeholder={"Recipient name / department\nStreet address\nSuburb, City\nPostal code"}
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">Each line will appear stacked on the PDF.</p>
             </div>
           </div>
 
