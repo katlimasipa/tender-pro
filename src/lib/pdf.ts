@@ -58,9 +58,6 @@ const hexToRgb = (hex?: string | null, fallback: [number, number, number] = [28,
   return [parseInt(m[0], 16), parseInt(m[1], 16), parseInt(m[2], 16)];
 };
 
-const luminance = ([r, g, b]: [number, number, number]) =>
-  (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
 const mix = (
   a: [number, number, number],
   b: [number, number, number],
@@ -86,140 +83,156 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
-  const margin = 40;
-  const FONT = "helvetica";
+  const margin = 56;
+  const SERIF = "times";
+  const SANS = "helvetica";
 
+  // Refined editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
-  const accent = hexToRgb(data.company.accent_color, [200, 147, 43]);
-  const onPrimary: [number, number, number] = luminance(primary) > 0.6 ? [20, 24, 22] : [250, 248, 242];
-  const ink: [number, number, number] = [22, 26, 24];
-  const subInk: [number, number, number] = [70, 76, 72];
-  const muted: [number, number, number] = [128, 132, 128];
-  const hairline: [number, number, number] = [222, 218, 208];
-  const paper: [number, number, number] = [255, 255, 255];
-  const cream: [number, number, number] = [250, 247, 240];
-  const primarySoft = mix(primary, [255, 255, 255], 0.92);
+  const accent = hexToRgb(data.company.accent_color, [176, 132, 56]); // refined gold
+  const ink: [number, number, number] = [24, 24, 22];
+  const subInk: [number, number, number] = [86, 86, 82];
+  const muted: [number, number, number] = [140, 140, 134];
+  const hairline: [number, number, number] = [212, 206, 192];
+  const cream: [number, number, number] = [251, 248, 241];
+  const deepInk: [number, number, number] = [12, 12, 10];
 
-  // Density heuristic: tighter spacing when there are many rows so we fit on one page
   const rowCount = data.items.length;
   const dense = rowCount > 8;
   const veryDense = rowCount > 14;
 
-  // ========== LEFT ACCENT RAIL ==========
-  const railW = 6;
-  doc.setFillColor(...primary);
-  doc.rect(0, 0, railW, pageH, "F");
-  doc.setFillColor(...accent);
-  doc.rect(0, 0, railW, 90, "F");
+  // ========== EDITORIAL FRAME ==========
+  // Outer hairline frame for premium feel
+  doc.setDrawColor(...hairline);
+  doc.setLineWidth(0.5);
+  doc.rect(28, 28, pageW - 56, pageH - 56, "S");
+  // Inner accent rule
+  doc.setDrawColor(...accent);
+  doc.setLineWidth(0.4);
+  doc.line(28, 36, pageW - 28, 36);
 
-  // ========== HEADER ==========
-  const headerTop = 38;
-  const headerH = veryDense ? 72 : dense ? 80 : 88;
+  // ========== HEADER: serif wordmark + meta ==========
+  const headerTop = margin + 4;
 
-  // Logo (top-left, on paper — no colored band)
-  let logoBottom = headerTop;
-  let logoRight = margin;
+  // Small uppercase eyebrow above title
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...accent);
+  doc.text("— PROPOSAL", margin, headerTop);
+
+  // Serif display title
+  const titleText = data.title || "Quotation";
+  doc.setFont(SERIF, "normal");
+  doc.setFontSize(28);
+  doc.setTextColor(...deepInk);
+  doc.text(titleText, margin, headerTop + 28);
+
+  // Right meta column
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...muted);
+  doc.text("REFERENCE", pageW - margin, headerTop, { align: "right" });
+  doc.setFont(SANS, "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...ink);
+  doc.text(data.tenderNumber || "—", pageW - margin, headerTop + 14, { align: "right" });
+
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...muted);
+  doc.text("ISSUED", pageW - margin, headerTop + 30, { align: "right" });
+  doc.setFont(SANS, "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...ink);
+  doc.text(formatDate(new Date()), pageW - margin, headerTop + 44, { align: "right" });
+
+  let cursorY = headerTop + 56;
+
+  // Hairline beneath header
+  doc.setDrawColor(...hairline);
+  doc.setLineWidth(0.4);
+  doc.line(margin, cursorY, pageW - margin, cursorY);
+  cursorY += 18;
+
+  // ========== COMPANY (logo + identity, centered-left composition) ==========
+  const idTop = cursorY;
+  let logoH = 0;
   if (data.company.logo_url) {
     try {
       const logo = await loadImage(data.company.logo_url);
-      const maxH = veryDense ? 44 : dense ? 50 : 56;
+      const maxH = 38;
       const ratio = logo.width / logo.height;
-      const h = maxH;
-      const w = Math.min(h * ratio, 150);
-      doc.addImage(logo, "PNG", margin, headerTop, w, h);
-      logoBottom = headerTop + h;
-      logoRight = margin + w;
+      logoH = maxH;
+      const w = Math.min(maxH * ratio, 130);
+      doc.addImage(logo, "PNG", margin, idTop, w, logoH);
     } catch { /* skip */ }
   }
 
-  // Right-aligned QUOTATION title block
-  const titleText = (data.title || "Quotation").toUpperCase();
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(26);
-  doc.setTextColor(...primary);
-  doc.text(titleText, pageW - margin, headerTop + 22, { align: "right" });
-
-  // Accent rule under title
-  doc.setFillColor(...accent);
-  doc.rect(pageW - margin - 56, headerTop + 30, 56, 2.5, "F");
-
-  // Meta under title
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...subInk);
-  let metaY = headerTop + 46;
-  if (data.tenderNumber) {
-    doc.text(`No. ${data.tenderNumber}`, pageW - margin, metaY, { align: "right" });
-    metaY += 11;
-  }
-  doc.text(`Date  ${formatDate(new Date())}`, pageW - margin, metaY, { align: "right" });
-
-  // Company name + contacts (left, under logo)
-  let cy = Math.max(logoBottom + 14, headerTop + headerH);
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(10.5);
+  // Company info aligned right of logo OR full width if no logo
+  const idTextX = data.company.logo_url ? margin + 145 : margin;
+  doc.setFont(SERIF, "bold");
+  doc.setFontSize(11);
   doc.setTextColor(...ink);
-  doc.text(data.company.name || "Company", margin, cy);
-  cy += 11;
+  doc.text(data.company.name || "Company", idTextX, idTop + 12);
 
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...muted);
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...subInk);
+  let icy = idTop + 24;
   const contactBits = [
     data.company.address,
     [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  ·  "),
     data.company.website,
   ].filter(Boolean) as string[];
   contactBits.forEach((line) => {
-    doc.text(line, margin, cy);
-    cy += 10;
+    doc.text(line, idTextX, icy);
+    icy += 10;
   });
 
-  // ========== DIVIDER ==========
-  let cursorY = cy + 8;
-  doc.setDrawColor(...hairline);
-  doc.setLineWidth(0.6);
-  doc.line(margin, cursorY, pageW - margin, cursorY);
-  cursorY += dense ? 16 : 20;
+  cursorY = Math.max(idTop + logoH, icy) + 22;
 
-  // ========== INFO ROW: BILL TO  |  REFS ==========
-  const colGap = 24;
+  // ========== BILLED TO  |  REFERENCES ==========
+  const colGap = 32;
   const colW = (pageW - margin * 2 - colGap) / 2;
 
-  // Left: Bill To
-  doc.setFont(FONT, "bold");
+  // Eyebrow labels
+  doc.setFont(SANS, "bold");
   doc.setFontSize(7);
   doc.setTextColor(...accent);
-  doc.text("BILLED TO", margin, cursorY);
+  doc.text("PREPARED FOR", margin, cursorY);
+  doc.text("DETAILS", margin + colW + colGap, cursorY);
 
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(...ink);
-  const clientLines: string[] = [];
-  if (data.clientName) clientLines.push(data.clientName);
+  // Underline marks
+  doc.setDrawColor(...accent);
+  doc.setLineWidth(0.6);
+  doc.line(margin, cursorY + 4, margin + 22, cursorY + 4);
+  doc.line(margin + colW + colGap, cursorY + 4, margin + colW + colGap + 22, cursorY + 4);
+
+  // Bill To
+  doc.setFont(SERIF, "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(...deepInk);
+  let bly = cursorY + 20;
+  doc.text(data.clientName || "—", margin, bly);
+  bly += 14;
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...subInk);
   if (data.clientAddress) {
-    data.clientAddress.split(/\r?\n/).forEach(l => l.trim() && clientLines.push(l.trim()));
+    data.clientAddress.split(/\r?\n/).forEach((l) => {
+      const t = l.trim();
+      if (t) {
+        doc.text(t, margin, bly);
+        bly += 11;
+      }
+    });
   }
-  if (clientLines.length === 0) clientLines.push("—");
-  let bly = cursorY + 13;
-  clientLines.forEach((l, i) => {
-    if (i === 0) doc.setFont(FONT, "bold");
-    else doc.setFont(FONT, "normal");
-    doc.text(l, margin, bly);
-    bly += 12;
-  });
 
-  // Right: References
+  // References
   const rightColX = margin + colW + colGap;
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(7);
-  doc.setTextColor(...accent);
-  doc.text("REFERENCE", rightColX, cursorY);
-
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(9.5);
-  doc.setTextColor(...ink);
-  let rry = cursorY + 13;
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(9);
+  let rry = cursorY + 20;
   const refRows: [string, string][] = [];
   if (data.quotationRef) refRows.push(["Quote Ref", data.quotationRef]);
   if (data.company.csd_number) refRows.push(["CSD No.", data.company.csd_number]);
@@ -232,254 +245,272 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     rry += 12;
   } else {
     refRows.forEach(([k, v]) => {
-      doc.setFont(FONT, "normal");
+      doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
       doc.text(k, rightColX, rry);
-      doc.setFont(FONT, "bold");
+      doc.setFont(SANS, "bold");
       doc.setTextColor(...ink);
-      doc.text(v, rightColX + 70, rry);
-      rry += 12;
+      doc.text(v, rightColX + 78, rry);
+      rry += 13;
     });
   }
 
-  cursorY = Math.max(bly, rry) + (dense ? 6 : 12);
+  cursorY = Math.max(bly, rry) + (dense ? 14 : 22);
 
-  // ========== TABLE ==========
-  const body = data.items.map((it) => [
+  // ========== TABLE — borderless editorial style ==========
+  const body = data.items.map((it, i) => [
+    String(i + 1).padStart(2, "0"),
     it.product,
     String(it.quantity),
     formatZAR(it.unitPrice),
     formatZAR(it.quantity * it.unitPrice),
   ]);
 
-  const cellPadV = veryDense ? 5 : dense ? 7 : 9;
+  const cellPadV = veryDense ? 7 : dense ? 9 : 12;
   const tableFontSize = veryDense ? 8.5 : dense ? 9.5 : 10;
 
   autoTable(doc, {
-    head: [["DESCRIPTION", "QTY", "UNIT PRICE", "AMOUNT"]],
+    head: [["№", "DESCRIPTION", "QTY", "UNIT", "AMOUNT"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
-    theme: "grid",
+    theme: "plain",
     styles: {
-      font: FONT,
+      font: SANS,
       fontSize: tableFontSize,
-      cellPadding: { top: cellPadV, right: 10, bottom: cellPadV, left: 10 },
+      cellPadding: { top: cellPadV, right: 8, bottom: cellPadV, left: 8 },
       textColor: ink,
       lineColor: hairline,
-      lineWidth: 0.4,
+      lineWidth: 0,
       valign: "middle",
     },
     headStyles: {
-      fillColor: primary,
-      textColor: onPrimary,
+      fillColor: [255, 255, 255],
+      textColor: muted,
       fontStyle: "bold",
-      fontSize: veryDense ? 7.5 : 8,
-      cellPadding: { top: 8, right: 10, bottom: 8, left: 10 },
-      lineColor: primary,
-      lineWidth: 0.4,
+      fontSize: 7.5,
+      cellPadding: { top: 6, right: 8, bottom: 8, left: 8 },
+      lineColor: ink,
+      lineWidth: 0,
       halign: "left",
     },
-    alternateRowStyles: {
-      fillColor: cream,
-    },
     columnStyles: {
-      0: { textColor: ink },
-      1: { halign: "right", cellWidth: 44, textColor: subInk },
-      2: { halign: "right", cellWidth: 92, textColor: subInk },
-      3: { halign: "right", cellWidth: 100, fontStyle: "bold", textColor: ink },
+      0: { cellWidth: 28, textColor: accent, fontStyle: "bold", halign: "left" },
+      1: { textColor: deepInk, fontStyle: "bold" },
+      2: { halign: "right", cellWidth: 44, textColor: subInk },
+      3: { halign: "right", cellWidth: 86, textColor: subInk },
+      4: { halign: "right", cellWidth: 96, fontStyle: "bold", textColor: deepInk },
     },
-    didParseCell: (data) => {
-      if (data.section === "head" && data.column.index > 0) {
-        data.cell.styles.halign = "right";
+    didParseCell: (d) => {
+      if (d.section === "head" && d.column.index >= 2) {
+        d.cell.styles.halign = "right";
+      }
+    },
+    didDrawCell: (d) => {
+      // Hairline under header
+      if (d.section === "head" && d.row.index === 0) {
+        const y = d.cell.y + d.cell.height;
+        if (d.column.index === 0) {
+          doc.setDrawColor(...deepInk);
+          doc.setLineWidth(0.8);
+          doc.line(margin, y, pageW - margin, y);
+        }
+      }
+      // Hairline between body rows
+      if (d.section === "body" && d.column.index === 0) {
+        const y = d.cell.y + d.cell.height;
+        doc.setDrawColor(...hairline);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, pageW - margin, y);
       }
     },
   });
 
   let lastY = (doc as any).lastAutoTable.finalY;
 
-  // ========== TOTALS BLOCK ==========
+  // ========== TOTALS — refined right-aligned editorial ==========
   const totals = computeTotals(data.items, data.vatRate, data.vatInclusive);
-  const totalsW = 230;
+  const totalsW = 240;
   const totalsX = pageW - margin - totalsW;
-  let ty = lastY + (dense ? 10 : 14);
+  let ty = lastY + 18;
 
-  doc.setFont(FONT, "normal");
-  doc.setFontSize(9.5);
+  // Subtotal & VAT rows
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text("Subtotal", totalsX + 4, ty + 12);
+  doc.text("Subtotal", totalsX, ty);
   doc.setTextColor(...ink);
-  doc.text(formatZAR(totals.subtotal), totalsX + totalsW - 4, ty + 12, { align: "right" });
+  doc.setFont(SANS, "normal");
+  doc.text(formatZAR(totals.subtotal), totalsX + totalsW, ty, { align: "right" });
 
   doc.setTextColor(...muted);
-  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (incl.)" : ""}`, totalsX + 4, ty + 27);
+  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (incl.)" : ""}`, totalsX, ty + 16);
   doc.setTextColor(...ink);
-  doc.text(formatZAR(totals.vatAmount), totalsX + totalsW - 4, ty + 27, { align: "right" });
+  doc.text(formatZAR(totals.vatAmount), totalsX + totalsW, ty + 16, { align: "right" });
 
-  // thin divider
-  doc.setDrawColor(...hairline);
+  // Double rule above grand total (editorial style)
+  doc.setDrawColor(...deepInk);
   doc.setLineWidth(0.5);
-  doc.line(totalsX, ty + 34, totalsX + totalsW, ty + 34);
+  doc.line(totalsX, ty + 26, totalsX + totalsW, ty + 26);
+  doc.line(totalsX, ty + 28.5, totalsX + totalsW, ty + 28.5);
 
-  // Grand total — outlined, black bold typography
-  const gtY = ty + 34;
-  const gtH = dense ? 32 : 38;
-  // outlined box (no fill, accent border)
-  doc.setDrawColor(...accent);
-  doc.setLineWidth(1.2);
-  doc.rect(totalsX, gtY, totalsW, gtH, "S");
-  // accent top accent bar
-  doc.setFillColor(...accent);
-  doc.rect(totalsX, gtY, totalsW, 2, "F");
+  // Grand total — clean black on cream, no box clutter
+  doc.setFont(SANS, "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...accent);
+  doc.text("TOTAL DUE", totalsX, ty + 44);
 
+  doc.setFont(SERIF, "bold");
+  doc.setFontSize(20);
   doc.setTextColor(0, 0, 0);
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(8);
-  doc.text("TOTAL DUE", totalsX + 12, gtY + 16);
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(dense ? 14 : 16);
-  doc.text(formatZAR(totals.grandTotal), totalsX + totalsW - 12, gtY + (dense ? 24 : 27), { align: "right" });
+  doc.text(formatZAR(totals.grandTotal), totalsX + totalsW, ty + 50, { align: "right" });
 
-  lastY = gtY + gtH;
+  lastY = ty + 60;
 
   // ========== NOTES (left of totals) ==========
   let notesBottom = lastY;
   if (data.notes) {
-    let ny = ty + 4;
-    doc.setFont(FONT, "bold");
+    let ny = ty;
+    doc.setFont(SANS, "bold");
     doc.setFontSize(7);
     doc.setTextColor(...accent);
     doc.text("NOTES & TERMS", margin, ny);
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(8.5);
+    doc.setDrawColor(...accent);
+    doc.setLineWidth(0.6);
+    doc.line(margin, ny + 4, margin + 22, ny + 4);
+
+    doc.setFont(SERIF, "italic");
+    doc.setFontSize(9.5);
     doc.setTextColor(...subInk);
-    const split = doc.splitTextToSize(data.notes, pageW - margin * 2 - totalsW - 24);
-    doc.text(split, margin, ny + 12);
-    notesBottom = ny + 12 + split.length * 10.5;
+    const split = doc.splitTextToSize(data.notes, pageW - margin * 2 - totalsW - 30);
+    doc.text(split, margin, ny + 18);
+    notesBottom = ny + 18 + split.length * 12;
   }
   lastY = Math.max(lastY, notesBottom);
 
-  // ========== BOTTOM-PINNED FOOTER GROUP ==========
+  // ========== BOTTOM BLOCK: signature + bank ==========
   const c = data.company;
   const bankRows: [string, string][] = [];
-  if (c.bank_account_name) bankRows.push(["Name", c.bank_account_name]);
+  if (c.bank_account_name) bankRows.push(["Account", c.bank_account_name]);
   if (c.bank_name) bankRows.push(["Bank", c.bank_name]);
-  if (c.bank_account_number) bankRows.push(["Acc No", c.bank_account_number]);
+  if (c.bank_account_number) bankRows.push(["Number", c.bank_account_number]);
   if (c.bank_branch_code) bankRows.push(["Branch", c.bank_branch_code]);
   if (c.bank_account_type) bankRows.push(["Type", c.bank_account_type]);
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
-  // Pre-measure bank box (compact)
-  const padX = 12;
-  const padY = 10;
-  const titleH = 12;
-  const rowH = 11;
-  const labelGapX = 10;
+  const padX = 14;
+  const padY = 12;
+  const titleH = 14;
+  const rowH = 12;
+  const labelGapX = 12;
   const bankTitle = "BANKING DETAILS";
 
-  doc.setFont(FONT, "bold");
-  doc.setFontSize(7);
   let bankBoxW = 0;
   let bankBoxH = 0;
   let bankLabelColW = 0;
   let bankValueColW = 0;
   if (bankRows.length > 0) {
+    doc.setFont(SANS, "bold");
+    doc.setFontSize(7);
     const titleW = doc.getTextWidth(bankTitle);
-    doc.setFont(FONT, "bold");
-    doc.setFontSize(8);
+    doc.setFont(SANS, "normal");
+    doc.setFontSize(8.5);
     bankRows.forEach(([k]) => {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
     });
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(8);
+    doc.setFont(SANS, "bold");
+    doc.setFontSize(8.5);
     bankRows.forEach(([, v]) => {
       const w = doc.getTextWidth(String(v));
       if (w > bankValueColW) bankValueColW = w;
     });
     const contentW = Math.max(titleW, bankLabelColW + labelGapX + bankValueColW);
-    bankBoxW = Math.min(contentW + padX * 2, pageW - margin * 2 - 230);
-    bankBoxH = padY + titleH + bankRows.length * rowH + padY - 4;
+    bankBoxW = Math.min(contentW + padX * 2, 260);
+    bankBoxH = padY + titleH + bankRows.length * rowH + padY;
   }
 
-  const sigBlockH = 60;
-  const footerBlockH = 28;
-  const gapSigToFooter = 18;
-  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gapSigToFooter + footerBlockH + 10;
+  const sigBlockH = 64;
+  const footerBlockH = 32;
+  const gapSigToFooter = 22;
+  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gapSigToFooter + footerBlockH + 14;
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
-  const requiredGap = 18;
+  const requiredGap = 24;
   if (lastY + requiredGap > minTopForBottomBlock) {
     doc.addPage();
-    // re-draw rail on new page
-    doc.setFillColor(...primary);
-    doc.rect(0, 0, railW, pageH, "F");
-    doc.setFillColor(...accent);
-    doc.rect(0, 0, railW, 90, "F");
+    // re-draw frame on new page
+    doc.setDrawColor(...hairline);
+    doc.setLineWidth(0.5);
+    doc.rect(28, 28, pageW - 56, pageH - 56, "S");
+    doc.setDrawColor(...accent);
+    doc.setLineWidth(0.4);
+    doc.line(28, 36, pageW - 28, 36);
   }
 
-  const footerHairlineY = pageH - 38;
-  const sigY = footerHairlineY - 16 - gapSigToFooter;
+  const footerHairlineY = pageH - 54;
+  const sigY = footerHairlineY - 22 - gapSigToFooter;
 
-  // ----- Bank box (right) -----
+  // ----- Bank panel (right) — minimal cream block, no border, just left accent rule -----
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
-    const boxY = sigY - sigBlockH + 6;
+    const boxY = sigY - sigBlockH + 4;
+
     doc.setFillColor(...cream);
-    doc.setDrawColor(...accent);
-    doc.setLineWidth(1);
-    doc.rect(boxX, boxY, bankBoxW, bankBoxH, "FD");
-
-    // accent tab
+    doc.rect(boxX, boxY, bankBoxW, bankBoxH, "F");
+    // left accent rule
     doc.setFillColor(...accent);
-    doc.rect(boxX, boxY, 3, bankBoxH, "F");
+    doc.rect(boxX, boxY, 2, bankBoxH, "F");
 
-    doc.setFont(FONT, "bold");
+    doc.setFont(SANS, "bold");
     doc.setFontSize(7);
     doc.setTextColor(...accent);
-    doc.text(bankTitle, boxX + padX, boxY + padY + 2);
+    doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
     bankRows.forEach((row, i) => {
-      const ry = boxY + padY + titleH + 4 + i * rowH;
-      doc.setFont(FONT, "normal");
+      const ry = boxY + padY + titleH + 6 + i * rowH;
+      doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
       doc.text(row[0], boxX + padX, ry);
-      doc.setFont(FONT, "bold");
+      doc.setFont(SANS, "bold");
       doc.setTextColor(...ink);
       doc.text(String(row[1]), boxX + padX + bankLabelColW + labelGapX, ry);
     });
   }
 
   // ----- Signature (left) -----
-  const sigW = 190;
+  const sigW = 200;
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
       const ratio = sig.width / sig.height;
-      const h = 36;
+      const h = 38;
       const w = Math.min(h * ratio, sigW - 20);
-      doc.addImage(sig, "PNG", margin, sigY - h - 4, w, h);
+      doc.addImage(sig, "PNG", margin, sigY - h - 6, w, h);
     } catch { /* skip */ }
   }
   doc.setDrawColor(...ink);
-  doc.setLineWidth(0.6);
+  doc.setLineWidth(0.5);
   doc.line(margin, sigY, margin + sigW, sigY);
-  doc.setFont(FONT, "normal");
+  doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
-  doc.text("AUTHORISED SIGNATURE", margin, sigY + 11);
+  doc.text("AUTHORISED SIGNATURE", margin, sigY + 12);
 
-  const dateLineX = margin + sigW + 20;
+  const dateLineX = margin + sigW + 24;
   const dateLineW = 130;
   doc.line(dateLineX, sigY, dateLineX + dateLineW, sigY);
-  doc.text("DATE", dateLineX, sigY + 11);
+  doc.text("DATE", dateLineX, sigY + 12);
 
-  // ----- Footer line -----
-  doc.setDrawColor(...hairline);
+  // ----- Footer -----
+  doc.setDrawColor(...accent);
   doc.setLineWidth(0.4);
-  doc.line(margin, footerHairlineY, pageW - margin, footerHairlineY);
-  doc.setFontSize(7);
+  doc.line(margin, footerHairlineY, margin + 30, footerHairlineY);
+  doc.line(pageW - margin - 30, footerHairlineY, pageW - margin, footerHairlineY);
+
+  doc.setFont(SERIF, "italic");
+  doc.setFontSize(8);
   doc.setTextColor(...muted);
   const footer = [
     data.company.name,
@@ -487,7 +518,12 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     data.company.contact_email,
     data.company.contact_phone,
   ].filter(Boolean).join("   ·   ");
-  doc.text(footer, pageW / 2, pageH - 22, { align: "center" });
+  doc.text(footer, pageW / 2, footerHairlineY + 4, { align: "center" });
+
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(...muted);
+  doc.text("THANK YOU FOR YOUR BUSINESS", pageW / 2, footerHairlineY + 18, { align: "center" });
 
   return doc.output("blob");
 }
