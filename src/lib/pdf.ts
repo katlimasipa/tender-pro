@@ -79,9 +79,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 48;
-  const SERIF = "times";
+  // Use helvetica everywhere — jsPDF's helvetica is metric-compatible with Arial
+  const SERIF = "helvetica";
   const SANS = "helvetica";
-  const MONO = "courier";
+  const MONO = "helvetica";
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
@@ -126,13 +127,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Serif display title (the user-entered title)
   const titleText = data.title || docType;
-  doc.setFont(SERIF, "normal");
-  doc.setFontSize(26);
+  doc.setFont(SERIF, "bold");
+  doc.setFontSize(18);
   doc.setTextColor(...deepInk);
   const titleMaxW = pageW - margin * 2 - 170;
   const titleLines = doc.splitTextToSize(titleText, titleMaxW);
-  doc.text(titleLines.slice(0, 2), margin, headerTop + 24);
-  const titleH = Math.min(titleLines.length, 2) * 26;
+  doc.text(titleLines.slice(0, 2), margin, headerTop + 18);
+  const titleH = Math.min(titleLines.length, 2) * 18;
 
   // Right meta column
   doc.setFont(SANS, "normal");
@@ -389,10 +390,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...accent);
   doc.text("TOTAL DUE", totalsX, ty + 44);
 
-  doc.setFont(SERIF, "bold");
-  doc.setFontSize(22);
+  doc.setFont(SANS, "bold");
+  doc.setFontSize(13);
   doc.setTextColor(0, 0, 0);
-  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 50, { align: "right" });
+  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 46, { align: "right" });
 
   lastY = ty + 60;
 
