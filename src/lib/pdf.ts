@@ -315,9 +315,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       4: { halign: "right", cellWidth: 100, fontStyle: "bold", textColor: deepInk },
     },
     didParseCell: (d) => {
-      if (d.section === "head") {
-        if (d.column.index >= 2) d.cell.styles.halign = "right";
-        else d.cell.styles.halign = "left";
+      if (d.column.index >= 2) d.cell.styles.halign = "right";
+      else d.cell.styles.halign = "left";
+
+      if (d.section === "body" && d.column.index >= 2) {
+        d.cell.styles.font = SANS;
+        d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
+        d.cell.styles.cellPadding = { ...d.cell.styles.cellPadding, right: 10 } as any;
       }
     },
     didDrawCell: (d) => {
@@ -426,36 +430,30 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const labelGapX = 12;
   const bankTitle = "BANKING DETAILS";
 
-  let bankBoxW = 0;
+  const bankBoxW = pageW - margin * 2;
   let bankBoxH = 0;
   let bankLabelColW = 0;
+  let bankWrappedRows: [string, string[]][] = [];
   if (bankRows.length > 0) {
-    doc.setFont(SANS, "bold");
-    doc.setFontSize(7);
-    const titleW = doc.getTextWidth(bankTitle);
     doc.setFont(SANS, "normal");
     doc.setFontSize(8.5);
     bankRows.forEach(([k]) => {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
     });
-    let bankValueColW = 0;
     doc.setFont(SANS, "bold");
     doc.setFontSize(8.5);
-    bankRows.forEach(([, v]) => {
-      const w = doc.getTextWidth(String(v));
-      if (w > bankValueColW) bankValueColW = w;
-    });
-    const contentW = Math.max(titleW, bankLabelColW + labelGapX + bankValueColW);
-    bankBoxW = Math.min(contentW + padX * 2, 260);
-    bankBoxH = padY + titleHB + bankRows.length * rowH + padY;
+    const valueW = bankBoxW - padX * 2 - bankLabelColW - labelGapX;
+    bankWrappedRows = bankRows.map(([k, v]) => [k, doc.splitTextToSize(String(v), valueW)]);
+    bankBoxH = padY + titleHB + bankWrappedRows.reduce((h, [, lines]) => h + Math.max(rowH, lines.length * rowH), 0) + padY;
   }
 
   const tight = density === "ultra" || density === "veryDense" || density === "dense";
-  const sigBlockH = tight ? 48 : 60;
-  const footerBlockH = 26;
-  const gapSigToFooter = tight ? 12 : 18;
-  const bottomBlockH = Math.max(bankBoxH, sigBlockH) + gapSigToFooter + footerBlockH + 6;
+  const sigBlockH = tight ? 44 : 54;
+  const footerBlockH = 16;
+  const gapSigToFooter = tight ? 10 : 14;
+  const gapBankToSig = bankRows.length > 0 ? (tight ? 10 : 14) : 0;
+  const bottomBlockH = bankBoxH + gapBankToSig + sigBlockH + gapSigToFooter + footerBlockH + 6;
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
   const requiredGap = tight ? 10 : 18;
