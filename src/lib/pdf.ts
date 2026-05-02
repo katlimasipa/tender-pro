@@ -79,9 +79,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 48;
-  const SERIF = "times";
+  // Use helvetica everywhere — jsPDF's helvetica is metric-compatible with Arial
+  const SERIF = "helvetica";
   const SANS = "helvetica";
-  const MONO = "courier";
+  const MONO = "helvetica";
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
