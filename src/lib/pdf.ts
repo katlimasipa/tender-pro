@@ -321,7 +321,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       if (d.section === "body" && d.column.index >= 2) {
         d.cell.styles.font = SANS;
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
-        d.cell.styles.cellPadding = { ...d.cell.styles.cellPadding, right: 10 } as any;
+        d.cell.styles.cellPadding = { top: cellPadV, right: 10, bottom: cellPadV, left: 8 } as any;
       }
     },
     didDrawCell: (d) => {
