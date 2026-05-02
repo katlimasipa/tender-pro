@@ -462,18 +462,21 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     drawFrame();
   }
 
-  const footerHairlineY = pageH - 44;
-  const sigY = footerHairlineY - 14 - gapSigToFooter;
+  const footerHairlineY = pageH - 38;
+  const sigY = footerHairlineY - gapSigToFooter;
 
   // Bank panel
   if (bankRows.length > 0) {
-    const boxX = pageW - margin - bankBoxW;
-    const boxY = sigY - bankBoxH + 4;
+    const boxX = margin;
+    const boxY = sigY - sigBlockH - gapBankToSig - bankBoxH;
 
     doc.setFillColor(...cream);
-    doc.rect(boxX, boxY, bankBoxW, bankBoxH, "F");
+    doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
+    doc.setDrawColor(...hairline);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "S");
     doc.setFillColor(...accent);
-    doc.rect(boxX, boxY, 2, bankBoxH, "F");
+    doc.roundedRect(boxX, boxY, 2.5, bankBoxH, 1.2, 1.2, "F");
 
     doc.setFont(SANS, "bold");
     doc.setFontSize(7);
@@ -481,25 +484,26 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
     doc.setFontSize(8.5);
-    bankRows.forEach((row, i) => {
-      const ry = boxY + padY + titleHB + 6 + i * rowH;
+    let bankY = boxY + padY + titleHB + 6;
+    bankWrappedRows.forEach(([label, lines]) => {
       doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
-      doc.text(row[0], boxX + padX, ry);
+      doc.text(label, boxX + padX, bankY);
       doc.setFont(SANS, "bold");
       doc.setTextColor(...ink);
-      doc.text(String(row[1]), boxX + padX + bankLabelColW + labelGapX, ry);
+      doc.text(lines, boxX + padX + bankLabelColW + labelGapX, bankY);
+      bankY += Math.max(rowH, lines.length * rowH);
     });
   }
 
   // Signature
-  const sigW = 200;
+  const sigW = 144;
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
       const ratio = sig.width / sig.height;
-      const h = density === "ultra" ? 30 : 36;
-      const w = Math.min(h * ratio, sigW - 20);
+      const h = density === "ultra" ? 26 : 32;
+      const w = Math.min(h * ratio, sigW - 14);
       doc.addImage(sig, "PNG", margin, sigY - h - 6, w, h);
     } catch { /* skip */ }
   }
@@ -536,7 +540,6 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setFont(SANS, "normal");
   doc.setFontSize(6.5);
   doc.setTextColor(...muted);
-  doc.text("THANK YOU FOR YOUR BUSINESS", pageW / 2, footerHairlineY + 16, { align: "center" });
 
   return doc.output("blob");
 }
