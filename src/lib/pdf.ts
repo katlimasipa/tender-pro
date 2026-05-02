@@ -438,13 +438,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   let bankWrappedRows: [string, string[]][] = [];
   if (bankRows.length > 0) {
     doc.setFont(SANS, "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     bankRows.forEach(([k]) => {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
     });
     doc.setFont(SANS, "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     const valueW = bankBoxW - padX * 2 - bankLabelColW - labelGapX;
     bankWrappedRows = bankRows.map(([k, v]) => [k, doc.splitTextToSize(String(v), valueW)]);
     bankBoxH = padY + titleHB + bankWrappedRows.reduce((h, [, lines]) => h + Math.max(rowH, lines.length * rowH), 0) + padY;
@@ -485,7 +485,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     doc.setTextColor(...accent);
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     let bankY = boxY + padY + titleHB + 6;
     bankWrappedRows.forEach(([label, lines]) => {
       doc.setFont(SANS, "normal");
@@ -528,8 +528,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.line(margin, footerHairlineY, margin + 30, footerHairlineY);
   doc.line(pageW - margin - 30, footerHairlineY, pageW - margin, footerHairlineY);
 
-  doc.setFont(SERIF, "italic");
-  doc.setFontSize(8);
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(7);
   doc.setTextColor(...muted);
   const footer = [
     data.company.name,
@@ -537,7 +537,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     data.company.contact_email,
     data.company.contact_phone,
   ].filter(Boolean).join("   ·   ");
-  doc.text(footer, pageW / 2, footerHairlineY + 4, { align: "center" });
+  const footerLines = doc.splitTextToSize(footer, pageW - margin * 2 - 80);
+  doc.text(footerLines.slice(0, 2), pageW / 2, footerHairlineY + 4, { align: "center" });
 
   doc.setFont(SANS, "normal");
   doc.setFontSize(6.5);
