@@ -390,10 +390,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...accent);
   doc.text("TOTAL DUE", totalsX, ty + 44);
 
-  doc.setFont(SERIF, "bold");
-  doc.setFontSize(22);
+  doc.setFont(SANS, "bold");
+  doc.setFontSize(13);
   doc.setTextColor(0, 0, 0);
-  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 50, { align: "right" });
+  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 46, { align: "right" });
 
   lastY = ty + 60;
 
