@@ -60,6 +60,8 @@ const hexToRgb = (hex?: string | null, fallback: [number, number, number] = [28,
 };
 
 const formatPdfMoney = (n: number) => formatZAR(n).replace(/\u00a0/g, " ");
+const formatPdfAmount = (n: number) =>
+  new Intl.NumberFormat("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number.isFinite(n) ? n : 0);
 
 export function computeTotals(items: TenderItem[], vatRate: number, vatInclusive: boolean) {
   const lineSum = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
@@ -269,8 +271,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     String(i + 1).padStart(2, "0"),
     it.product,
     String(it.quantity),
-    formatPdfMoney(it.unitPrice),
-    formatPdfMoney(it.quantity * it.unitPrice),
+    formatPdfAmount(it.unitPrice),
+    formatPdfAmount(it.quantity * it.unitPrice),
   ]);
 
   const cellPadV =
