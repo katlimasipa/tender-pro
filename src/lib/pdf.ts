@@ -465,8 +465,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     drawFrame();
   }
 
-  const footerHairlineY = pageH - 38;
-  const sigY = footerHairlineY - gapSigToFooter;
+  const footerHairlineY = pageH - 34;
+  const sigY = footerHairlineY - gapSigToFooter - 16;
 
   // Bank panel
   if (bankRows.length > 0) {
@@ -492,7 +492,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
       doc.text(label, boxX + padX, bankY);
-      doc.setFont(SANS, "bold");
+      doc.setFont(SANS, "normal");
       doc.setTextColor(...ink);
       doc.text(lines, boxX + padX + bankLabelColW + labelGapX, bankY);
       bankY += Math.max(rowH, lines.length * rowH);
