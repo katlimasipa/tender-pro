@@ -79,6 +79,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const margin = 48;
   const SERIF = "times";
   const SANS = "helvetica";
+  const MONO = "courier";
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
@@ -321,7 +322,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       else d.cell.styles.halign = "left";
 
       if (d.section === "body" && d.column.index >= 2) {
-        d.cell.styles.font = SANS;
+        d.cell.styles.font = MONO;
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
         d.cell.styles.cellPadding = { top: cellPadV, right: 10, bottom: cellPadV, left: 8 } as any;
       }
@@ -443,7 +444,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
     });
-    doc.setFont(SANS, "bold");
+    doc.setFont(SANS, "normal");
     doc.setFontSize(8);
     const valueW = bankBoxW - padX * 2 - bankLabelColW - labelGapX;
     bankWrappedRows = bankRows.map(([k, v]) => [k, doc.splitTextToSize(String(v), valueW)]);
