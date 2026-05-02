@@ -59,6 +59,8 @@ const hexToRgb = (hex?: string | null, fallback: [number, number, number] = [28,
   return [parseInt(m[0], 16), parseInt(m[1], 16), parseInt(m[2], 16)];
 };
 
+const formatPdfMoney = (n: number) => formatZAR(n).replace(/\u00a0/g, " ");
+
 export function computeTotals(items: TenderItem[], vatRate: number, vatInclusive: boolean) {
   const lineSum = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
   if (vatInclusive) {
@@ -266,8 +268,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     String(i + 1).padStart(2, "0"),
     it.product,
     String(it.quantity),
-    formatZAR(it.unitPrice),
-    formatZAR(it.quantity * it.unitPrice),
+    formatPdfMoney(it.unitPrice),
+    formatPdfMoney(it.quantity * it.unitPrice),
   ]);
 
   const cellPadV =
@@ -310,9 +312,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     columnStyles: {
       0: { cellWidth: 32, textColor: accent, fontStyle: "bold", halign: "left" },
       1: { textColor: deepInk, fontStyle: "bold" },
-      2: { halign: "right", cellWidth: 48, textColor: subInk },
-      3: { halign: "right", cellWidth: 92, textColor: subInk },
-      4: { halign: "right", cellWidth: 100, fontStyle: "bold", textColor: deepInk },
+      2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
+      3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
+      4: { halign: "right", cellWidth: 108, fontStyle: "bold", textColor: deepInk, overflow: "visible" },
     },
     didParseCell: (d) => {
       if (d.column.index >= 2) d.cell.styles.halign = "right";
@@ -360,7 +362,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setFont(SANS, "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...deepInk);
-  doc.text(formatZAR(totals.subtotal), totalsX + totalsW, ty, { align: "right" });
+  doc.text(formatPdfMoney(totals.subtotal), totalsX + totalsW, ty, { align: "right" });
 
   // VAT row — bold values
   doc.setFont(SANS, "bold");
@@ -370,7 +372,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setFont(SANS, "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...deepInk);
-  doc.text(formatZAR(totals.vatAmount), totalsX + totalsW, ty + 16, { align: "right" });
+  doc.text(formatPdfMoney(totals.vatAmount), totalsX + totalsW, ty + 16, { align: "right" });
 
   // Double rule
   doc.setDrawColor(...deepInk);
@@ -387,7 +389,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setFont(SERIF, "bold");
   doc.setFontSize(22);
   doc.setTextColor(0, 0, 0);
-  doc.text(formatZAR(totals.grandTotal), totalsX + totalsW, ty + 50, { align: "right" });
+  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 50, { align: "right" });
 
   lastY = ty + 60;
 
