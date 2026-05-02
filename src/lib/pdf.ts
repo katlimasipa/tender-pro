@@ -127,13 +127,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Serif display title (the user-entered title)
   const titleText = data.title || docType;
-  doc.setFont(SERIF, "normal");
-  doc.setFontSize(26);
+  doc.setFont(SERIF, "bold");
+  doc.setFontSize(18);
   doc.setTextColor(...deepInk);
   const titleMaxW = pageW - margin * 2 - 170;
   const titleLines = doc.splitTextToSize(titleText, titleMaxW);
-  doc.text(titleLines.slice(0, 2), margin, headerTop + 24);
-  const titleH = Math.min(titleLines.length, 2) * 26;
+  doc.text(titleLines.slice(0, 2), margin, headerTop + 18);
+  const titleH = Math.min(titleLines.length, 2) * 18;
 
   // Right meta column
   doc.setFont(SANS, "normal");
