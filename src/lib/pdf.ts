@@ -479,10 +479,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
     doc.setFillColor(...cream);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
-    doc.setDrawColor(...hairline);
-    doc.setLineWidth(0.4);
+    doc.setDrawColor(...primary);
+    doc.setLineWidth(0.8);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "S");
-    doc.setFillColor(...accent);
+    doc.setFillColor(...primary);
     doc.roundedRect(boxX, boxY, 2.5, bankBoxH, 1.2, 1.2, "F");
 
     doc.setFont(SANS, "bold");
