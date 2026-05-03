@@ -170,18 +170,6 @@ export default function CompanyProfile() {
                   <Input value={form.primary_color || "#1C382C"} onChange={e => setForm({ ...form, primary_color: e.target.value })} className="font-mono uppercase" />
                 </div>
               </div>
-              <div>
-                <Label>Accent colour</Label>
-                <div className="mt-1.5 flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={form.accent_color || "#C8932B"}
-                    onChange={e => setForm({ ...form, accent_color: e.target.value })}
-                    className="h-11 w-14 rounded-md border border-border cursor-pointer bg-transparent"
-                  />
-                  <Input value={form.accent_color || "#C8932B"} onChange={e => setForm({ ...form, accent_color: e.target.value })} className="font-mono uppercase" />
-                </div>
-              </div>
             </div>
           </div>
 
