@@ -86,7 +86,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
-  const accent = hexToRgb(data.company.accent_color, [176, 132, 56]);
+  // Accent is unified with primary — single brand colour drives all highlights
+  const accent = primary;
   const ink: [number, number, number] = [24, 24, 22];
   const subInk: [number, number, number] = [86, 86, 82];
   const muted: [number, number, number] = [140, 140, 134];
@@ -478,10 +479,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
     doc.setFillColor(...cream);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
-    doc.setDrawColor(...hairline);
-    doc.setLineWidth(0.4);
+    doc.setDrawColor(...primary);
+    doc.setLineWidth(0.8);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "S");
-    doc.setFillColor(...accent);
+    doc.setFillColor(...primary);
     doc.roundedRect(boxX, boxY, 2.5, bankBoxH, 1.2, 1.2, "F");
 
     doc.setFont(SANS, "bold");
