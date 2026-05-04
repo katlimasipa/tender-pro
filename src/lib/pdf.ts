@@ -439,14 +439,19 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
   const tightBank = density === "ultra" || density === "veryDense";
-  const padX = 14;
-  const padY = tightBank ? 8 : 10;
-  const titleHB = tightBank ? 12 : 14;
-  const rowH = tightBank ? 10.5 : 12;
-  const labelGapX = 12;
+  const padX = 12;
+  const padY = tightBank ? 7 : 9;
+  const titleHB = tightBank ? 11 : 13;
+  const rowH = tightBank ? 10 : 11.5;
+  const labelGapX = 10;
   const bankTitle = "BANKING DETAILS";
 
-  const bankBoxW = pageW - margin * 2;
+  // Layout: signature (left) + banking box (right), side-by-side, at the
+  // bottom of the page so the table can use the rest of the height.
+  const sigW = 144;
+  const sideGap = 24;
+  const bankBoxW = pageW - margin * 2 - sigW - sideGap;
+
   let bankBoxH = 0;
   let bankLabelColW = 0;
   let bankWrappedRows: [string, string[]][] = [];
@@ -457,8 +462,6 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
     });
-    doc.setFont(SANS, "normal");
-    doc.setFontSize(8);
     const valueW = bankBoxW - padX * 2 - bankLabelColW - labelGapX;
     bankWrappedRows = bankRows.map(([k, v]) => [k, doc.splitTextToSize(String(v), valueW)]);
     bankBoxH = padY + titleHB + bankWrappedRows.reduce((h, [, lines]) => h + Math.max(rowH, lines.length * rowH), 0) + padY;
@@ -468,8 +471,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const sigBlockH = tight ? 44 : 54;
   const footerBlockH = 16;
   const gapSigToFooter = tight ? 10 : 14;
-  const gapBankToSig = bankRows.length > 0 ? (tight ? 10 : 14) : 0;
-  const bottomBlockH = bankBoxH + gapBankToSig + sigBlockH + gapSigToFooter + footerBlockH + 6;
+
+  // The bottom band height is whichever side is taller.
+  const bottomBandH = Math.max(sigBlockH, bankBoxH);
+  const bottomBlockH = bottomBandH + gapSigToFooter + footerBlockH + 6;
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
   const requiredGap = tight ? 10 : 18;
@@ -479,12 +484,15 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   }
 
   const footerHairlineY = pageH - 34;
+  // Sig baseline sits near the bottom of the bottom band
   const sigY = footerHairlineY - gapSigToFooter - 16;
+  // Bank box top-aligned with the signature image area, bottom-aligned to sigY area
+  const bankBoxY = sigY - sigBlockH + (sigBlockH - bankBoxH) / 2 - 6;
 
-  // Bank panel
+  // Bank panel — right side
   if (bankRows.length > 0) {
-    const boxX = margin;
-    const boxY = sigY - sigBlockH - gapBankToSig - bankBoxH;
+    const boxX = pageW - margin - bankBoxW;
+    const boxY = bankBoxY;
 
     doc.setFillColor(...cream);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
@@ -500,7 +508,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
     doc.setFontSize(8);
-    let bankY = boxY + padY + titleHB + 6;
+    let bankY = boxY + padY + titleHB + 4;
     bankWrappedRows.forEach(([label, lines]) => {
       doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
@@ -512,8 +520,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     });
   }
 
-  // Signature
-  const sigW = 144;
+  // Signature — left side
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
@@ -531,10 +538,17 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...muted);
   doc.text("AUTHORISED SIGNATURE", margin, sigY + 12);
 
-  const dateLineX = margin + sigW + 24;
-  const dateLineW = 130;
-  doc.line(dateLineX, sigY, dateLineX + dateLineW, sigY);
-  doc.text("DATE", dateLineX, sigY + 12);
+  // Date line beneath signature (stacked on the left, so it doesn't collide
+  // with the banking box on the right).
+  const dateLineY = sigY + 26;
+  const dateLineW = sigW;
+  doc.setDrawColor(...ink);
+  doc.setLineWidth(0.5);
+  doc.line(margin, dateLineY, margin + dateLineW, dateLineY);
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...muted);
+  doc.text("DATE", margin, dateLineY + 12);
 
   // Footer
   doc.setDrawColor(...accent);
