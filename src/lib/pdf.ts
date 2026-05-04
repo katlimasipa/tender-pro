@@ -86,7 +86,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
-  // Accent is unified with primary — single brand colour drives all highlights
+  // Primary drives structural elements (borders, rules, the bank box).
+  // `accent` keeps that role for non-text uses; `accentText` is a neutral
+  // ink so labels/eyebrows never render in the brand (e.g. orange) colour.
   const accent = primary;
   const ink: [number, number, number] = [24, 24, 22];
   const subInk: [number, number, number] = [86, 86, 82];
@@ -94,6 +96,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const hairline: [number, number, number] = [212, 206, 192];
   const cream: [number, number, number] = [251, 248, 241];
   const deepInk: [number, number, number] = [12, 12, 10];
+  const accentText: [number, number, number] = deepInk;
 
   const docType = (data.documentType || "Quotation").trim();
   const docTypeUpper = docType.toUpperCase();
@@ -123,7 +126,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   // Eyebrow shows document type
   doc.setFont(SANS, "bold");
   doc.setFontSize(7.5);
-  doc.setTextColor(...accent);
+  doc.setTextColor(...accentText);
   doc.text(`— ${docTypeUpper}`, margin, headerTop);
 
   // Serif display title (the user-entered title)
@@ -206,7 +209,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   doc.setFont(SANS, "bold");
   doc.setFontSize(7);
-  doc.setTextColor(...accent);
+  doc.setTextColor(...accentText);
   doc.text("PREPARED FOR", margin, cursorY);
   doc.text("DETAILS", margin + colW + colGap, cursorY);
 
@@ -315,7 +318,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       lineWidth: 0,
     },
     columnStyles: {
-      0: { cellWidth: 32, textColor: accent, fontStyle: "bold", halign: "left" },
+      0: { cellWidth: 32, textColor: muted, fontStyle: "bold", halign: "left" },
       1: { textColor: deepInk, fontStyle: "bold" },
       2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
       3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
@@ -353,50 +356,56 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   let lastY = (doc as any).lastAutoTable.finalY;
 
   // ========== TOTALS ==========
+  // Align numbers to the same right edge as the table's AMOUNT column
+  // (which ends at pageW - margin) and use the same MONO font + plain
+  // formatting (no "R" prefix) so every digit and decimal lines up
+  // perfectly with the rows above.
   const totals = computeTotals(data.items, data.vatRate, data.vatInclusive);
-  const totalsW = 240;
-  const totalsX = pageW - margin - totalsW;
+  const totalsRightX = pageW - margin;
+  const totalsLabelX = pageW - margin - 240;
   const totalsGap = density === "ultra" || density === "veryDense" ? 8 : density === "dense" ? 12 : 16;
   let ty = lastY + totalsGap;
 
-  // Subtotal row — bold values
+  // Subtotal
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text("SUBTOTAL", totalsX, ty);
-  doc.setFont(SANS, "bold");
+  doc.text("SUBTOTAL", totalsLabelX, ty);
+  doc.setFont(MONO, "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...deepInk);
-  doc.text(formatPdfMoney(totals.subtotal), totalsX + totalsW, ty, { align: "right" });
+  doc.text(formatPdfAmount(totals.subtotal), totalsRightX, ty, { align: "right" });
 
-  // VAT row — bold values
+  // VAT
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (INCL.)" : ""}`, totalsX, ty + 16);
-  doc.setFont(SANS, "bold");
+  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (INCL.)" : ""}`, totalsLabelX, ty + 16);
+  doc.setFont(MONO, "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...deepInk);
-  doc.text(formatPdfMoney(totals.vatAmount), totalsX + totalsW, ty + 16, { align: "right" });
+  doc.text(formatPdfAmount(totals.vatAmount), totalsRightX, ty + 16, { align: "right" });
 
-  // Double rule
+  // Double rule across the totals area
   doc.setDrawColor(...deepInk);
   doc.setLineWidth(0.5);
-  doc.line(totalsX, ty + 26, totalsX + totalsW, ty + 26);
-  doc.line(totalsX, ty + 28.5, totalsX + totalsW, ty + 28.5);
+  doc.line(totalsLabelX, ty + 26, totalsRightX, ty + 26);
+  doc.line(totalsLabelX, ty + 28.5, totalsRightX, ty + 28.5);
 
   // Grand total
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
-  doc.setTextColor(...accent);
-  doc.text("TOTAL DUE", totalsX, ty + 44);
+  doc.setTextColor(...muted);
+  doc.text("TOTAL DUE", totalsLabelX, ty + 44);
 
-  doc.setFont(SANS, "bold");
+  doc.setFont(MONO, "bold");
   doc.setFontSize(13);
   doc.setTextColor(0, 0, 0);
-  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 46, { align: "right" });
+  doc.text(formatPdfAmount(totals.grandTotal), totalsRightX, ty + 46, { align: "right" });
 
   lastY = ty + 60;
+  const totalsW = 240;
+  const totalsX = totalsLabelX;
 
   // ========== NOTES ==========
   let notesBottom = lastY;
@@ -404,7 +413,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     let ny = ty;
     doc.setFont(SANS, "bold");
     doc.setFontSize(7);
-    doc.setTextColor(...accent);
+    doc.setTextColor(...accentText);
     doc.text("NOTES & TERMS", margin, ny);
     doc.setDrawColor(...accent);
     doc.setLineWidth(0.6);
@@ -430,14 +439,19 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
   const tightBank = density === "ultra" || density === "veryDense";
-  const padX = 14;
-  const padY = tightBank ? 8 : 10;
-  const titleHB = tightBank ? 12 : 14;
-  const rowH = tightBank ? 10.5 : 12;
-  const labelGapX = 12;
+  const padX = 12;
+  const padY = tightBank ? 7 : 9;
+  const titleHB = tightBank ? 11 : 13;
+  const rowH = tightBank ? 10 : 11.5;
+  const labelGapX = 10;
   const bankTitle = "BANKING DETAILS";
 
-  const bankBoxW = pageW - margin * 2;
+  // Layout: signature (left) + banking box (right), side-by-side, at the
+  // bottom of the page so the table can use the rest of the height.
+  const sigW = 144;
+  const sideGap = 24;
+  const bankBoxW = pageW - margin * 2 - sigW - sideGap;
+
   let bankBoxH = 0;
   let bankLabelColW = 0;
   let bankWrappedRows: [string, string[]][] = [];
@@ -448,8 +462,6 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
     });
-    doc.setFont(SANS, "normal");
-    doc.setFontSize(8);
     const valueW = bankBoxW - padX * 2 - bankLabelColW - labelGapX;
     bankWrappedRows = bankRows.map(([k, v]) => [k, doc.splitTextToSize(String(v), valueW)]);
     bankBoxH = padY + titleHB + bankWrappedRows.reduce((h, [, lines]) => h + Math.max(rowH, lines.length * rowH), 0) + padY;
@@ -459,8 +471,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const sigBlockH = tight ? 44 : 54;
   const footerBlockH = 16;
   const gapSigToFooter = tight ? 10 : 14;
-  const gapBankToSig = bankRows.length > 0 ? (tight ? 10 : 14) : 0;
-  const bottomBlockH = bankBoxH + gapBankToSig + sigBlockH + gapSigToFooter + footerBlockH + 6;
+
+  // The bottom band height is whichever side is taller.
+  const bottomBandH = Math.max(sigBlockH, bankBoxH);
+  const bottomBlockH = bottomBandH + gapSigToFooter + footerBlockH + 6;
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
   const requiredGap = tight ? 10 : 18;
@@ -470,12 +484,15 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   }
 
   const footerHairlineY = pageH - 34;
+  // Sig baseline sits near the bottom of the bottom band
   const sigY = footerHairlineY - gapSigToFooter - 16;
+  // Bank box top-aligned with the signature image area, bottom-aligned to sigY area
+  const bankBoxY = sigY - sigBlockH + (sigBlockH - bankBoxH) / 2 - 6;
 
-  // Bank panel
+  // Bank panel — right side
   if (bankRows.length > 0) {
-    const boxX = margin;
-    const boxY = sigY - sigBlockH - gapBankToSig - bankBoxH;
+    const boxX = pageW - margin - bankBoxW;
+    const boxY = bankBoxY;
 
     doc.setFillColor(...cream);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
@@ -487,11 +504,11 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
     doc.setFont(SANS, "bold");
     doc.setFontSize(7);
-    doc.setTextColor(...accent);
+    doc.setTextColor(...accentText);
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
     doc.setFontSize(8);
-    let bankY = boxY + padY + titleHB + 6;
+    let bankY = boxY + padY + titleHB + 4;
     bankWrappedRows.forEach(([label, lines]) => {
       doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
@@ -503,8 +520,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     });
   }
 
-  // Signature
-  const sigW = 144;
+  // Signature — left side
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
@@ -522,10 +538,17 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...muted);
   doc.text("AUTHORISED SIGNATURE", margin, sigY + 12);
 
-  const dateLineX = margin + sigW + 24;
-  const dateLineW = 130;
-  doc.line(dateLineX, sigY, dateLineX + dateLineW, sigY);
-  doc.text("DATE", dateLineX, sigY + 12);
+  // Date line beneath signature (stacked on the left, so it doesn't collide
+  // with the banking box on the right).
+  const dateLineY = sigY + 26;
+  const dateLineW = sigW;
+  doc.setDrawColor(...ink);
+  doc.setLineWidth(0.5);
+  doc.line(margin, dateLineY, margin + dateLineW, dateLineY);
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...muted);
+  doc.text("DATE", margin, dateLineY + 12);
 
   // Footer
   doc.setDrawColor(...accent);
