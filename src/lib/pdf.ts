@@ -86,8 +86,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
-  // Accent is unified with primary — single brand colour drives all highlights
-  const accent = primary;
+  // Primary is reserved for structural elements (borders, rules, the bank box).
+  // All TEXT uses neutral ink tones so the brand colour never appears as coloured type.
   const ink: [number, number, number] = [24, 24, 22];
   const subInk: [number, number, number] = [86, 86, 82];
   const muted: [number, number, number] = [140, 140, 134];
