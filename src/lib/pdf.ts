@@ -86,14 +86,17 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Editorial palette
   const primary = hexToRgb(data.company.primary_color, [18, 38, 32]);
-  // Primary is reserved for structural elements (borders, rules, the bank box).
-  // All TEXT uses neutral ink tones so the brand colour never appears as coloured type.
+  // Primary drives structural elements (borders, rules, the bank box).
+  // `accent` keeps that role for non-text uses; `accentText` is a neutral
+  // ink so labels/eyebrows never render in the brand (e.g. orange) colour.
+  const accent = primary;
   const ink: [number, number, number] = [24, 24, 22];
   const subInk: [number, number, number] = [86, 86, 82];
   const muted: [number, number, number] = [140, 140, 134];
   const hairline: [number, number, number] = [212, 206, 192];
   const cream: [number, number, number] = [251, 248, 241];
   const deepInk: [number, number, number] = [12, 12, 10];
+  const accentText: [number, number, number] = deepInk;
 
   const docType = (data.documentType || "Quotation").trim();
   const docTypeUpper = docType.toUpperCase();
