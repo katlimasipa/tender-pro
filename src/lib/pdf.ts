@@ -356,50 +356,56 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   let lastY = (doc as any).lastAutoTable.finalY;
 
   // ========== TOTALS ==========
+  // Align numbers to the same right edge as the table's AMOUNT column
+  // (which ends at pageW - margin) and use the same MONO font + plain
+  // formatting (no "R" prefix) so every digit and decimal lines up
+  // perfectly with the rows above.
   const totals = computeTotals(data.items, data.vatRate, data.vatInclusive);
-  const totalsW = 240;
-  const totalsX = pageW - margin - totalsW;
+  const totalsRightX = pageW - margin;
+  const totalsLabelX = pageW - margin - 240;
   const totalsGap = density === "ultra" || density === "veryDense" ? 8 : density === "dense" ? 12 : 16;
   let ty = lastY + totalsGap;
 
-  // Subtotal row — bold values
+  // Subtotal
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text("SUBTOTAL", totalsX, ty);
-  doc.setFont(SANS, "bold");
+  doc.text("SUBTOTAL", totalsLabelX, ty);
+  doc.setFont(MONO, "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...deepInk);
-  doc.text(formatPdfMoney(totals.subtotal), totalsX + totalsW, ty, { align: "right" });
+  doc.text(formatPdfAmount(totals.subtotal), totalsRightX, ty, { align: "right" });
 
-  // VAT row — bold values
+  // VAT
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (INCL.)" : ""}`, totalsX, ty + 16);
-  doc.setFont(SANS, "bold");
+  doc.text(`VAT ${data.vatRate}%${data.vatInclusive ? " (INCL.)" : ""}`, totalsLabelX, ty + 16);
+  doc.setFont(MONO, "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...deepInk);
-  doc.text(formatPdfMoney(totals.vatAmount), totalsX + totalsW, ty + 16, { align: "right" });
+  doc.text(formatPdfAmount(totals.vatAmount), totalsRightX, ty + 16, { align: "right" });
 
-  // Double rule
+  // Double rule across the totals area
   doc.setDrawColor(...deepInk);
   doc.setLineWidth(0.5);
-  doc.line(totalsX, ty + 26, totalsX + totalsW, ty + 26);
-  doc.line(totalsX, ty + 28.5, totalsX + totalsW, ty + 28.5);
+  doc.line(totalsLabelX, ty + 26, totalsRightX, ty + 26);
+  doc.line(totalsLabelX, ty + 28.5, totalsRightX, ty + 28.5);
 
   // Grand total
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
   doc.setTextColor(...muted);
-  doc.text("TOTAL DUE", totalsX, ty + 44);
+  doc.text("TOTAL DUE", totalsLabelX, ty + 44);
 
-  doc.setFont(SANS, "bold");
+  doc.setFont(MONO, "bold");
   doc.setFontSize(13);
   doc.setTextColor(0, 0, 0);
-  doc.text(formatPdfMoney(totals.grandTotal), totalsX + totalsW, ty + 46, { align: "right" });
+  doc.text(formatPdfAmount(totals.grandTotal), totalsRightX, ty + 46, { align: "right" });
 
   lastY = ty + 60;
+  const totalsW = 240;
+  const totalsX = totalsLabelX;
 
   // ========== NOTES ==========
   let notesBottom = lastY;
