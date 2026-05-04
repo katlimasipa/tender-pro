@@ -126,7 +126,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   // Eyebrow shows document type
   doc.setFont(SANS, "bold");
   doc.setFontSize(7.5);
-  doc.setTextColor(...accent);
+  doc.setTextColor(...accentText);
   doc.text(`— ${docTypeUpper}`, margin, headerTop);
 
   // Serif display title (the user-entered title)
@@ -209,7 +209,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   doc.setFont(SANS, "bold");
   doc.setFontSize(7);
-  doc.setTextColor(...accent);
+  doc.setTextColor(...accentText);
   doc.text("PREPARED FOR", margin, cursorY);
   doc.text("DETAILS", margin + colW + colGap, cursorY);
 
@@ -318,7 +318,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       lineWidth: 0,
     },
     columnStyles: {
-      0: { cellWidth: 32, textColor: accent, fontStyle: "bold", halign: "left" },
+      0: { cellWidth: 32, textColor: muted, fontStyle: "bold", halign: "left" },
       1: { textColor: deepInk, fontStyle: "bold" },
       2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
       3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
@@ -391,7 +391,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   // Grand total
   doc.setFont(SANS, "bold");
   doc.setFontSize(8);
-  doc.setTextColor(...accent);
+  doc.setTextColor(...muted);
   doc.text("TOTAL DUE", totalsX, ty + 44);
 
   doc.setFont(SANS, "bold");
@@ -407,7 +407,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     let ny = ty;
     doc.setFont(SANS, "bold");
     doc.setFontSize(7);
-    doc.setTextColor(...accent);
+    doc.setTextColor(...accentText);
     doc.text("NOTES & TERMS", margin, ny);
     doc.setDrawColor(...accent);
     doc.setLineWidth(0.6);
@@ -490,7 +490,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
     doc.setFont(SANS, "bold");
     doc.setFontSize(7);
-    doc.setTextColor(...accent);
+    doc.setTextColor(...accentText);
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
     doc.setFontSize(8);
