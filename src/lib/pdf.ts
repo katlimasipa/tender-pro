@@ -496,8 +496,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     boxY = bankBoxBottom - bankBoxH;
   }
 
-  // (Unused) keep reference to bottomBlockH for clarity in future tweaks.
-  void bottomBlockH;
+  void footerBlockH; void sigRowH;
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
 
