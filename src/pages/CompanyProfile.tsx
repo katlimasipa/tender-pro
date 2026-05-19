@@ -37,13 +37,26 @@ export default function CompanyProfile() {
   const save = async () => {
     if (!company) return;
     setSaving(true);
+    const composedAddress = [
+      form.address_line1,
+      form.address_line2,
+      form.suburb,
+      form.city,
+      form.postal_code,
+    ].map((s: string | undefined) => (s || "").trim()).filter(Boolean).join("\n") || null;
+
     const { error } = await supabase.from("companies").update({
       name: form.name,
       registration_number: form.registration_number || null,
       vat_number: form.vat_number || null,
       contact_email: form.contact_email || null,
       contact_phone: form.contact_phone || null,
-      address: form.address || null,
+      address: composedAddress,
+      address_line1: form.address_line1 || null,
+      address_line2: form.address_line2 || null,
+      suburb: form.suburb || null,
+      city: form.city || null,
+      postal_code: form.postal_code || null,
       website: form.website || null,
       csd_number: form.csd_number || null,
       primary_color: form.primary_color || "#1C382C",
@@ -55,7 +68,7 @@ export default function CompanyProfile() {
       bank_account_type: form.bank_account_type || null,
       bank_swift: form.bank_swift || null,
       payment_reference: form.payment_reference || null,
-    }).eq("id", company.id);
+    } as any).eq("id", company.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Company updated");
