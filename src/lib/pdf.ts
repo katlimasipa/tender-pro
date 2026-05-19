@@ -187,17 +187,26 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...ink);
   doc.text(data.company.name || "Company", idTextX, idTop + 10);
 
+  // Right-aligned address & contact stack
   doc.setFont(SANS, "normal");
   doc.setFontSize(8);
   doc.setTextColor(...subInk);
-  let icy = idTop + 22;
-  const contactBits = [
-    data.company.address,
-    [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  ·  "),
-    data.company.website,
-  ].filter(Boolean) as string[];
-  contactBits.forEach((line) => {
-    doc.text(line, idTextX, icy);
+  const rightEdge = pageW - margin;
+  const addressLines: string[] = [];
+  if (data.company.address) {
+    data.company.address
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .forEach((l) => addressLines.push(l));
+  }
+  const contactLine = [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  ·  ");
+  if (contactLine) addressLines.push(contactLine);
+  if (data.company.website) addressLines.push(data.company.website);
+
+  let icy = idTop + 10;
+  addressLines.forEach((line) => {
+    doc.text(line, rightEdge, icy, { align: "right" });
     icy += 9.5;
   });
 
