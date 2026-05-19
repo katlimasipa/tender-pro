@@ -455,11 +455,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const labelGapX = 10;
   const bankTitle = "BANKING DETAILS";
 
-  // Layout: signature (left) + banking box (right), side-by-side, at the
-  // bottom of the page so the table can use the rest of the height.
-  const sigW = 144;
-  const sideGap = 24;
-  const bankBoxW = pageW - margin * 2 - sigW - sideGap;
+  // Layout: banking box (right-aligned, compact) ABOVE a signature/date row.
+  // Sig sits on the left, Date sits on the right, both on the same baseline.
+  const bankBoxW = Math.min(280, pageW - margin * 2 - 40);
 
   let bankBoxH = 0;
   let bankLabelColW = 0;
@@ -477,13 +475,12 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   }
 
   const tight = density === "ultra" || density === "veryDense" || density === "dense";
-  const sigBlockH = tight ? 44 : 54;
+  const sigRowH = tight ? 44 : 54;
   const footerBlockH = 16;
   const gapSigToFooter = tight ? 10 : 14;
+  const gapBankToSig = tight ? 10 : 14;
 
-  // The bottom band height is whichever side is taller.
-  const bottomBandH = Math.max(sigBlockH, bankBoxH);
-  const bottomBlockH = bottomBandH + gapSigToFooter + footerBlockH + 6;
+  const bottomBlockH = bankBoxH + (bankBoxH > 0 ? gapBankToSig : 0) + sigRowH + gapSigToFooter + footerBlockH + 6;
 
   const minTopForBottomBlock = pageH - bottomBlockH - margin;
   const requiredGap = tight ? 10 : 18;
@@ -493,15 +490,16 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   }
 
   const footerHairlineY = pageH - 34;
-  // Sig baseline sits near the bottom of the bottom band
   const sigY = footerHairlineY - gapSigToFooter - 16;
-  // Bank box top-aligned with the signature image area, bottom-aligned to sigY area
-  const bankBoxY = sigY - sigBlockH + (sigBlockH - bankBoxH) / 2 - 6;
+  const bankBoxY = sigY - sigRowH + (sigRowH - bankBoxH) / 2 - bankBoxH - gapBankToSig + sigRowH; // placeholder, recomputed below
 
-  // Bank panel — right side
+  // Bank panel — top of bottom block, right-aligned
+  const bankBoxYFinal = sigY - sigRowH + 4 - gapBankToSig - bankBoxH + sigRowH - 8;
+  // Simpler: anchor bank box bottom = sigY - sigRowH - gapBankToSig
+  const bankBoxBottom = sigY - 30 - gapBankToSig;
+  const boxY = bankBoxBottom - bankBoxH;
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
-    const boxY = bankBoxY;
 
     doc.setFillColor(...cream);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
@@ -529,35 +527,35 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     });
   }
 
-  // Signature — left side
+  // Signature line — left
+  const sigLineW = 200;
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
       const ratio = sig.width / sig.height;
       const h = density === "ultra" ? 26 : 32;
-      const w = Math.min(h * ratio, sigW - 14);
+      const w = Math.min(h * ratio, sigLineW - 14);
       doc.addImage(sig, "PNG", margin, sigY - h - 6, w, h);
     } catch { /* skip */ }
   }
   doc.setDrawColor(...ink);
   doc.setLineWidth(0.5);
-  doc.line(margin, sigY, margin + sigW, sigY);
+  doc.line(margin, sigY, margin + sigLineW, sigY);
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
   doc.text("AUTHORISED SIGNATURE", margin, sigY + 12);
 
-  // Date line beneath signature (stacked on the left, so it doesn't collide
-  // with the banking box on the right).
-  const dateLineY = sigY + 26;
-  const dateLineW = sigW;
+  // Date line — right, same baseline as signature
+  const dateLineW = 180;
+  const dateLineX = pageW - margin - dateLineW;
   doc.setDrawColor(...ink);
   doc.setLineWidth(0.5);
-  doc.line(margin, dateLineY, margin + dateLineW, dateLineY);
+  doc.line(dateLineX, sigY, dateLineX + dateLineW, sigY);
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
-  doc.text("DATE", margin, dateLineY + 12);
+  doc.text("DATE", dateLineX, sigY + 12);
 
   // Footer
   doc.setDrawColor(...accent);
