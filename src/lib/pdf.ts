@@ -491,11 +491,9 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   const footerHairlineY = pageH - 34;
   const sigY = footerHairlineY - gapSigToFooter - 16;
-  const bankBoxY = sigY - sigRowH + (sigRowH - bankBoxH) / 2 - bankBoxH - gapBankToSig + sigRowH; // placeholder, recomputed below
 
-  // Bank panel — top of bottom block, right-aligned
-  const bankBoxYFinal = sigY - sigRowH + 4 - gapBankToSig - bankBoxH + sigRowH - 8;
-  // Simpler: anchor bank box bottom = sigY - sigRowH - gapBankToSig
+  // Bank box sits above the signature/date row, right-aligned.
+  // Anchor its bottom edge a comfortable gap above the sig/date baseline.
   const bankBoxBottom = sigY - 30 - gapBankToSig;
   const boxY = bankBoxBottom - bankBoxH;
   if (bankRows.length > 0) {
