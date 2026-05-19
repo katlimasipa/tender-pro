@@ -224,9 +224,30 @@ export default function CompanyProfile() {
               <Label>Website</Label>
               <Input value={form.website || ""} onChange={e => setForm({ ...form, website: e.target.value })} className="mt-1.5" placeholder="www.yourcompany.co.za" />
             </div>
-            <div>
-              <Label>Address</Label>
-              <Textarea value={form.address || ""} onChange={e => setForm({ ...form, address: e.target.value })} className="mt-1.5" rows={3} />
+            <div className="space-y-4">
+              <Label className="text-base">Address</Label>
+              <div>
+                <Label className="text-xs text-muted-foreground">Street address</Label>
+                <Input value={form.address_line1 || ""} onChange={e => setForm({ ...form, address_line1: e.target.value })} className="mt-1.5" placeholder="123 Main Street" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Address line 2 (optional)</Label>
+                <Input value={form.address_line2 || ""} onChange={e => setForm({ ...form, address_line2: e.target.value })} className="mt-1.5" placeholder="Suite, unit, building…" />
+              </div>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Suburb</Label>
+                  <Input value={form.suburb || ""} onChange={e => setForm({ ...form, suburb: e.target.value })} className="mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">City</Label>
+                  <Input value={form.city || ""} onChange={e => setForm({ ...form, city: e.target.value })} className="mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Postal code</Label>
+                  <Input value={form.postal_code || ""} onChange={e => setForm({ ...form, postal_code: e.target.value })} className="mt-1.5" />
+                </div>
+              </div>
             </div>
           </div>
 
