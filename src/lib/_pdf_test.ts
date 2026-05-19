@@ -480,23 +480,23 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const gapSigToFooter = tight ? 8 : 10;
   const gapBankToSig = tight ? 6 : 10;
 
-  const bottomBlockH = bankBoxH + (bankBoxH > 0 ? gapBankToSig : 0) + sigRowH + gapSigToFooter + footerBlockH + 6;
-
-  const minTopForBottomBlock = pageH - bottomBlockH - margin;
-  const requiredGap = tight ? 10 : 18;
-  if (lastY + requiredGap > minTopForBottomBlock) {
-    doc.addPage();
-    drawFrame();
-  }
-
+  // Anchor the bottom block to the bottom of the page. We then page-break
+  // only if it would actually overlap content above.
   const footerHairlineY = pageH - 28;
   const sigY = footerHairlineY - gapSigToFooter - 14;
-
-  // Bank box sits above the signature/date row, right-aligned.
-  // Anchor its bottom edge a comfortable gap above the signature image area.
   const sigImageReserveH = tight ? 26 : 32;
   const bankBoxBottom = sigY - sigImageReserveH - gapBankToSig;
-  const boxY = bankBoxBottom - bankBoxH;
+  let boxY = bankBoxBottom - bankBoxH;
+  const topOfBottomBlock = bankRows.length > 0 ? boxY : (sigY - sigImageReserveH);
+
+  if (lastY + 6 > topOfBottomBlock) {
+    doc.addPage();
+    drawFrame();
+    // Recompute (page geometry unchanged, but keep boxY in sync)
+    boxY = bankBoxBottom - bankBoxH;
+  }
+
+  void footerBlockH; void sigRowH;
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
 
