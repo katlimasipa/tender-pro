@@ -187,17 +187,26 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...ink);
   doc.text(data.company.name || "Company", idTextX, idTop + 10);
 
+  // Right-aligned address & contact stack
   doc.setFont(SANS, "normal");
   doc.setFontSize(8);
   doc.setTextColor(...subInk);
-  let icy = idTop + 22;
-  const contactBits = [
-    data.company.address,
-    [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  ·  "),
-    data.company.website,
-  ].filter(Boolean) as string[];
-  contactBits.forEach((line) => {
-    doc.text(line, idTextX, icy);
+  const rightEdge = pageW - margin;
+  const addressLines: string[] = [];
+  if (data.company.address) {
+    data.company.address
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .forEach((l) => addressLines.push(l));
+  }
+  const contactLine = [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  ·  ");
+  if (contactLine) addressLines.push(contactLine);
+  if (data.company.website) addressLines.push(data.company.website);
+
+  let icy = idTop + 10;
+  addressLines.forEach((line) => {
+    doc.text(line, rightEdge, icy, { align: "right" });
     icy += 9.5;
   });
 
@@ -438,26 +447,24 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_account_type) bankRows.push(["Type", c.bank_account_type]);
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
-  const tightBank = density === "ultra" || density === "veryDense";
-  const padX = 12;
-  const padY = tightBank ? 7 : 9;
-  const titleHB = tightBank ? 11 : 13;
-  const rowH = tightBank ? 10 : 11.5;
+  const tightBank = density !== "comfortable";
+  const padX = 11;
+  const padY = tightBank ? 6 : 8;
+  const titleHB = tightBank ? 10 : 12;
+  const rowH = tightBank ? 9.5 : 10.5;
   const labelGapX = 10;
   const bankTitle = "BANKING DETAILS";
 
-  // Layout: signature (left) + banking box (right), side-by-side, at the
-  // bottom of the page so the table can use the rest of the height.
-  const sigW = 144;
-  const sideGap = 24;
-  const bankBoxW = pageW - margin * 2 - sigW - sideGap;
+  // Layout: banking box (right-aligned, compact) ABOVE a signature/date row.
+  // Sig sits on the left, Date sits on the right, both on the same baseline.
+  const bankBoxW = Math.min(260, pageW - margin * 2 - 40);
 
   let bankBoxH = 0;
   let bankLabelColW = 0;
   let bankWrappedRows: [string, string[]][] = [];
   if (bankRows.length > 0) {
     doc.setFont(SANS, "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     bankRows.forEach(([k]) => {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
@@ -468,31 +475,30 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   }
 
   const tight = density === "ultra" || density === "veryDense" || density === "dense";
-  const sigBlockH = tight ? 44 : 54;
-  const footerBlockH = 16;
-  const gapSigToFooter = tight ? 10 : 14;
+  const sigRowH = tight ? 38 : 46;
+  const footerBlockH = 14;
+  const gapSigToFooter = tight ? 8 : 10;
+  const gapBankToSig = tight ? 6 : 10;
 
-  // The bottom band height is whichever side is taller.
-  const bottomBandH = Math.max(sigBlockH, bankBoxH);
-  const bottomBlockH = bottomBandH + gapSigToFooter + footerBlockH + 6;
+  // Anchor the bottom block to the bottom of the page. We then page-break
+  // only if it would actually overlap content above.
+  const footerHairlineY = pageH - 28;
+  const sigY = footerHairlineY - gapSigToFooter - 14;
+  const sigImageReserveH = tight ? 26 : 32;
+  const bankBoxBottom = sigY - sigImageReserveH - gapBankToSig;
+  let boxY = bankBoxBottom - bankBoxH;
+  const topOfBottomBlock = bankRows.length > 0 ? boxY : (sigY - sigImageReserveH);
 
-  const minTopForBottomBlock = pageH - bottomBlockH - margin;
-  const requiredGap = tight ? 10 : 18;
-  if (lastY + requiredGap > minTopForBottomBlock) {
+  if (lastY + 6 > topOfBottomBlock) {
     doc.addPage();
     drawFrame();
+    // Recompute (page geometry unchanged, but keep boxY in sync)
+    boxY = bankBoxBottom - bankBoxH;
   }
 
-  const footerHairlineY = pageH - 34;
-  // Sig baseline sits near the bottom of the bottom band
-  const sigY = footerHairlineY - gapSigToFooter - 16;
-  // Bank box top-aligned with the signature image area, bottom-aligned to sigY area
-  const bankBoxY = sigY - sigBlockH + (sigBlockH - bankBoxH) / 2 - 6;
-
-  // Bank panel — right side
+  void footerBlockH; void sigRowH;
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
-    const boxY = bankBoxY;
 
     doc.setFillColor(...cream);
     doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
@@ -507,8 +513,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     doc.setTextColor(...accentText);
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
-    doc.setFontSize(8);
-    let bankY = boxY + padY + titleHB + 4;
+    doc.setFontSize(7.5);
+    let bankY = boxY + padY + titleHB + 3;
     bankWrappedRows.forEach(([label, lines]) => {
       doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
@@ -520,35 +526,35 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     });
   }
 
-  // Signature — left side
+  // Signature line — left
+  const sigLineW = 200;
   if (data.company.signature_url) {
     try {
       const sig = await loadImage(data.company.signature_url);
       const ratio = sig.width / sig.height;
       const h = density === "ultra" ? 26 : 32;
-      const w = Math.min(h * ratio, sigW - 14);
+      const w = Math.min(h * ratio, sigLineW - 14);
       doc.addImage(sig, "PNG", margin, sigY - h - 6, w, h);
     } catch { /* skip */ }
   }
   doc.setDrawColor(...ink);
   doc.setLineWidth(0.5);
-  doc.line(margin, sigY, margin + sigW, sigY);
+  doc.line(margin, sigY, margin + sigLineW, sigY);
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
   doc.text("AUTHORISED SIGNATURE", margin, sigY + 12);
 
-  // Date line beneath signature (stacked on the left, so it doesn't collide
-  // with the banking box on the right).
-  const dateLineY = sigY + 26;
-  const dateLineW = sigW;
+  // Date line — right, same baseline as signature
+  const dateLineW = 180;
+  const dateLineX = pageW - margin - dateLineW;
   doc.setDrawColor(...ink);
   doc.setLineWidth(0.5);
-  doc.line(margin, dateLineY, margin + dateLineW, dateLineY);
+  doc.line(dateLineX, sigY, dateLineX + dateLineW, sigY);
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
-  doc.text("DATE", margin, dateLineY + 12);
+  doc.text("DATE", dateLineX, sigY + 12);
 
   // Footer
   doc.setDrawColor(...accent);

@@ -37,13 +37,26 @@ export default function CompanyProfile() {
   const save = async () => {
     if (!company) return;
     setSaving(true);
+    const composedAddress = [
+      form.address_line1,
+      form.address_line2,
+      form.suburb,
+      form.city,
+      form.postal_code,
+    ].map((s: string | undefined) => (s || "").trim()).filter(Boolean).join("\n") || null;
+
     const { error } = await supabase.from("companies").update({
       name: form.name,
       registration_number: form.registration_number || null,
       vat_number: form.vat_number || null,
       contact_email: form.contact_email || null,
       contact_phone: form.contact_phone || null,
-      address: form.address || null,
+      address: composedAddress,
+      address_line1: form.address_line1 || null,
+      address_line2: form.address_line2 || null,
+      suburb: form.suburb || null,
+      city: form.city || null,
+      postal_code: form.postal_code || null,
       website: form.website || null,
       csd_number: form.csd_number || null,
       primary_color: form.primary_color || "#1C382C",
@@ -55,7 +68,7 @@ export default function CompanyProfile() {
       bank_account_type: form.bank_account_type || null,
       bank_swift: form.bank_swift || null,
       payment_reference: form.payment_reference || null,
-    }).eq("id", company.id);
+    } as any).eq("id", company.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Company updated");
@@ -211,9 +224,30 @@ export default function CompanyProfile() {
               <Label>Website</Label>
               <Input value={form.website || ""} onChange={e => setForm({ ...form, website: e.target.value })} className="mt-1.5" placeholder="www.yourcompany.co.za" />
             </div>
-            <div>
-              <Label>Address</Label>
-              <Textarea value={form.address || ""} onChange={e => setForm({ ...form, address: e.target.value })} className="mt-1.5" rows={3} />
+            <div className="space-y-4">
+              <Label className="text-base">Address</Label>
+              <div>
+                <Label className="text-xs text-muted-foreground">Street address</Label>
+                <Input value={form.address_line1 || ""} onChange={e => setForm({ ...form, address_line1: e.target.value })} className="mt-1.5" placeholder="123 Main Street" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Address line 2 (optional)</Label>
+                <Input value={form.address_line2 || ""} onChange={e => setForm({ ...form, address_line2: e.target.value })} className="mt-1.5" placeholder="Suite, unit, building…" />
+              </div>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Suburb</Label>
+                  <Input value={form.suburb || ""} onChange={e => setForm({ ...form, suburb: e.target.value })} className="mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">City</Label>
+                  <Input value={form.city || ""} onChange={e => setForm({ ...form, city: e.target.value })} className="mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Postal code</Label>
+                  <Input value={form.postal_code || ""} onChange={e => setForm({ ...form, postal_code: e.target.value })} className="mt-1.5" />
+                </div>
+              </div>
             </div>
           </div>
 

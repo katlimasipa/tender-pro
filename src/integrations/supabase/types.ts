@@ -18,12 +18,15 @@ export type Database = {
         Row: {
           accent_color: string | null
           address: string | null
+          address_line1: string | null
+          address_line2: string | null
           bank_account_name: string | null
           bank_account_number: string | null
           bank_account_type: string | null
           bank_branch_code: string | null
           bank_name: string | null
           bank_swift: string | null
+          city: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
@@ -34,9 +37,11 @@ export type Database = {
           name: string
           owner_id: string
           payment_reference: string | null
+          postal_code: string | null
           primary_color: string | null
           registration_number: string | null
           signature_url: string | null
+          suburb: string | null
           updated_at: string
           vat_number: string | null
           website: string | null
@@ -44,12 +49,15 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           address?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
           bank_account_name?: string | null
           bank_account_number?: string | null
           bank_account_type?: string | null
           bank_branch_code?: string | null
           bank_name?: string | null
           bank_swift?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -60,9 +68,11 @@ export type Database = {
           name: string
           owner_id: string
           payment_reference?: string | null
+          postal_code?: string | null
           primary_color?: string | null
           registration_number?: string | null
           signature_url?: string | null
+          suburb?: string | null
           updated_at?: string
           vat_number?: string | null
           website?: string | null
@@ -70,12 +80,15 @@ export type Database = {
         Update: {
           accent_color?: string | null
           address?: string | null
+          address_line1?: string | null
+          address_line2?: string | null
           bank_account_name?: string | null
           bank_account_number?: string | null
           bank_account_type?: string | null
           bank_branch_code?: string | null
           bank_name?: string | null
           bank_swift?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -86,9 +99,11 @@ export type Database = {
           name?: string
           owner_id?: string
           payment_reference?: string | null
+          postal_code?: string | null
           primary_color?: string | null
           registration_number?: string | null
           signature_url?: string | null
+          suburb?: string | null
           updated_at?: string
           vat_number?: string | null
           website?: string | null
