@@ -489,12 +489,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     drawFrame();
   }
 
-  const footerHairlineY = pageH - 34;
-  const sigY = footerHairlineY - gapSigToFooter - 16;
+  const footerHairlineY = pageH - 28;
+  const sigY = footerHairlineY - gapSigToFooter - 14;
 
   // Bank box sits above the signature/date row, right-aligned.
-  // Anchor its bottom edge a comfortable gap above the sig/date baseline.
-  const bankBoxBottom = sigY - 30 - gapBankToSig;
+  // Anchor its bottom edge a comfortable gap above the signature image area.
+  const sigImageReserveH = tight ? 26 : 32;
+  const bankBoxBottom = sigY - sigImageReserveH - gapBankToSig;
   const boxY = bankBoxBottom - bankBoxH;
   if (bankRows.length > 0) {
     const boxX = pageW - margin - bankBoxW;
@@ -512,8 +513,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     doc.setTextColor(...accentText);
     doc.text(bankTitle, boxX + padX, boxY + padY + 4);
 
-    doc.setFontSize(8);
-    let bankY = boxY + padY + titleHB + 4;
+    doc.setFontSize(7.5);
+    let bankY = boxY + padY + titleHB + 3;
     bankWrappedRows.forEach(([label, lines]) => {
       doc.setFont(SANS, "normal");
       doc.setTextColor(...muted);
