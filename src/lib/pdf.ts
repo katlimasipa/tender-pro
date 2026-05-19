@@ -447,24 +447,24 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   if (c.bank_account_type) bankRows.push(["Type", c.bank_account_type]);
   if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
 
-  const tightBank = density === "ultra" || density === "veryDense";
-  const padX = 12;
-  const padY = tightBank ? 7 : 9;
-  const titleHB = tightBank ? 11 : 13;
-  const rowH = tightBank ? 10 : 11.5;
+  const tightBank = density !== "comfortable";
+  const padX = 11;
+  const padY = tightBank ? 6 : 8;
+  const titleHB = tightBank ? 10 : 12;
+  const rowH = tightBank ? 9.5 : 10.5;
   const labelGapX = 10;
   const bankTitle = "BANKING DETAILS";
 
   // Layout: banking box (right-aligned, compact) ABOVE a signature/date row.
   // Sig sits on the left, Date sits on the right, both on the same baseline.
-  const bankBoxW = Math.min(280, pageW - margin * 2 - 40);
+  const bankBoxW = Math.min(260, pageW - margin * 2 - 40);
 
   let bankBoxH = 0;
   let bankLabelColW = 0;
   let bankWrappedRows: [string, string[]][] = [];
   if (bankRows.length > 0) {
     doc.setFont(SANS, "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     bankRows.forEach(([k]) => {
       const w = doc.getTextWidth(k);
       if (w > bankLabelColW) bankLabelColW = w;
@@ -475,10 +475,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   }
 
   const tight = density === "ultra" || density === "veryDense" || density === "dense";
-  const sigRowH = tight ? 44 : 54;
-  const footerBlockH = 16;
-  const gapSigToFooter = tight ? 10 : 14;
-  const gapBankToSig = tight ? 10 : 14;
+  const sigRowH = tight ? 38 : 46;
+  const footerBlockH = 14;
+  const gapSigToFooter = tight ? 8 : 10;
+  const gapBankToSig = tight ? 6 : 10;
 
   const bottomBlockH = bankBoxH + (bankBoxH > 0 ? gapBankToSig : 0) + sigRowH + gapSigToFooter + footerBlockH + 6;
 
