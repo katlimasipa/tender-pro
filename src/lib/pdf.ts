@@ -308,32 +308,32 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
-    theme: "plain",
+    theme: "grid",
     styles: {
       font: SANS,
       fontSize: tableFontSize,
       cellPadding: { top: cellPadV, right: 14, bottom: cellPadV, left: 14 },
-      textColor: ink,
-      lineColor: hairline,
-      lineWidth: 0,
+      textColor: [0, 0, 0],
+      lineColor: [0, 0, 0],
+      lineWidth: 0.5,
       valign: "middle",
       overflow: "linebreak",
     },
     headStyles: {
       fillColor: cream,
-      textColor: subInk,
+      textColor: [0, 0, 0],
       fontStyle: "bold",
       fontSize: 7.5,
       cellPadding: { top: 8, right: 14, bottom: 8, left: 14 },
-      lineColor: ink,
-      lineWidth: 0,
+      lineColor: [0, 0, 0],
+      lineWidth: 0.5,
     },
     columnStyles: {
-      0: { cellWidth: 40, textColor: muted, fontStyle: "bold", halign: "center" },
-      1: { textColor: deepInk, fontStyle: "normal", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
-      2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
-      3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
-      4: { halign: "right", cellWidth: 108, fontStyle: "bold", textColor: deepInk, overflow: "visible" },
+      0: { cellWidth: 40, textColor: [0, 0, 0], fontStyle: "bold", halign: "center" },
+      1: { textColor: [0, 0, 0], fontStyle: "normal", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
+      2: { halign: "right", cellWidth: 75, textColor: [0, 0, 0], overflow: "visible" },
+      3: { halign: "right", cellWidth: 100, textColor: [0, 0, 0], overflow: "visible" },
+      4: { halign: "right", cellWidth: 108, fontStyle: "bold", textColor: [0, 0, 0], overflow: "visible" },
     },
     didParseCell: (d) => {
       if (d.column.index === 0) d.cell.styles.halign = "center";
@@ -344,20 +344,6 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
         d.cell.styles.font = d.column.index >= 3 ? MONO : SANS;
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
         d.cell.styles.cellPadding = { top: cellPadV, right: 14, bottom: cellPadV, left: 14 } as any;
-      }
-    },
-    didDrawCell: (d) => {
-      if (d.section === "head" && d.row.index === 0 && d.column.index === 0) {
-        const y = d.cell.y + d.cell.height;
-        doc.setDrawColor(...deepInk);
-        doc.setLineWidth(0.8);
-        doc.line(margin, y, pageW - margin, y);
-      }
-      if (d.section === "body" && d.column.index === 0) {
-        const y = d.cell.y + d.cell.height;
-        doc.setDrawColor(...hairline);
-        doc.setLineWidth(0.3);
-        doc.line(margin, y, pageW - margin, y);
       }
     },
     didDrawPage: () => {
@@ -575,7 +561,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const footerMaxW = pageW - margin * 2;
   const footerLines = doc.splitTextToSize(footerText, footerMaxW);
   // Place the footer text centered, well above the bottom rule (which is at pageH - 36)
-  const footerTextY = pageH - 50;
+  const footerTextY = pageH - 24;
   doc.text(footerLines.slice(0, 2), pageW / 2, footerTextY, { align: "center" });
 
   return doc.output("blob");
