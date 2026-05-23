@@ -115,7 +115,7 @@ const Index = () => {
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Why Tender Desk</div>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold mt-3 text-balance">Less paperwork. More winning bids.</h2>
         </div>
-        <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 gap-px bg-border rounded-xl overflow-hidden border border-border">
           {features.map((f) => (
             <div key={f.title} className="bg-card p-6 sm:p-8 hover:bg-secondary/40 transition">
               <f.icon className="h-6 w-6 text-accent" />
@@ -130,7 +130,7 @@ const Index = () => {
       <section id="how" className="bg-secondary/40 border-y border-border">
         <div className="container py-16 sm:py-24">
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold max-w-2xl text-balance">Three steps. One polished tender.</h2>
-          <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="mt-10 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {[
               { n: "01", t: "Set up your company", d: "Add your registration, VAT number, and upload your letterhead — once." },
               { n: "02", t: "Build your tender", d: "Add line items. Watch totals and VAT calculate in real time." },
@@ -152,7 +152,7 @@ const Index = () => {
           <div className="text-sm text-accent font-medium uppercase tracking-widest">Pricing</div>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold mt-3">Start free. Scale when you're ready.</h2>
         </div>
-        <div className="mt-10 sm:mt-14 grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
           {[
             { name: "Free", price: "R0", per: "forever", features: ["3 tenders / month", "PDF export", "1 letterhead"], cta: "Start free" },
             { name: "Pro", price: "R249", per: "per month", features: ["Unlimited tenders", "Templates library", "Priority support"], cta: "Go Pro", featured: true },

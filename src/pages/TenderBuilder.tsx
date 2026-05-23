@@ -237,7 +237,7 @@ export default function TenderBuilder() {
 
   return (
     <AppShell>
-      <div className="p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid xl:grid-cols-[1fr_500px] gap-8 items-start">
+      <div className="p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid grid-cols-1 xl:grid-cols-[1fr_500px] gap-8 items-start">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 xl:h-[calc(100vh-96px)] xl:overflow-y-auto xl:pr-4">
           <button onClick={() => navigate("/tenders")} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-4">
             <ArrowLeft className="h-3 w-3" /> Back to tenders
@@ -265,7 +265,7 @@ export default function TenderBuilder() {
           </div>
 
           {/* Header card */}
-          <div className="mt-6 sm:mt-8 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft grid md:grid-cols-2 gap-5">
+          <div className="mt-6 sm:mt-8 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
               <Label>Document title *</Label>
               <Input value={title} onChange={e => setTitle(e.target.value)} className="mt-1.5" placeholder="Supply of construction materials — Phase 2" />
@@ -315,7 +315,7 @@ export default function TenderBuilder() {
                 <Label className="text-xs text-muted-foreground">Address line 2 (optional)</Label>
                 <Input value={clientAddressLine2} onChange={e => setClientAddressLine2(e.target.value)} className="mt-1.5" placeholder="Suite, unit, building…" />
               </div>
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label className="text-xs text-muted-foreground">Suburb</Label>
                   <Input value={clientSuburb} onChange={e => setClientSuburb(e.target.value)} className="mt-1.5" />

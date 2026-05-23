@@ -58,7 +58,7 @@ const ContactSection = () => {
 
   return (
     <section id="contact" className="border-t border-border bg-background">
-      <div className="container py-16 sm:py-24 grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+      <div className="container py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -70,7 +70,7 @@ export default function Onboarding() {
               <Label>Company name *</Label>
               <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5" placeholder="Mthembu Construction (Pty) Ltd" />
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Registration number</Label>
                 <Input value={form.registration_number} onChange={e => setForm({ ...form, registration_number: e.target.value })} className="mt-1.5" placeholder="2019/123456/07" />
@@ -80,7 +80,7 @@ export default function Onboarding() {
                 <Input value={form.vat_number} onChange={e => setForm({ ...form, vat_number: e.target.value })} className="mt-1.5" placeholder="4123456789" />
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Contact email</Label>
                 <Input type="email" value={form.contact_email} onChange={e => setForm({ ...form, contact_email: e.target.value })} className="mt-1.5" />

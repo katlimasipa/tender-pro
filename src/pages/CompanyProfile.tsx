@@ -142,7 +142,7 @@ export default function CompanyProfile() {
           <p className="text-muted-foreground mt-2">These details and brand assets appear on every tender PDF you export.</p>
 
           {/* Brand assets grid */}
-          <div className="mt-8 sm:mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <AssetCard
               kind="logo"
               label="Logo"
@@ -170,7 +170,7 @@ export default function CompanyProfile() {
           <div className="mt-6 bg-card border border-border rounded-xl p-5 sm:p-7 shadow-soft">
             <h2 className="font-display text-xl">Brand colours</h2>
             <p className="text-sm text-muted-foreground mt-1">Used for the header band, table header, and totals on every PDF.</p>
-            <div className="mt-5 grid sm:grid-cols-2 gap-5">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <Label>Primary colour</Label>
                 <div className="mt-1.5 flex items-center gap-3">
@@ -193,7 +193,7 @@ export default function CompanyProfile() {
               <Label>Company name</Label>
               <Input value={form.name || ""} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5" />
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Registration number</Label>
                 <Input value={form.registration_number || ""} onChange={e => setForm({ ...form, registration_number: e.target.value })} className="mt-1.5" />
@@ -203,14 +203,14 @@ export default function CompanyProfile() {
                 <Input value={form.vat_number || ""} onChange={e => setForm({ ...form, vat_number: e.target.value })} className="mt-1.5" />
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>CSD number</Label>
                 <Input value={form.csd_number || ""} onChange={e => setForm({ ...form, csd_number: e.target.value })} className="mt-1.5" placeholder="MAAA0893252" />
               </div>
               <div />
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Contact email</Label>
                 <Input type="email" value={form.contact_email || ""} onChange={e => setForm({ ...form, contact_email: e.target.value })} className="mt-1.5" />
@@ -234,7 +234,7 @@ export default function CompanyProfile() {
                 <Label className="text-xs text-muted-foreground">Address line 2 (optional)</Label>
                 <Input value={form.address_line2 || ""} onChange={e => setForm({ ...form, address_line2: e.target.value })} className="mt-1.5" placeholder="Suite, unit, building…" />
               </div>
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label className="text-xs text-muted-foreground">Suburb</Label>
                   <Input value={form.suburb || ""} onChange={e => setForm({ ...form, suburb: e.target.value })} className="mt-1.5" />
@@ -257,7 +257,7 @@ export default function CompanyProfile() {
               <h2 className="font-display text-xl">Payment details</h2>
               <p className="text-sm text-muted-foreground mt-1">Banking info shown in a "Payment Details" block on every PDF.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Bank name</Label>
                 <Input value={form.bank_name || ""} onChange={e => setForm({ ...form, bank_name: e.target.value })} className="mt-1.5" placeholder="Standard Bank" />
@@ -267,7 +267,7 @@ export default function CompanyProfile() {
                 <Input value={form.bank_account_name || ""} onChange={e => setForm({ ...form, bank_account_name: e.target.value })} className="mt-1.5" />
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Account number</Label>
                 <Input value={form.bank_account_number || ""} onChange={e => setForm({ ...form, bank_account_number: e.target.value })} className="mt-1.5" />
@@ -277,7 +277,7 @@ export default function CompanyProfile() {
                 <Input value={form.bank_branch_code || ""} onChange={e => setForm({ ...form, bank_branch_code: e.target.value })} className="mt-1.5" />
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Account type</Label>
                 <Input value={form.bank_account_type || ""} onChange={e => setForm({ ...form, bank_account_type: e.target.value })} className="mt-1.5" placeholder="Cheque / Current" />

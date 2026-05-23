@@ -52,7 +52,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats */}
-          <div className="mt-8 sm:mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
+          <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
             {[
               { label: "Total tenders", value: tenders.length, icon: FileText },
               { label: "Total value quoted", value: formatZAR(totalValue), icon: TrendingUp },
@@ -92,7 +92,7 @@ export default function Dashboard() {
             ) : (
               <>
                 {/* Mobile cards */}
-                <div className="grid gap-3 md:hidden">
+                <div className="grid grid-cols-1 gap-3 md:hidden">
                   {recent.map(t => (
                     <button key={t.id} onClick={() => navigate(`/tenders/${t.id}`)}
                       className="block w-full text-left bg-card border border-border rounded-xl p-4 shadow-soft overflow-hidden">
@@ -138,7 +138,7 @@ export default function Dashboard() {
           </div>
 
           {/* Quick links */}
-          <div className="mt-12 grid sm:grid-cols-2 gap-5">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Link to="/company" className="group bg-gradient-velvet text-primary-foreground rounded-xl p-7 flex items-center justify-between hover:shadow-elevated transition">
               <div>
                 <Building2 className="h-5 w-5 text-accent" />

@@ -81,7 +81,7 @@ export default function TendersList() {
           ) : (
             <>
               {/* Mobile cards */}
-              <div className="mt-6 sm:mt-8 grid gap-3 md:hidden">
+              <div className="mt-6 sm:mt-8 grid grid-cols-1 gap-3 md:hidden">
                 {filtered.map(t => (
                   <div key={t.id} className="bg-card border border-border rounded-xl p-4 shadow-soft flex items-start gap-3">
                     <button onClick={() => navigate(`/tenders/${t.id}`)} className="flex-1 text-left min-w-0">

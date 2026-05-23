@@ -63,7 +63,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
       {/* Left — brand panel */}
       <div className="hidden lg:flex relative bg-gradient-velvet text-primary-foreground p-12 flex-col justify-between overflow-hidden grain">
         <Link to="/" className="flex items-center relative z-10">
