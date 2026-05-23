@@ -82,7 +82,7 @@ const Index = () => {
               <div className="p-4 sm:p-8 overflow-x-auto">
                 <table className="w-full text-xs sm:text-sm min-w-[480px]">
                   <thead className="text-left border-b border-border">
-                    <tr className="text-muted-foreground"><th className="py-2 font-medium">No.</th><th className="font-medium">Product</th><th className="text-right font-medium">Qty</th><th className="text-right font-medium">Unit</th><th className="text-right font-medium">Total</th></tr>
+                    <tr className="text-muted-foreground"><th className="py-2 font-medium">No.</th><th className="font-medium">Product</th><th className="text-right font-medium">Quantity</th><th className="text-right font-medium">Unit</th><th className="text-right font-medium">Total</th></tr>
                   </thead>
                   <tbody>
                     {[

@@ -18,7 +18,7 @@ export async function exportWord(data: PdfData) {
               new TableRow({
                 children: [
                   new TableCell({ children: [new Paragraph({ text: "Description", alignment: AlignmentType.CENTER })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Qty", alignment: AlignmentType.CENTER })] }),
+                  new TableCell({ children: [new Paragraph({ text: "Quantity", alignment: AlignmentType.CENTER })] }),
                   new TableCell({ children: [new Paragraph({ text: "Unit Price", alignment: AlignmentType.CENTER })] }),
                   new TableCell({ children: [new Paragraph({ text: "Total", alignment: AlignmentType.CENTER })] }),
                 ],
@@ -53,7 +53,7 @@ export async function exportWord(data: PdfData) {
 }
 
 export function exportCSV(data: PdfData) {
-  let csvContent = "Description,Qty,Unit Price,Total\n";
+  let csvContent = "Description,Quantity,Unit Price,Total\n";
   data.items.forEach(item => {
     const total = item.quantity * item.unitPrice;
     csvContent += `"${item.product.replace(/"/g, '""')}",${item.quantity},${item.unitPrice},${total}\n`;

@@ -304,7 +304,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     density === "normal" ? 10 : 10.5;
 
   autoTable(doc, {
-    head: [["#", "DESCRIPTION", "QTY", "UNIT PRICE (R)", "AMOUNT (R)"]],
+    head: [["No.", "DESCRIPTION", "QUANTITY", "UNIT PRICE (R)", "AMOUNT (R)"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
@@ -330,7 +330,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     },
     columnStyles: {
       0: { cellWidth: 40, textColor: muted, fontStyle: "bold", halign: "center" },
-      1: { textColor: deepInk, fontStyle: "bold", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
+      1: { textColor: deepInk, fontStyle: "normal", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
       2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
       3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
       4: { halign: "right", cellWidth: 108, fontStyle: "bold", textColor: deepInk, overflow: "visible" },
