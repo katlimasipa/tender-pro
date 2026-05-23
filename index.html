@@ -2,7 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TenderDesk" />
+    <link rel="apple-touch-icon" href="/placeholder.svg" />
     <title>Tender Desk — Tender documents, beautifully done</title>
     <meta name="description" content="Generate compliant, branded South African tender PDFs in minutes. Auto VAT, ZAR pricing tables, letterheads — built for SA businesses.">
     <meta name="author" content="Tender Desk" />
@@ -23,6 +28,9 @@
 </head>
 
   <body>
+    <div id="splash-screen" style="position:fixed;top:0;left:0;right:0;bottom:0;background-color:#ffffff;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s ease-out;">
+      <img src="/tender-desk-logo.svg" alt="Tender Desk Logo" style="width:120px;height:auto;" />
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
