@@ -112,12 +112,14 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   else density = "ultra";
 
   const drawFrame = () => {
-    doc.setDrawColor(...hairline);
-    doc.setLineWidth(0.5);
-    doc.rect(24, 24, pageW - 48, pageH - 48, "S");
+    // Top accent rule only — no full page border so footer text doesn't collide
     doc.setDrawColor(...accent);
+    doc.setLineWidth(1.2);
+    doc.line(margin, 30, pageW - margin, 30);
+    // Bottom accent rule
+    doc.setDrawColor(...hairline);
     doc.setLineWidth(0.4);
-    doc.line(24, 32, pageW - 24, 32);
+    doc.line(margin, pageH - 36, pageW - margin, pageH - 36);
   };
   drawFrame();
 
@@ -302,7 +304,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     density === "normal" ? 10 : 10.5;
 
   autoTable(doc, {
-    head: [["No.", "DESCRIPTION", "QTY", "UNIT PRICE (R)", "AMOUNT (R)"]],
+    head: [["#", "DESCRIPTION", "QTY", "UNIT PRICE (R)", "AMOUNT (R)"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
@@ -318,23 +320,24 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       overflow: "linebreak",
     },
     headStyles: {
-      fillColor: [255, 255, 255],
-      textColor: muted,
+      fillColor: cream,
+      textColor: subInk,
       fontStyle: "bold",
       fontSize: 7.5,
-      cellPadding: { top: 6, right: 14, bottom: 8, left: 14 },
+      cellPadding: { top: 8, right: 14, bottom: 8, left: 14 },
       lineColor: ink,
       lineWidth: 0,
     },
     columnStyles: {
-      0: { cellWidth: 32, textColor: muted, fontStyle: "bold", halign: "left" },
+      0: { cellWidth: 40, textColor: muted, fontStyle: "bold", halign: "center" },
       1: { textColor: deepInk, fontStyle: "bold", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
       2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
       3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
       4: { halign: "right", cellWidth: 108, fontStyle: "bold", textColor: deepInk, overflow: "visible" },
     },
     didParseCell: (d) => {
-      if (d.column.index >= 2) d.cell.styles.halign = "right";
+      if (d.column.index === 0) d.cell.styles.halign = "center";
+      else if (d.column.index >= 2) d.cell.styles.halign = "right";
       else d.cell.styles.halign = "left";
 
       if (d.section === "body" && d.column.index >= 2) {
@@ -484,7 +487,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
 
   // Anchor the bottom block to the bottom of the page. We then page-break
   // only if it would actually overlap content above.
-  const footerHairlineY = pageH - 28;
+  const footerHairlineY = pageH - 44;
   const sigY = footerHairlineY - gapSigToFooter - 14;
   const sigImageReserveH = tight ? 26 : 32;
   const bankBoxBottom = sigY - sigImageReserveH - gapBankToSig;
@@ -558,27 +561,22 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...muted);
   doc.text("DATE", dateLineX, sigY + 12);
 
-  // Footer
-  // doc.setDrawColor(...accent);
-  // doc.setLineWidth(0.4);
-  // doc.line(margin, footerHairlineY, margin + 30, footerHairlineY);
-  // doc.line(pageW - margin - 30, footerHairlineY, pageW - margin, footerHairlineY);
-
+  // Footer — company info, well-spaced above the bottom rule
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
-  const footer = [
+  const footerParts = [
     data.company.name,
     data.company.website,
     data.company.contact_email,
     data.company.contact_phone,
-  ].filter(Boolean).join("   ·   ");
-  const footerLines = doc.splitTextToSize(footer, pageW - margin * 2 - 80);
-  doc.text(footerLines.slice(0, 2), pageW / 2, footerHairlineY + 4, { align: "center" });
-
-  doc.setFont(SANS, "normal");
-  doc.setFontSize(6.5);
-  doc.setTextColor(...muted);
+  ].filter(Boolean);
+  const footerText = footerParts.join("   ·   ");
+  const footerMaxW = pageW - margin * 2;
+  const footerLines = doc.splitTextToSize(footerText, footerMaxW);
+  // Place the footer text centered, well above the bottom rule (which is at pageH - 36)
+  const footerTextY = pageH - 50;
+  doc.text(footerLines.slice(0, 2), pageW / 2, footerTextY, { align: "center" });
 
   return doc.output("blob");
 }

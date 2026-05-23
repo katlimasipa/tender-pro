@@ -61,6 +61,13 @@
     --sidebar-ring: 21 100% 50%;
   }
 
+  @media (max-width: 640px) {
+    :root {
+      --shadow-elevated: 4px 4px 0px 0px hsl(220 10% 10%);
+      --shadow-ochre: 4px 4px 0px 0px hsl(21 100% 50%);
+    }
+  }
+
   .dark {
     --background: 150 16% 8%;
     --foreground: 38 30% 92%;
@@ -87,7 +94,7 @@
 @layer base {
   * { @apply border-border; }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
   h1, h2, h3, h4 {

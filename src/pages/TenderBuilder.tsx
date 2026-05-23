@@ -212,7 +212,7 @@ export default function TenderBuilder() {
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = `${(tenderNumber || title || "tender").replace(/\s+/g, "-")}.pdf`;
+      a.href = url; a.download = `${(title || tenderNumber || "tender").replace(/\s+/g, "-")}.pdf`;
       a.click(); URL.revokeObjectURL(url);
       toast.success("PDF generated");
     } catch (e: any) {
