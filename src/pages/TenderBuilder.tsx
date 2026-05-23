@@ -93,7 +93,6 @@ export default function TenderBuilder() {
   // Load existing
   useEffect(() => {
     if (isNew) {
-      setTenderNumber(`TEN-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
       return;
     }
     supabase.from("tenders").select("*").eq("id", id!).maybeSingle().then(({ data }) => {
@@ -294,7 +293,7 @@ export default function TenderBuilder() {
               )}
             </div>
             <div>
-              <Label>Document No.</Label>
+              <Label>Document No. <span className="text-muted-foreground font-normal">(optional)</span></Label>
               <Input value={tenderNumber} onChange={e => setTenderNumber(e.target.value)} className="mt-1.5" placeholder="KGL2026/015" />
             </div>
             <div>

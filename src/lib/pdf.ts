@@ -143,23 +143,27 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   const titleH = Math.min(titleLines.length, 2) * 18;
 
   // Right meta column
-  doc.setFont(SANS, "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(...muted);
-  doc.text("REFERENCE", pageW - margin, headerTop, { align: "right" });
-  doc.setFont(SANS, "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...ink);
-  doc.text(data.tenderNumber || "—", pageW - margin, headerTop + 13, { align: "right" });
+  let rightCursorY = headerTop;
+  if (data.tenderNumber) {
+    doc.setFont(SANS, "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...muted);
+    doc.text("REFERENCE", pageW - margin, rightCursorY, { align: "right" });
+    doc.setFont(SANS, "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...ink);
+    doc.text(data.tenderNumber, pageW - margin, rightCursorY + 13, { align: "right" });
+    rightCursorY += 28;
+  }
 
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);
   doc.setTextColor(...muted);
-  doc.text("ISSUED", pageW - margin, headerTop + 28, { align: "right" });
+  doc.text("ISSUED", pageW - margin, rightCursorY, { align: "right" });
   doc.setFont(SANS, "bold");
   doc.setFontSize(10);
   doc.setTextColor(...ink);
-  doc.text(formatDate(new Date()), pageW - margin, headerTop + 41, { align: "right" });
+  doc.text(formatDate(new Date()), pageW - margin, rightCursorY + 13, { align: "right" });
 
   let cursorY = headerTop + Math.max(titleH + 4, 50);
 
