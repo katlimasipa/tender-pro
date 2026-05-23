@@ -52,7 +52,7 @@ export default function TendersList() {
       <div className="p-4 sm:p-8 md:p-12 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-end justify-between flex-wrap gap-4">
-            <div>
+            <div className="min-w-0">
               <div className="text-sm text-muted-foreground">Documents</div>
               <h1 className="font-display text-3xl sm:text-4xl mt-1">Tenders</h1>
             </div>

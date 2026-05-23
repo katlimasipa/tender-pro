@@ -248,7 +248,7 @@ export default function TenderBuilder() {
               <div className="text-sm text-muted-foreground">{isNew ? "New" : "Editing"} tender</div>
               <h1 className="font-display text-3xl sm:text-4xl mt-1 break-words">{title || "Untitled tender"}</h1>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <Button variant="outline" onClick={save} disabled={saving} className="flex-1 sm:flex-none">
                 <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save"}
               </Button>
@@ -341,8 +341,8 @@ export default function TenderBuilder() {
               </Button>
             </div>
 
-            {/* Desktop: table */}
-            <div className="hidden md:block overflow-x-auto">
+            {/* Table */}
+            <div className="block overflow-x-auto">
               <table className="w-full text-sm min-w-[560px]">
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>

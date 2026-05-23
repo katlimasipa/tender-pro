@@ -42,7 +42,7 @@ export default function Dashboard() {
       <div className="p-4 sm:p-8 md:p-12 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-end justify-between flex-wrap gap-4">
-            <div>
+            <div className="min-w-0">
               <div className="text-sm text-muted-foreground">Welcome back</div>
               <h1 className="font-display text-3xl sm:text-4xl mt-1 break-words">{company?.name || "Your dashboard"}</h1>
             </div>
@@ -95,7 +95,7 @@ export default function Dashboard() {
                 <div className="grid gap-3 md:hidden">
                   {recent.map(t => (
                     <button key={t.id} onClick={() => navigate(`/tenders/${t.id}`)}
-                      className="text-left bg-card border border-border rounded-xl p-4 shadow-soft">
+                      className="block w-full text-left bg-card border border-border rounded-xl p-4 shadow-soft overflow-hidden">
                       <div className="font-medium truncate">{t.title}</div>
                       {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
                       <div className="mt-2 text-sm text-muted-foreground truncate">{t.client_name || "—"}</div>
