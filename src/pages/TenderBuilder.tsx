@@ -238,7 +238,7 @@ export default function TenderBuilder() {
   return (
     <AppShell>
       <div className="p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid xl:grid-cols-[1fr_500px] gap-8 items-start">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 xl:h-[calc(100vh-96px)] xl:overflow-y-auto xl:pr-4">
           <button onClick={() => navigate("/tenders")} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-4">
             <ArrowLeft className="h-3 w-3" /> Back to tenders
           </button>
@@ -420,7 +420,7 @@ export default function TenderBuilder() {
         </motion.div>
         
         {/* Live Preview */}
-        <div className="hidden xl:block sticky top-8 h-[calc(100vh-64px)] rounded-xl border border-border shadow-soft overflow-hidden bg-secondary">
+        <div className="hidden xl:block h-[calc(100vh-96px)] rounded-xl border border-border shadow-soft overflow-hidden bg-secondary">
           <div className="p-3 border-b border-border bg-card flex items-center justify-between">
             <h3 className="font-display text-sm">Live Preview</h3>
           </div>
