@@ -18,6 +18,7 @@ export interface PdfData {
   notes?: string;
   vatInclusive: boolean;
   vatRate: number;
+  includeBankingDetails?: boolean;
   items: TenderItem[];
   company: {
     name: string;
@@ -200,9 +201,8 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       .filter(Boolean)
       .forEach((l) => addressLines.push(l));
   }
-  const contactLine = [data.company.contact_phone, data.company.contact_email].filter(Boolean).join("  ·  ");
-  if (contactLine) addressLines.push(contactLine);
-  if (data.company.website) addressLines.push(data.company.website);
+  // Contact info removed from address block below
+
 
   let icy = idTop + 10;
   addressLines.forEach((line) => {
@@ -310,7 +310,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     styles: {
       font: SANS,
       fontSize: tableFontSize,
-      cellPadding: { top: cellPadV, right: 8, bottom: cellPadV, left: 8 },
+      cellPadding: { top: cellPadV, right: 14, bottom: cellPadV, left: 14 },
       textColor: ink,
       lineColor: hairline,
       lineWidth: 0,
@@ -322,13 +322,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       textColor: muted,
       fontStyle: "bold",
       fontSize: 7.5,
-      cellPadding: { top: 6, right: 8, bottom: 8, left: 8 },
+      cellPadding: { top: 6, right: 14, bottom: 8, left: 14 },
       lineColor: ink,
       lineWidth: 0,
     },
     columnStyles: {
       0: { cellWidth: 32, textColor: muted, fontStyle: "bold", halign: "left" },
-      1: { textColor: deepInk, fontStyle: "bold" },
+      1: { textColor: deepInk, fontStyle: "bold", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
       2: { halign: "right", cellWidth: 42, textColor: subInk, overflow: "visible" },
       3: { halign: "right", cellWidth: 100, textColor: subInk, overflow: "visible" },
       4: { halign: "right", cellWidth: 108, fontStyle: "bold", textColor: deepInk, overflow: "visible" },
@@ -340,7 +340,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       if (d.section === "body" && d.column.index >= 2) {
         d.cell.styles.font = d.column.index >= 3 ? MONO : SANS;
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
-        d.cell.styles.cellPadding = { top: cellPadV, right: 10, bottom: cellPadV, left: 8 } as any;
+        d.cell.styles.cellPadding = { top: cellPadV, right: 14, bottom: cellPadV, left: 14 } as any;
       }
     },
     didDrawCell: (d) => {
@@ -440,12 +440,14 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   // ========== BOTTOM BLOCK ==========
   const c = data.company;
   const bankRows: [string, string][] = [];
-  if (c.bank_account_name) bankRows.push(["Account", c.bank_account_name]);
-  if (c.bank_name) bankRows.push(["Bank", c.bank_name]);
-  if (c.bank_account_number) bankRows.push(["Number", c.bank_account_number]);
-  if (c.bank_branch_code) bankRows.push(["Branch", c.bank_branch_code]);
-  if (c.bank_account_type) bankRows.push(["Type", c.bank_account_type]);
-  if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
+  if (data.includeBankingDetails !== false) {
+    if (c.bank_account_name) bankRows.push(["Account", c.bank_account_name]);
+    if (c.bank_name) bankRows.push(["Bank", c.bank_name]);
+    if (c.bank_account_number) bankRows.push(["Number", c.bank_account_number]);
+    if (c.bank_branch_code) bankRows.push(["Branch", c.bank_branch_code]);
+    if (c.bank_account_type) bankRows.push(["Type", c.bank_account_type]);
+    if (c.bank_swift) bankRows.push(["SWIFT", c.bank_swift]);
+  }
 
   const tightBank = density !== "comfortable";
   const padX = 11;
@@ -501,12 +503,12 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     const boxX = pageW - margin - bankBoxW;
 
     doc.setFillColor(...cream);
-    doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "F");
+    doc.rect(boxX, boxY, bankBoxW, bankBoxH, "F");
     doc.setDrawColor(...primary);
     doc.setLineWidth(0.8);
-    doc.roundedRect(boxX, boxY, bankBoxW, bankBoxH, 7, 7, "S");
+    doc.rect(boxX, boxY, bankBoxW, bankBoxH, "S");
     doc.setFillColor(...primary);
-    doc.roundedRect(boxX, boxY, 2.5, bankBoxH, 1.2, 1.2, "F");
+    doc.rect(boxX, boxY, 2.5, bankBoxH, "F");
 
     doc.setFont(SANS, "bold");
     doc.setFontSize(7);
@@ -557,10 +559,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.text("DATE", dateLineX, sigY + 12);
 
   // Footer
-  doc.setDrawColor(...accent);
-  doc.setLineWidth(0.4);
-  doc.line(margin, footerHairlineY, margin + 30, footerHairlineY);
-  doc.line(pageW - margin - 30, footerHairlineY, pageW - margin, footerHairlineY);
+  // doc.setDrawColor(...accent);
+  // doc.setLineWidth(0.4);
+  // doc.line(margin, footerHairlineY, margin + 30, footerHairlineY);
+  // doc.line(pageW - margin - 30, footerHairlineY, pageW - margin, footerHairlineY);
 
   doc.setFont(SANS, "normal");
   doc.setFontSize(7);

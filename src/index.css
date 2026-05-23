@@ -1,72 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Tender Desk — South African editorial identity
- * Palette: warm bone, deep velvet green, ochre, ink
+/* Industrial-Editorial Minimalist
+ * Palette: Stark white, deep slate/charcoal, safety orange
  */
 
 @layer base {
   :root {
-    /* Surfaces */
-    --background: 38 36% 96%;          /* warm bone */
-    --foreground: 150 12% 12%;         /* ink */
+    --background: 0 0% 100%;          /* stark white */
+    --foreground: 220 10% 10%;         /* deep slate */
 
-    --card: 40 40% 98%;
-    --card-foreground: 150 12% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 10% 10%;
 
-    --popover: 40 40% 98%;
-    --popover-foreground: 150 12% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 10% 10%;
 
-    /* Brand */
-    --primary: 158 38% 18%;            /* deep velvet green */
-    --primary-foreground: 38 40% 96%;
+    --primary: 220 10% 10%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 22% 90%;           /* paper */
-    --secondary-foreground: 150 12% 12%;
+    --secondary: 220 5% 96%;           /* off-white/light gray */
+    --secondary-foreground: 220 10% 10%;
 
-    --muted: 36 18% 92%;
-    --muted-foreground: 150 8% 38%;
+    --muted: 220 5% 90%;
+    --muted-foreground: 220 5% 40%;
 
-    --accent: 32 78% 52%;              /* ochre */
-    --accent-foreground: 150 16% 10%;
+    --accent: 21 100% 50%;              /* safety orange */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 8 70% 45%;
-    --destructive-foreground: 38 40% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 36 16% 84%;
-    --input: 36 16% 88%;
-    --ring: 158 38% 18%;
+    --border: 220 10% 10%;              /* hard black borders */
+    --input: 220 10% 80%;
+    --ring: 21 100% 50%;
 
-    --radius: 0.625rem;
+    --radius: 0.125rem;                 /* very minimal rounding, almost sharp */
 
     /* Editorial extras */
-    --ochre: 32 78% 52%;
-    --ochre-soft: 36 70% 78%;
-    --velvet: 158 38% 18%;
-    --velvet-deep: 158 42% 12%;
-    --bone: 38 36% 96%;
-    --paper: 36 22% 90%;
-    --ink: 150 16% 10%;
+    --ochre: 21 100% 50%;               /* map ochre to safety orange for compatibility */
+    --velvet: 220 10% 10%;              /* map velvet to deep slate */
+    --bone: 0 0% 100%;
+    --paper: 220 5% 96%;
+    --ink: 220 10% 10%;
 
-    --gradient-velvet: linear-gradient(135deg, hsl(158 42% 14%) 0%, hsl(158 38% 22%) 100%);
-    --gradient-ochre: linear-gradient(135deg, hsl(32 78% 52%) 0%, hsl(22 75% 48%) 100%);
-    --gradient-paper: linear-gradient(180deg, hsl(38 36% 96%) 0%, hsl(36 22% 90%) 100%);
+    --shadow-soft: 4px 4px 0px 0px hsl(220 10% 10%);
+    --shadow-elevated: 8px 8px 0px 0px hsl(220 10% 10%);
+    --shadow-ochre: 4px 4px 0px 0px hsl(21 100% 50%);
 
-    --shadow-soft: 0 1px 2px hsl(150 16% 10% / 0.04), 0 8px 24px -8px hsl(150 16% 10% / 0.08);
-    --shadow-elevated: 0 2px 4px hsl(150 16% 10% / 0.06), 0 24px 48px -16px hsl(150 16% 10% / 0.16);
-    --shadow-ochre: 0 12px 32px -8px hsl(32 78% 52% / 0.35);
-
-    --sidebar-background: 158 38% 14%;
-    --sidebar-foreground: 38 30% 88%;
-    --sidebar-primary: 32 78% 52%;
-    --sidebar-primary-foreground: 150 16% 10%;
-    --sidebar-accent: 158 30% 20%;
-    --sidebar-accent-foreground: 38 30% 92%;
-    --sidebar-border: 158 24% 22%;
-    --sidebar-ring: 32 78% 52%;
+    --sidebar-background: 220 10% 10%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 21 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 10% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 10% 20%;
+    --sidebar-ring: 21 100% 50%;
   }
 
   .dark {
@@ -96,25 +88,19 @@
   * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-feature-settings: 'ss01', 'cv11';
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
   h1, h2, h3, h4 {
-    font-family: 'Fraunces', Georgia, serif;
-    font-feature-settings: 'ss01';
-    letter-spacing: -0.02em;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: normal;
   }
 }
 
 @layer utilities {
-  .font-display { font-family: 'Fraunces', Georgia, serif; }
-  .font-body { font-family: 'Inter', system-ui, sans-serif; }
+  .font-display { font-family: 'Instrument Serif', Georgia, serif; font-weight: normal; }
+  .font-body { font-family: 'Space Grotesk', system-ui, sans-serif; }
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
-
-  .bg-gradient-velvet { background: var(--gradient-velvet); }
-  .bg-gradient-ochre { background: var(--gradient-ochre); }
-  .bg-gradient-paper { background: var(--gradient-paper); }
 
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
