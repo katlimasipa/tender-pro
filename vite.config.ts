@@ -29,12 +29,12 @@ export default defineConfig(({ mode }) => ({
         orientation: 'portrait',
         icons: [
           {
-            src: '/placeholder.svg',
+            src: '/tender-desk-logo.svg',
             sizes: 'any',
             type: 'image/svg+xml'
           },
           {
-            src: '/placeholder.svg',
+            src: '/tender-desk-logo.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'maskable'
