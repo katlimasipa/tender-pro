@@ -75,7 +75,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Mobile top bar */}
-      <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 border-b border-border bg-background/90 backdrop-blur">
+      <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-4 border-b border-border bg-background/90 backdrop-blur">
         <Link to="/dashboard" className="flex items-center">
           <img src={logo} alt="Tender Desk" className="h-7 w-auto" />
         </Link>
@@ -93,10 +93,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {open && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-          <aside className="relative w-72 max-w-[85%] bg-sidebar text-sidebar-foreground flex flex-col border-r border-sidebar-border animate-in slide-in-from-left duration-200">
+          <aside className="relative w-72 max-w-[85%] bg-sidebar text-sidebar-foreground flex flex-col border-r border-sidebar-border animate-in slide-in-from-left duration-200 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-3 right-3 h-8 w-8 grid place-items-center rounded-md hover:bg-sidebar-accent/60"
+              className="absolute top-[calc(0.75rem+env(safe-area-inset-top))] right-3 h-8 w-8 grid place-items-center rounded-md hover:bg-sidebar-accent/60"
               aria-label="Close menu"
             >
               <X className="h-4 w-4" />

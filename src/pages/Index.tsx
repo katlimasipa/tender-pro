@@ -16,7 +16,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background grain">
       {/* Nav */}
-      <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-50">
+      <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
         <div className="container flex h-16 items-center justify-between gap-2">
           <Link to="/" className="flex items-center shrink-0">
             <img src={logo} alt="Tender Desk" className="h-8 sm:h-9 w-auto" />
