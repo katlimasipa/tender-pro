@@ -1,6 +1,6 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, Building2, LogOut, Plus, Menu, X } from "lucide-react";
+import { LayoutDashboard, FileText, Building2, LogOut, Plus, Menu, X, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem("sidebar-collapsed") === "true"; } catch { return false; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem("sidebar-collapsed", String(collapsed)); } catch {}
+  }, [collapsed]);
 
   const SidebarBody = (
     <>
@@ -72,6 +79,53 @@ export default function AppShell({ children }: { children: ReactNode }) {
     </>
   );
 
+  // Collapsed sidebar body — icon-only with tooltips
+  const CollapsedSidebarBody = (
+    <>
+      <Link to="/dashboard" className="flex items-center justify-center h-16 border-b border-sidebar-border">
+        <img src={logo} alt="Tender Desk" className="h-7 w-7 object-contain" />
+      </Link>
+
+      <div className="p-2">
+        <Button
+          onClick={() => navigate("/tenders/new")}
+          size="icon"
+          className="w-full h-10 bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 shadow-ochre"
+          title="New Tender"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <nav className="px-2 flex-1 space-y-0.5">
+        {nav.map(item => {
+          const active = loc.pathname === item.to || (item.to !== "/dashboard" && loc.pathname.startsWith(item.to));
+          return (
+            <Link key={item.to} to={item.to}
+              title={item.label}
+              className={cn(
+                "flex items-center justify-center p-2.5 rounded-md transition",
+                active
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="p-2 border-t border-sidebar-border space-y-1">
+        <Button variant="ghost" size="icon" onClick={async () => { await signOut(); navigate("/"); }}
+          title="Sign out"
+          className="w-full text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60">
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Mobile top bar */}
@@ -85,8 +139,22 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border">
-        {SidebarBody}
+      <aside
+        className={cn(
+          "hidden md:flex bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border relative transition-all duration-300 ease-in-out",
+          collapsed ? "w-[72px]" : "w-64"
+        )}
+      >
+        {collapsed ? CollapsedSidebarBody : SidebarBody}
+
+        {/* Collapse toggle button */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-20 h-6 w-6 rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 flex items-center justify-center shadow-sm transition-colors z-10"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <ChevronsRight className="h-3.5 w-3.5" /> : <ChevronsLeft className="h-3.5 w-3.5" />}
+        </button>
       </aside>
 
       {/* Mobile drawer */}

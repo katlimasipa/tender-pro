@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical } from "lucide-react";
@@ -28,13 +28,35 @@ const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", qua
 const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
+  const [descFocused, setDescFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea height on focus or when content changes while focused
+  useEffect(() => {
+    if (descFocused && textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.height = "auto";
+      el.style.height = el.scrollHeight + "px";
+    }
+  }, [descFocused, it.product]);
+
   return (
-    <tr ref={setNodeRef} style={style} className="border-t border-border bg-card">
-      <td className="px-2 py-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground" {...attributes} {...listeners}>
+    <tr ref={setNodeRef} style={style} className="border-t border-border bg-card align-top">
+      <td className="px-2 py-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground pt-3" {...attributes} {...listeners}>
         <GripVertical className="h-4 w-4" />
       </td>
       <td className="px-2 py-2">
-        <Input value={it.product} onChange={e => updateItem(index, { product: e.target.value })} placeholder="Item description" className="border-0 bg-transparent focus-visible:bg-secondary/40" />
+        <textarea
+          ref={textareaRef}
+          value={it.product}
+          onChange={e => updateItem(index, { product: e.target.value })}
+          onFocus={() => setDescFocused(true)}
+          onBlur={() => setDescFocused(false)}
+          placeholder="Item description"
+          rows={descFocused ? undefined : 1}
+          className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none overflow-hidden"
+          style={!descFocused ? { height: "36px", whiteSpace: "nowrap", textOverflow: "ellipsis" } : {}}
+        />
       </td>
       <td className="px-2 py-2">
         <Input type="number" min={0} value={it.quantity === 0 ? "" : it.quantity} placeholder="0" onChange={e => updateItem(index, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
