@@ -429,11 +429,27 @@ export default function TenderBuilder() {
 
           {/* Line items */}
           <div className="mt-6 bg-card border border-border rounded-xl shadow-soft overflow-hidden">
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+            <div className="flex items-center justify-between gap-2 p-4 sm:p-5 border-b border-border flex-wrap">
               <h2 className="font-display text-lg sm:text-xl">Line items</h2>
-              <Button variant="outline" size="sm" onClick={addItem}>
-                <Plus className="h-4 w-4 mr-1.5" /> Add row
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={() => { setPasteMode("append"); setPasteOpen(true); }}>
+                  <ClipboardPaste className="h-4 w-4 mr-1.5" /> Paste table
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()} disabled={extractingImage}>
+                  {extractingImage ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-1.5" />}
+                  {extractingImage ? "Reading…" : "From image"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-4 w-4 mr-1.5" /> Add row
+                </Button>
+              </div>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImagePick(f); }}
+              />
             </div>
 
             {/* Table */}
