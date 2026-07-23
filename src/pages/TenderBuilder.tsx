@@ -106,6 +106,11 @@ export default function TenderBuilder() {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
+  const [extractingImage, setExtractingImage] = useState(false);
+  const pasteRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
