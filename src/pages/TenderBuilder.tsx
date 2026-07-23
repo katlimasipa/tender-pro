@@ -600,6 +600,86 @@ export default function TenderBuilder() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={previewRows !== null} onOpenChange={(open) => { if (!open) setPreviewRows(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Review detected rows</DialogTitle>
+            <DialogDescription>
+              {previewSource === "image"
+                ? "These rows were read from your image. Edit anything that's off, delete rows you don't want, then add them to your tender."
+                : "These are the rows detected from what you pasted. Edit or delete any before adding them to your tender."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[50vh] overflow-y-auto -mx-2 px-2">
+            {previewRows && previewRows.length > 0 ? (
+              <div className="space-y-2">
+                <div className="grid grid-cols-[1fr_80px_100px_36px] gap-2 text-xs text-muted-foreground px-1">
+                  <div>Description</div>
+                  <div className="text-right">Qty</div>
+                  <div className="text-right">Unit price</div>
+                  <div />
+                </div>
+                {previewRows.map((r, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_80px_100px_36px] gap-2 items-start">
+                    <Textarea
+                      value={r.product}
+                      onChange={e => updatePreviewRow(i, { product: e.target.value })}
+                      rows={1}
+                      className="min-h-[38px] py-2"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      value={r.quantity === 0 ? "" : r.quantity}
+                      placeholder="0"
+                      onChange={e => updatePreviewRow(i, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })}
+                      className="text-right tabular-nums"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={r.unitPrice === 0 ? "" : r.unitPrice}
+                      placeholder="0.00"
+                      onChange={e => updatePreviewRow(i, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })}
+                      className="text-right tabular-nums"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removePreviewRow(i)}
+                      className="text-muted-foreground hover:text-destructive"
+                      title="Remove this row"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground py-6 text-center">No rows left to add.</div>
+            )}
+          </div>
+          <div className="flex items-center gap-4 text-sm pt-2 border-t border-border">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "append"} onChange={() => setPasteMode("append")} />
+              Append to existing rows
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "replace"} onChange={() => setPasteMode("replace")} />
+              Replace all rows
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewRows(null)}>Cancel</Button>
+            <Button onClick={confirmPreview} disabled={!previewRows || previewRows.length === 0}>
+              Add {previewRows?.length ?? 0} row{(previewRows?.length ?? 0) === 1 ? "" : "s"} to tender
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
+
   );
 }
