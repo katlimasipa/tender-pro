@@ -194,6 +194,73 @@ export default function TenderBuilder() {
     }
   };
 
+  const mergeParsedRows = (rows: ParsedRow[]) => {
+    if (!rows.length) { toast.error("No rows detected"); return; }
+    const newItems: ItemWithId[] = rows.map(r => ({
+      id: crypto.randomUUID(),
+      product: r.product,
+      quantity: r.quantity,
+      unitPrice: r.unitPrice,
+    }));
+    if (pasteMode === "replace") {
+      setItems(newItems);
+    } else {
+      // Drop trailing blank row if present
+      const base = items.filter(it => it.product.trim() || it.quantity || it.unitPrice);
+      setItems([...(base.length ? base : []), ...newItems]);
+    }
+    toast.success(`${rows.length} row${rows.length === 1 ? "" : "s"} added`);
+  };
+
+  const handlePasteInDialog = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const html = e.clipboardData.getData("text/html");
+    const text = e.clipboardData.getData("text/plain");
+    const rows = parseClipboard(html, text);
+    if (!rows.length) {
+      toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
+      return;
+    }
+    mergeParsedRows(rows);
+    setPasteOpen(false);
+  };
+
+  const handleImagePick = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image is too large (max 8MB)");
+      return;
+    }
+    setExtractingImage(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { data, error } = await supabase.functions.invoke("extract-table-image", {
+        body: { imageDataUrl: dataUrl },
+      });
+      if (error) throw error;
+      const rows: ParsedRow[] = (data?.items ?? []).map((it: any) => ({
+        product: String(it.product || ""),
+        quantity: Number(it.quantity) || 0,
+        unitPrice: Number(it.unitPrice) || 0,
+      }));
+      mergeParsedRows(rows);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Failed to extract table from image");
+    } finally {
+      setExtractingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  };
+
   const save = async (): Promise<string | null> => {
     if (!user) return null;
     if (!title.trim()) { toast.error("Add a title"); return null; }
