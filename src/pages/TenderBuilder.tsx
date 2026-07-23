@@ -70,7 +70,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         {formatZAR(it.quantity * it.unitPrice)}
       </td>
       <td className="pr-3">
-        <Button variant="ghost" size="icon" onClick={() => removeItem(index)} disabled={itemsLength === 1} className="text-muted-foreground hover:text-destructive">
+        <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="text-muted-foreground hover:text-destructive">
           <Trash2 className="h-4 w-4" />
         </Button>
       </td>
@@ -109,6 +109,8 @@ export default function TenderBuilder() {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
   const [extractingImage, setExtractingImage] = useState(false);
+  const [previewRows, setPreviewRows] = useState<ParsedRow[] | null>(null);
+  const [previewSource, setPreviewSource] = useState<"paste" | "image">("paste");
   const pasteRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -178,10 +180,13 @@ export default function TenderBuilder() {
   const totals = useMemo(() => computeTotals(items, vatRate, vatInclusive), [items, vatRate, vatInclusive]);
 
   const updateItem = (i: number, patch: Partial<TenderItem>) => {
-    setItems(items.map((it, idx) => idx === i ? { ...it, ...patch } : it));
+    setItems(prev => prev.map((it, idx) => idx === i ? { ...it, ...patch } : it));
   };
-  const addItem = () => setItems([...items, blankItem()]);
-  const removeItem = (i: number) => setItems(items.filter((_, idx) => idx !== i));
+  const addItem = () => setItems(prev => [...prev, blankItem()]);
+  const removeItem = (i: number) => setItems(prev => {
+    const next = prev.filter((_, idx) => idx !== i);
+    return next.length ? next : [blankItem()];
+  });
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
@@ -195,20 +200,18 @@ export default function TenderBuilder() {
   };
 
   const mergeParsedRows = (rows: ParsedRow[]) => {
-    if (!rows.length) { toast.error("No rows detected"); return; }
+    if (!rows.length) { toast.error("No rows to add"); return; }
     const newItems: ItemWithId[] = rows.map(r => ({
       id: crypto.randomUUID(),
       product: r.product,
       quantity: r.quantity,
       unitPrice: r.unitPrice,
     }));
-    if (pasteMode === "replace") {
-      setItems(newItems);
-    } else {
-      // Drop trailing blank row if present
-      const base = items.filter(it => it.product.trim() || it.quantity || it.unitPrice);
-      setItems([...(base.length ? base : []), ...newItems]);
-    }
+    setItems(prev => {
+      if (pasteMode === "replace") return newItems;
+      const base = prev.filter(it => it.product.trim() || it.quantity || it.unitPrice);
+      return [...base, ...newItems];
+    });
     toast.success(`${rows.length} row${rows.length === 1 ? "" : "s"} added`);
   };
 
@@ -221,7 +224,8 @@ export default function TenderBuilder() {
       toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
       return;
     }
-    mergeParsedRows(rows);
+    setPreviewSource("paste");
+    setPreviewRows(rows);
     setPasteOpen(false);
   };
 
@@ -251,7 +255,12 @@ export default function TenderBuilder() {
         quantity: Number(it.quantity) || 0,
         unitPrice: Number(it.unitPrice) || 0,
       }));
-      mergeParsedRows(rows);
+      if (!rows.length) {
+        toast.error("No line items detected in that image");
+        return;
+      }
+      setPreviewSource("image");
+      setPreviewRows(rows);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Failed to extract table from image");
@@ -259,6 +268,18 @@ export default function TenderBuilder() {
       setExtractingImage(false);
       if (imageInputRef.current) imageInputRef.current.value = "";
     }
+  };
+
+  const updatePreviewRow = (i: number, patch: Partial<ParsedRow>) => {
+    setPreviewRows(prev => prev ? prev.map((r, idx) => idx === i ? { ...r, ...patch } : r) : prev);
+  };
+  const removePreviewRow = (i: number) => {
+    setPreviewRows(prev => prev ? prev.filter((_, idx) => idx !== i) : prev);
+  };
+  const confirmPreview = () => {
+    if (!previewRows) return;
+    mergeParsedRows(previewRows);
+    setPreviewRows(null);
   };
 
   const save = async (): Promise<string | null> => {
@@ -579,6 +600,86 @@ export default function TenderBuilder() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={previewRows !== null} onOpenChange={(open) => { if (!open) setPreviewRows(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Review detected rows</DialogTitle>
+            <DialogDescription>
+              {previewSource === "image"
+                ? "These rows were read from your image. Edit anything that's off, delete rows you don't want, then add them to your tender."
+                : "These are the rows detected from what you pasted. Edit or delete any before adding them to your tender."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[50vh] overflow-y-auto -mx-2 px-2">
+            {previewRows && previewRows.length > 0 ? (
+              <div className="space-y-2">
+                <div className="grid grid-cols-[1fr_80px_100px_36px] gap-2 text-xs text-muted-foreground px-1">
+                  <div>Description</div>
+                  <div className="text-right">Qty</div>
+                  <div className="text-right">Unit price</div>
+                  <div />
+                </div>
+                {previewRows.map((r, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_80px_100px_36px] gap-2 items-start">
+                    <Textarea
+                      value={r.product}
+                      onChange={e => updatePreviewRow(i, { product: e.target.value })}
+                      rows={1}
+                      className="min-h-[38px] py-2"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      value={r.quantity === 0 ? "" : r.quantity}
+                      placeholder="0"
+                      onChange={e => updatePreviewRow(i, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })}
+                      className="text-right tabular-nums"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={r.unitPrice === 0 ? "" : r.unitPrice}
+                      placeholder="0.00"
+                      onChange={e => updatePreviewRow(i, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })}
+                      className="text-right tabular-nums"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removePreviewRow(i)}
+                      className="text-muted-foreground hover:text-destructive"
+                      title="Remove this row"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground py-6 text-center">No rows left to add.</div>
+            )}
+          </div>
+          <div className="flex items-center gap-4 text-sm pt-2 border-t border-border">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "append"} onChange={() => setPasteMode("append")} />
+              Append to existing rows
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "replace"} onChange={() => setPasteMode("replace")} />
+              Replace all rows
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewRows(null)}>Cancel</Button>
+            <Button onClick={confirmPreview} disabled={!previewRows || previewRows.length === 0}>
+              Add {previewRows?.length ?? 0} row{(previewRows?.length ?? 0) === 1 ? "" : "s"} to tender
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
+
   );
 }
