@@ -200,20 +200,18 @@ export default function TenderBuilder() {
   };
 
   const mergeParsedRows = (rows: ParsedRow[]) => {
-    if (!rows.length) { toast.error("No rows detected"); return; }
+    if (!rows.length) { toast.error("No rows to add"); return; }
     const newItems: ItemWithId[] = rows.map(r => ({
       id: crypto.randomUUID(),
       product: r.product,
       quantity: r.quantity,
       unitPrice: r.unitPrice,
     }));
-    if (pasteMode === "replace") {
-      setItems(newItems);
-    } else {
-      // Drop trailing blank row if present
-      const base = items.filter(it => it.product.trim() || it.quantity || it.unitPrice);
-      setItems([...(base.length ? base : []), ...newItems]);
-    }
+    setItems(prev => {
+      if (pasteMode === "replace") return newItems;
+      const base = prev.filter(it => it.product.trim() || it.quantity || it.unitPrice);
+      return [...base, ...newItems];
+    });
     toast.success(`${rows.length} row${rows.length === 1 ? "" : "s"} added`);
   };
 
@@ -226,7 +224,8 @@ export default function TenderBuilder() {
       toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
       return;
     }
-    mergeParsedRows(rows);
+    setPreviewSource("paste");
+    setPreviewRows(rows);
     setPasteOpen(false);
   };
 
@@ -256,7 +255,12 @@ export default function TenderBuilder() {
         quantity: Number(it.quantity) || 0,
         unitPrice: Number(it.unitPrice) || 0,
       }));
-      mergeParsedRows(rows);
+      if (!rows.length) {
+        toast.error("No line items detected in that image");
+        return;
+      }
+      setPreviewSource("image");
+      setPreviewRows(rows);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Failed to extract table from image");
@@ -264,6 +268,18 @@ export default function TenderBuilder() {
       setExtractingImage(false);
       if (imageInputRef.current) imageInputRef.current.value = "";
     }
+  };
+
+  const updatePreviewRow = (i: number, patch: Partial<ParsedRow>) => {
+    setPreviewRows(prev => prev ? prev.map((r, idx) => idx === i ? { ...r, ...patch } : r) : prev);
+  };
+  const removePreviewRow = (i: number) => {
+    setPreviewRows(prev => prev ? prev.filter((_, idx) => idx !== i) : prev);
+  };
+  const confirmPreview = () => {
+    if (!previewRows) return;
+    mergeParsedRows(previewRows);
+    setPreviewRows(null);
   };
 
   const save = async (): Promise<string | null> => {
