@@ -109,6 +109,8 @@ export default function TenderBuilder() {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
   const [extractingImage, setExtractingImage] = useState(false);
+  const [previewRows, setPreviewRows] = useState<ParsedRow[] | null>(null);
+  const [previewSource, setPreviewSource] = useState<"paste" | "image">("paste");
   const pasteRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
