@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical } from "lucide-react";
+import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical, ClipboardPaste, Image as ImageIcon, Loader2 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useCompany } from "@/lib/useCompany";
 import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { exportWord, exportCSV } from "@/lib/export";
+import { parseClipboard, ParsedRow } from "@/lib/parseTable";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -104,6 +106,11 @@ export default function TenderBuilder() {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
+  const [extractingImage, setExtractingImage] = useState(false);
+  const pasteRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -184,6 +191,73 @@ export default function TenderBuilder() {
         const newIndex = items.findIndex((it) => it.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
+    }
+  };
+
+  const mergeParsedRows = (rows: ParsedRow[]) => {
+    if (!rows.length) { toast.error("No rows detected"); return; }
+    const newItems: ItemWithId[] = rows.map(r => ({
+      id: crypto.randomUUID(),
+      product: r.product,
+      quantity: r.quantity,
+      unitPrice: r.unitPrice,
+    }));
+    if (pasteMode === "replace") {
+      setItems(newItems);
+    } else {
+      // Drop trailing blank row if present
+      const base = items.filter(it => it.product.trim() || it.quantity || it.unitPrice);
+      setItems([...(base.length ? base : []), ...newItems]);
+    }
+    toast.success(`${rows.length} row${rows.length === 1 ? "" : "s"} added`);
+  };
+
+  const handlePasteInDialog = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const html = e.clipboardData.getData("text/html");
+    const text = e.clipboardData.getData("text/plain");
+    const rows = parseClipboard(html, text);
+    if (!rows.length) {
+      toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
+      return;
+    }
+    mergeParsedRows(rows);
+    setPasteOpen(false);
+  };
+
+  const handleImagePick = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image is too large (max 8MB)");
+      return;
+    }
+    setExtractingImage(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { data, error } = await supabase.functions.invoke("extract-table-image", {
+        body: { imageDataUrl: dataUrl },
+      });
+      if (error) throw error;
+      const rows: ParsedRow[] = (data?.items ?? []).map((it: any) => ({
+        product: String(it.product || ""),
+        quantity: Number(it.quantity) || 0,
+        unitPrice: Number(it.unitPrice) || 0,
+      }));
+      mergeParsedRows(rows);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Failed to extract table from image");
+    } finally {
+      setExtractingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   };
 
@@ -355,11 +429,27 @@ export default function TenderBuilder() {
 
           {/* Line items */}
           <div className="mt-6 bg-card border border-border rounded-xl shadow-soft overflow-hidden">
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+            <div className="flex items-center justify-between gap-2 p-4 sm:p-5 border-b border-border flex-wrap">
               <h2 className="font-display text-lg sm:text-xl">Line items</h2>
-              <Button variant="outline" size="sm" onClick={addItem}>
-                <Plus className="h-4 w-4 mr-1.5" /> Add row
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={() => { setPasteMode("append"); setPasteOpen(true); }}>
+                  <ClipboardPaste className="h-4 w-4 mr-1.5" /> Paste table
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()} disabled={extractingImage}>
+                  {extractingImage ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <ImageIcon className="h-4 w-4 mr-1.5" />}
+                  {extractingImage ? "Reading…" : "From image"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-4 w-4 mr-1.5" /> Add row
+                </Button>
+              </div>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImagePick(f); }}
+              />
             </div>
 
             {/* Table */}
@@ -454,6 +544,41 @@ export default function TenderBuilder() {
           )}
         </div>
       </div>
+
+      <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Paste table from Word or Excel</DialogTitle>
+            <DialogDescription>
+              Copy a table in Word, Excel or Google Sheets, then click the box below and paste (Ctrl/Cmd + V).
+              Rows fill in automatically and stay fully editable.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-4 text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "append"} onChange={() => setPasteMode("append")} />
+              Append to existing rows
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "replace"} onChange={() => setPasteMode("replace")} />
+              Replace all rows
+            </label>
+          </div>
+          <div
+            ref={pasteRef}
+            contentEditable
+            suppressContentEditableWarning
+            onPaste={handlePasteInDialog}
+            className="min-h-32 rounded-md border-2 border-dashed border-border bg-secondary/30 p-4 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
+            data-placeholder="Click here and press Ctrl/Cmd + V"
+          >
+            Click here, then paste your table…
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPasteOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
