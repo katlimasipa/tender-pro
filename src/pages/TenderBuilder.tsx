@@ -70,7 +70,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         {formatZAR(it.quantity * it.unitPrice)}
       </td>
       <td className="pr-3">
-        <Button variant="ghost" size="icon" onClick={() => removeItem(index)} disabled={itemsLength === 1} className="text-muted-foreground hover:text-destructive">
+        <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="text-muted-foreground hover:text-destructive">
           <Trash2 className="h-4 w-4" />
         </Button>
       </td>
