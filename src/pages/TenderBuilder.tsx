@@ -544,6 +544,41 @@ export default function TenderBuilder() {
           )}
         </div>
       </div>
+
+      <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Paste table from Word or Excel</DialogTitle>
+            <DialogDescription>
+              Copy a table in Word, Excel or Google Sheets, then click the box below and paste (Ctrl/Cmd + V).
+              Rows fill in automatically and stay fully editable.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-4 text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "append"} onChange={() => setPasteMode("append")} />
+              Append to existing rows
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" checked={pasteMode === "replace"} onChange={() => setPasteMode("replace")} />
+              Replace all rows
+            </label>
+          </div>
+          <div
+            ref={pasteRef}
+            contentEditable
+            suppressContentEditableWarning
+            onPaste={handlePasteInDialog}
+            className="min-h-32 rounded-md border-2 border-dashed border-border bg-secondary/30 p-4 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
+            data-placeholder="Click here and press Ctrl/Cmd + V"
+          >
+            Click here, then paste your table…
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPasteOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
