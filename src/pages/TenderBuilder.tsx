@@ -178,10 +178,13 @@ export default function TenderBuilder() {
   const totals = useMemo(() => computeTotals(items, vatRate, vatInclusive), [items, vatRate, vatInclusive]);
 
   const updateItem = (i: number, patch: Partial<TenderItem>) => {
-    setItems(items.map((it, idx) => idx === i ? { ...it, ...patch } : it));
+    setItems(prev => prev.map((it, idx) => idx === i ? { ...it, ...patch } : it));
   };
-  const addItem = () => setItems([...items, blankItem()]);
-  const removeItem = (i: number) => setItems(items.filter((_, idx) => idx !== i));
+  const addItem = () => setItems(prev => [...prev, blankItem()]);
+  const removeItem = (i: number) => setItems(prev => {
+    const next = prev.filter((_, idx) => idx !== i);
+    return next.length ? next : [blankItem()];
+  });
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
