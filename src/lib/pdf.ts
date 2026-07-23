@@ -123,8 +123,128 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   };
   drawFrame();
 
+  // ========== COMPANY identity ==========
+  let cursorY = margin;
+  const idTop = cursorY;
+  let logoH = 0;
+  let logoW = 0;
+  if (data.company.logo_url) {
+    try {
+      const logo = await loadImage(data.company.logo_url);
+      const maxH = density === "ultra" || density === "veryDense" ? 30 : 36;
+      const ratio = logo.width / logo.height;
+      logoH = maxH;
+      logoW = Math.min(maxH * ratio, 130);
+      doc.addImage(logo, "PNG", margin, idTop, logoW, logoH);
+    } catch { /* skip */ }
+  }
+
+  const idTextX = data.company.logo_url ? margin + logoW + 14 : margin;
+  doc.setFont(SERIF, "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...ink);
+  doc.text(data.company.name || "Company", idTextX, idTop + 10);
+
+  // Right-aligned address & contact stack
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...subInk);
+  const rightEdge = pageW - margin;
+  const addressLines: string[] = [];
+  if (data.company.address) {
+    data.company.address
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .forEach((l) => addressLines.push(l));
+  }
+
+
+  let icy = idTop + 10;
+  addressLines.forEach((line) => {
+    doc.text(line, rightEdge, icy, { align: "right" });
+    icy += 9.5;
+  });
+
+  cursorY = Math.max(idTop + logoH, icy) + (density === "ultra" ? 12 : 18);
+
+  // ========== PREPARED FOR | DETAILS ==========
+  const colGap = 28;
+  const colW = (pageW - margin * 2 - colGap) / 2;
+  const hasClient = !!(data.clientName || data.clientAddress);
+
+  doc.setFont(SANS, "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...accentText);
+  if (hasClient) {
+    doc.text("PREPARED FOR", margin, cursorY);
+  }
+  doc.text("DETAILS", margin + colW + colGap, cursorY);
+
+  doc.setDrawColor(...accent);
+  doc.setLineWidth(0.6);
+  if (hasClient) {
+    doc.line(margin, cursorY + 4, margin + 22, cursorY + 4);
+  }
+  doc.line(margin + colW + colGap, cursorY + 4, margin + colW + colGap + 22, cursorY + 4);
+
+  // Bill To — name + multi-line address
+  let bly = cursorY + 18;
+  if (hasClient) {
+    doc.setFont(SERIF, "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...deepInk);
+    doc.text(data.clientName || "", margin, bly);
+    bly += 13;
+    doc.setFont(SANS, "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...subInk);
+    if (data.clientAddress) {
+      // Split on newlines OR commas if all on one line
+      const raw = data.clientAddress.trim();
+      const lines = raw.includes("\n")
+        ? raw.split(/\r?\n/)
+        : raw.split(/,\s*/);
+      lines
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .forEach((t) => {
+          const wrapped = doc.splitTextToSize(t, colW);
+          wrapped.forEach((w: string) => {
+            doc.text(w, margin, bly);
+            bly += 11;
+          });
+        });
+    }
+  }
+
+  // References
+  const rightColX = margin + colW + colGap;
+  doc.setFont(SANS, "normal");
+  doc.setFontSize(9);
+  let rry = cursorY + 18;
+  const refRows: [string, string][] = [];
+  refRows.push(["Document", docType]);
+  if (data.quotationRef) refRows.push(["Quote Ref", data.quotationRef]);
+  if (data.company.csd_number) refRows.push(["CSD No.", data.company.csd_number]);
+  if (data.company.vat_number) refRows.push(["VAT", data.company.vat_number]);
+  if (data.company.registration_number) refRows.push(["Reg.", data.company.registration_number]);
+
+  refRows.forEach(([k, v]) => {
+    doc.setFont(SANS, "normal");
+    doc.setTextColor(...muted);
+    doc.text(k, rightColX, rry);
+    doc.setFont(SANS, "bold");
+    doc.setTextColor(...ink);
+    const vw = doc.splitTextToSize(String(v), colW - 80);
+    doc.text(vw, rightColX + 78, rry);
+    rry += 12 + (vw.length - 1) * 11;
+  });
+
+  cursorY = Math.max(bly, rry) + (density === "ultra" || density === "veryDense" ? 10 : 18);
+
   // ========== HEADER ==========
-  const headerTop = margin;
+  const headerTop = cursorY;
 
   // Eyebrow shows document type
   doc.setFont(SANS, "bold");
@@ -165,126 +285,13 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   doc.setTextColor(...ink);
   doc.text(formatDate(new Date()), pageW - margin, rightCursorY + 13, { align: "right" });
 
-  let cursorY = headerTop + Math.max(titleH + 4, 50);
+  cursorY = headerTop + Math.max(titleH + 4, 50);
 
   // Hairline beneath header
   doc.setDrawColor(...hairline);
   doc.setLineWidth(0.4);
   doc.line(margin, cursorY, pageW - margin, cursorY);
   cursorY += density === "ultra" ? 10 : 14;
-
-  // ========== COMPANY identity ==========
-  const idTop = cursorY;
-  let logoH = 0;
-  let logoW = 0;
-  if (data.company.logo_url) {
-    try {
-      const logo = await loadImage(data.company.logo_url);
-      const maxH = density === "ultra" || density === "veryDense" ? 30 : 36;
-      const ratio = logo.width / logo.height;
-      logoH = maxH;
-      logoW = Math.min(maxH * ratio, 130);
-      doc.addImage(logo, "PNG", margin, idTop, logoW, logoH);
-    } catch { /* skip */ }
-  }
-
-  const idTextX = data.company.logo_url ? margin + logoW + 14 : margin;
-  doc.setFont(SERIF, "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(...ink);
-  doc.text(data.company.name || "Company", idTextX, idTop + 10);
-
-  // Right-aligned address & contact stack
-  doc.setFont(SANS, "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...subInk);
-  const rightEdge = pageW - margin;
-  const addressLines: string[] = [];
-  if (data.company.address) {
-    data.company.address
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .forEach((l) => addressLines.push(l));
-  }
-  // Contact info removed from address block below
-
-
-  let icy = idTop + 10;
-  addressLines.forEach((line) => {
-    doc.text(line, rightEdge, icy, { align: "right" });
-    icy += 9.5;
-  });
-
-  cursorY = Math.max(idTop + logoH, icy) + (density === "ultra" ? 12 : 18);
-
-  // ========== PREPARED FOR | DETAILS ==========
-  const colGap = 28;
-  const colW = (pageW - margin * 2 - colGap) / 2;
-
-  doc.setFont(SANS, "bold");
-  doc.setFontSize(7);
-  doc.setTextColor(...accentText);
-  doc.text("PREPARED FOR", margin, cursorY);
-  doc.text("DETAILS", margin + colW + colGap, cursorY);
-
-  doc.setDrawColor(...accent);
-  doc.setLineWidth(0.6);
-  doc.line(margin, cursorY + 4, margin + 22, cursorY + 4);
-  doc.line(margin + colW + colGap, cursorY + 4, margin + colW + colGap + 22, cursorY + 4);
-
-  // Bill To — name + multi-line address
-  doc.setFont(SERIF, "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(...deepInk);
-  let bly = cursorY + 18;
-  doc.text(data.clientName || "—", margin, bly);
-  bly += 13;
-  doc.setFont(SANS, "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...subInk);
-  if (data.clientAddress) {
-    // Split on newlines OR commas if all on one line
-    const raw = data.clientAddress.trim();
-    const lines = raw.includes("\n")
-      ? raw.split(/\r?\n/)
-      : raw.split(/,\s*/);
-    lines
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .forEach((t) => {
-        const wrapped = doc.splitTextToSize(t, colW);
-        wrapped.forEach((w: string) => {
-          doc.text(w, margin, bly);
-          bly += 11;
-        });
-      });
-  }
-
-  // References
-  const rightColX = margin + colW + colGap;
-  doc.setFont(SANS, "normal");
-  doc.setFontSize(9);
-  let rry = cursorY + 18;
-  const refRows: [string, string][] = [];
-  refRows.push(["Document", docType]);
-  if (data.quotationRef) refRows.push(["Quote Ref", data.quotationRef]);
-  if (data.company.csd_number) refRows.push(["CSD No.", data.company.csd_number]);
-  if (data.company.vat_number) refRows.push(["VAT", data.company.vat_number]);
-  if (data.company.registration_number) refRows.push(["Reg.", data.company.registration_number]);
-
-  refRows.forEach(([k, v]) => {
-    doc.setFont(SANS, "normal");
-    doc.setTextColor(...muted);
-    doc.text(k, rightColX, rry);
-    doc.setFont(SANS, "bold");
-    doc.setTextColor(...ink);
-    const vw = doc.splitTextToSize(String(v), colW - 80);
-    doc.text(vw, rightColX + 78, rry);
-    rry += 12 + (vw.length - 1) * 11;
-  });
-
-  cursorY = Math.max(bly, rry) + (density === "ultra" || density === "veryDense" ? 10 : 18);
 
   // ========== TABLE ==========
   const body = data.items.map((it, i) => [
