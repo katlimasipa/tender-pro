@@ -265,6 +265,14 @@ export default function TenderBuilder() {
         toast.error("No line items detected in that image");
         return;
       }
+      const h = data?.headers || {};
+      setPreviewHeaders({
+        description: h.description || undefined,
+        quantity: h.quantity || undefined,
+        unitPrice: h.unitPrice || undefined,
+      });
+      setPreviewHasQuantity(data?.hasQuantity !== false && (!!h.quantity || rows.some(r => r.quantity > 0)));
+      setPreviewHasUnitPrice(data?.hasUnitPrice !== false && (!!h.unitPrice || rows.some(r => r.unitPrice > 0)));
       setPreviewSource("image");
       setPreviewRows(rows);
     } catch (e: any) {
