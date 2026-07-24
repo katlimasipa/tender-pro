@@ -623,15 +623,25 @@ export default function TenderBuilder() {
               {previewSource === "image"
                 ? "These rows were read from your image. Edit anything that's off, delete rows you don't want, then add them to your tender."
                 : "These are the rows detected from what you pasted. Edit or delete any before adding them to your tender."}
+              {(previewHeaders.description || previewHeaders.quantity || previewHeaders.unitPrice) && (
+                <span className="block mt-2 text-xs">
+                  Detected columns:{" "}
+                  {[previewHeaders.description, previewHeaders.quantity, previewHeaders.unitPrice]
+                    .filter(Boolean)
+                    .map(h => `"${h}"`)
+                    .join(" · ")}
+                  {!previewHasUnitPrice && " — no unit-price column detected, totals will be left blank."}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[50vh] overflow-y-auto -mx-2 px-2">
             {previewRows && previewRows.length > 0 ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-[1fr_80px_100px_36px] gap-2 text-xs text-muted-foreground px-1">
-                  <div>Description</div>
-                  <div className="text-right">Qty</div>
-                  <div className="text-right">Unit price</div>
+                  <div>{previewHeaders.description || "Description"}</div>
+                  <div className="text-right">{previewHeaders.quantity || (previewHasQuantity ? "Qty" : "Qty (none)")}</div>
+                  <div className="text-right">{previewHeaders.unitPrice || (previewHasUnitPrice ? "Unit price" : "Unit price (none)")}</div>
                   <div />
                 </div>
                 {previewRows.map((r, i) => (
