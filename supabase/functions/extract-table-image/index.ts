@@ -24,12 +24,21 @@ Deno.serve(async (req) => {
     }
 
     const systemPrompt = `You extract tabular line items from images of tables (invoices, quotations, spreadsheets).
-Return ONLY valid JSON of the shape: { "items": [{ "product": string, "quantity": number, "unitPrice": number }] }.
-- product: full description text for the row
-- quantity: numeric quantity (default 1 if not shown)
-- unitPrice: numeric unit price in the row's currency, no symbols, use dot as decimal separator
+Return ONLY valid JSON of the shape:
+{
+  "headers": { "description": string | null, "quantity": string | null, "unitPrice": string | null },
+  "hasQuantity": boolean,
+  "hasUnitPrice": boolean,
+  "items": [{ "product": string, "quantity": number, "unitPrice": number }]
+}
+Rules:
+- headers: copy the EXACT column header text used in the source image for the description, quantity and unit-price columns. Use null for any column that isn't present.
+- hasQuantity / hasUnitPrice: true only if that column actually exists in the source table.
+- product: full description text for the row.
+- quantity: numeric quantity from the row. If the table has no quantity column, set 0.
+- unitPrice: numeric unit price in the row's currency, no symbols, dot as decimal separator. If the table has no unit-price column, set 0. Do NOT invent or compute prices.
 - Ignore total/subtotal/VAT summary rows. Only include line items.
-- If a value is missing, use 0.`;
+- If a numeric value is missing on a specific row, use 0.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -44,7 +53,7 @@ Return ONLY valid JSON of the shape: { "items": [{ "product": string, "quantity"
           {
             role: "user",
             content: [
-              { type: "text", text: "Extract the line items from this table image." },
+              { type: "text", text: "Extract the line items and the exact column header names from this table image." },
               { type: "image_url", image_url: { url: imageDataUrl } },
             ],
           },
@@ -65,7 +74,7 @@ Return ONLY valid JSON of the shape: { "items": [{ "product": string, "quantity"
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content ?? "{}";
     let parsed: any;
-    try { parsed = JSON.parse(content); } catch { parsed = { items: [] }; }
+    try { parsed = JSON.parse(content); } catch { parsed = {}; }
     const items = Array.isArray(parsed.items) ? parsed.items : [];
     const cleaned = items.map((it: any) => ({
       product: String(it.product ?? "").trim(),
@@ -73,7 +82,20 @@ Return ONLY valid JSON of the shape: { "items": [{ "product": string, "quantity"
       unitPrice: Number(it.unitPrice) || 0,
     })).filter((it: any) => it.product);
 
-    return new Response(JSON.stringify({ items: cleaned }), {
+    const rawHeaders = parsed.headers || {};
+    const headers = {
+      description: rawHeaders.description ? String(rawHeaders.description).trim() : null,
+      quantity: rawHeaders.quantity ? String(rawHeaders.quantity).trim() : null,
+      unitPrice: rawHeaders.unitPrice ? String(rawHeaders.unitPrice).trim() : null,
+    };
+    const hasQuantity = typeof parsed.hasQuantity === "boolean"
+      ? parsed.hasQuantity
+      : !!headers.quantity || cleaned.some((it: any) => it.quantity > 0);
+    const hasUnitPrice = typeof parsed.hasUnitPrice === "boolean"
+      ? parsed.hasUnitPrice
+      : !!headers.unitPrice || cleaned.some((it: any) => it.unitPrice > 0);
+
+    return new Response(JSON.stringify({ items: cleaned, headers, hasQuantity, hasUnitPrice }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

@@ -15,7 +15,7 @@ import { useCompany } from "@/lib/useCompany";
 import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { exportWord, exportCSV } from "@/lib/export";
-import { parseClipboard, ParsedRow } from "@/lib/parseTable";
+import { parseClipboard, ParsedRow, ParsedHeaders } from "@/lib/parseTable";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -67,7 +67,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         <Input type="number" min={0} step="0.01" value={it.unitPrice === 0 ? "" : it.unitPrice} placeholder="0.00" onChange={e => updateItem(index, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
       </td>
       <td className="px-4 py-3 text-right tabular-nums font-medium">
-        {formatZAR(it.quantity * it.unitPrice)}
+        {it.unitPrice > 0 ? formatZAR(it.quantity * it.unitPrice) : <span className="text-muted-foreground">—</span>}
       </td>
       <td className="pr-3">
         <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="text-muted-foreground hover:text-destructive">
@@ -110,6 +110,9 @@ export default function TenderBuilder() {
   const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
   const [extractingImage, setExtractingImage] = useState(false);
   const [previewRows, setPreviewRows] = useState<ParsedRow[] | null>(null);
+  const [previewHeaders, setPreviewHeaders] = useState<ParsedHeaders>({});
+  const [previewHasUnitPrice, setPreviewHasUnitPrice] = useState(true);
+  const [previewHasQuantity, setPreviewHasQuantity] = useState(true);
   const [previewSource, setPreviewSource] = useState<"paste" | "image">("paste");
   const pasteRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -219,13 +222,16 @@ export default function TenderBuilder() {
     e.preventDefault();
     const html = e.clipboardData.getData("text/html");
     const text = e.clipboardData.getData("text/plain");
-    const rows = parseClipboard(html, text);
-    if (!rows.length) {
+    const res = parseClipboard(html, text);
+    if (!res.rows.length) {
       toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
       return;
     }
     setPreviewSource("paste");
-    setPreviewRows(rows);
+    setPreviewHeaders(res.headers);
+    setPreviewHasQuantity(res.hasQuantity);
+    setPreviewHasUnitPrice(res.hasUnitPrice);
+    setPreviewRows(res.rows);
     setPasteOpen(false);
   };
 
@@ -259,6 +265,14 @@ export default function TenderBuilder() {
         toast.error("No line items detected in that image");
         return;
       }
+      const h = data?.headers || {};
+      setPreviewHeaders({
+        description: h.description || undefined,
+        quantity: h.quantity || undefined,
+        unitPrice: h.unitPrice || undefined,
+      });
+      setPreviewHasQuantity(data?.hasQuantity !== false && (!!h.quantity || rows.some(r => r.quantity > 0)));
+      setPreviewHasUnitPrice(data?.hasUnitPrice !== false && (!!h.unitPrice || rows.some(r => r.unitPrice > 0)));
       setPreviewSource("image");
       setPreviewRows(rows);
     } catch (e: any) {
@@ -609,15 +623,25 @@ export default function TenderBuilder() {
               {previewSource === "image"
                 ? "These rows were read from your image. Edit anything that's off, delete rows you don't want, then add them to your tender."
                 : "These are the rows detected from what you pasted. Edit or delete any before adding them to your tender."}
+              {(previewHeaders.description || previewHeaders.quantity || previewHeaders.unitPrice) && (
+                <span className="block mt-2 text-xs">
+                  Detected columns:{" "}
+                  {[previewHeaders.description, previewHeaders.quantity, previewHeaders.unitPrice]
+                    .filter(Boolean)
+                    .map(h => `"${h}"`)
+                    .join(" · ")}
+                  {!previewHasUnitPrice && " — no unit-price column detected, totals will be left blank."}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[50vh] overflow-y-auto -mx-2 px-2">
             {previewRows && previewRows.length > 0 ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-[1fr_80px_100px_36px] gap-2 text-xs text-muted-foreground px-1">
-                  <div>Description</div>
-                  <div className="text-right">Qty</div>
-                  <div className="text-right">Unit price</div>
+                  <div>{previewHeaders.description || "Description"}</div>
+                  <div className="text-right">{previewHeaders.quantity || (previewHasQuantity ? "Qty" : "Qty (none)")}</div>
+                  <div className="text-right">{previewHeaders.unitPrice || (previewHasUnitPrice ? "Unit price" : "Unit price (none)")}</div>
                   <div />
                 </div>
                 {previewRows.map((r, i) => (
