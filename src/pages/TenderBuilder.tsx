@@ -67,7 +67,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         <Input type="number" min={0} step="0.01" value={it.unitPrice === 0 ? "" : it.unitPrice} placeholder="0.00" onChange={e => updateItem(index, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
       </td>
       <td className="px-4 py-3 text-right tabular-nums font-medium">
-        {formatZAR(it.quantity * it.unitPrice)}
+        {it.unitPrice > 0 ? formatZAR(it.quantity * it.unitPrice) : <span className="text-muted-foreground">—</span>}
       </td>
       <td className="pr-3">
         <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="text-muted-foreground hover:text-destructive">
