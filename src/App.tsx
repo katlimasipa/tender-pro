@@ -40,8 +40,8 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/company" element={<ProtectedRoute><CompanyProfile /></ProtectedRoute>} />
             <Route path="/tenders" element={<ProtectedRoute><TendersList /></ProtectedRoute>} />
-            <Route path="/tenders/new" element={<ProtectedRoute><TenderBuilder /></ProtectedRoute>} />
-            <Route path="/tenders/:id" element={<ProtectedRoute><TenderBuilder /></ProtectedRoute>} />
+            <Route path="/tenders/new" element={<ProtectedRoute><TenderBuilderRoute /></ProtectedRoute>} />
+            <Route path="/tenders/:id" element={<ProtectedRoute><TenderBuilderRoute /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
