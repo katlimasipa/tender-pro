@@ -110,6 +110,9 @@ export default function TenderBuilder() {
   const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
   const [extractingImage, setExtractingImage] = useState(false);
   const [previewRows, setPreviewRows] = useState<ParsedRow[] | null>(null);
+  const [previewHeaders, setPreviewHeaders] = useState<ParsedHeaders>({});
+  const [previewHasUnitPrice, setPreviewHasUnitPrice] = useState(true);
+  const [previewHasQuantity, setPreviewHasQuantity] = useState(true);
   const [previewSource, setPreviewSource] = useState<"paste" | "image">("paste");
   const pasteRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
