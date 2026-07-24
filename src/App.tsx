@@ -16,6 +16,16 @@ import TenderBuilder from "./pages/TenderBuilder.tsx";
 
 const queryClient = new QueryClient();
 
+// Force TenderBuilder to remount on every navigation to /tenders/new so the
+// "+ New Tender" button always yields a fresh, empty form (even when the user
+// is already on that route).
+const TenderBuilderRoute = () => {
+  const { id } = useParams();
+  const location = useLocation();
+  const key = id ? `edit-${id}` : `new-${location.key}`;
+  return <TenderBuilder key={key} />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
