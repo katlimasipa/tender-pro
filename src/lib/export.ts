@@ -17,10 +17,10 @@ export async function exportWord(data: PdfData) {
             rows: [
               new TableRow({
                 children: [
-                  new TableCell({ children: [new Paragraph({ text: "Description", alignment: AlignmentType.CENTER })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Quantity", alignment: AlignmentType.CENTER })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Unit Price", alignment: AlignmentType.CENTER })] }),
-                  new TableCell({ children: [new Paragraph({ text: "Total", alignment: AlignmentType.CENTER })] }),
+                  new TableCell({ children: [new Paragraph({ text: data.columnNames?.desc || "Description", alignment: AlignmentType.CENTER })] }),
+                  new TableCell({ children: [new Paragraph({ text: data.columnNames?.qty || "Quantity", alignment: AlignmentType.CENTER })] }),
+                  new TableCell({ children: [new Paragraph({ text: data.columnNames?.price || "Unit Price", alignment: AlignmentType.CENTER })] }),
+                  new TableCell({ children: [new Paragraph({ text: data.columnNames?.total || "Total", alignment: AlignmentType.CENTER })] }),
                 ],
               }),
               ...data.items.map(
@@ -53,7 +53,11 @@ export async function exportWord(data: PdfData) {
 }
 
 export function exportCSV(data: PdfData) {
-  let csvContent = "Description,Quantity,Unit Price,Total\n";
+  const hDesc = (data.columnNames?.desc || "Description").replace(/"/g, '""');
+  const hQty = (data.columnNames?.qty || "Quantity").replace(/"/g, '""');
+  const hPrice = (data.columnNames?.price || "Unit Price").replace(/"/g, '""');
+  const hTotal = (data.columnNames?.total || "Total").replace(/"/g, '""');
+  let csvContent = `"${hDesc}","${hQty}","${hPrice}","${hTotal}"\n`;
   data.items.forEach(item => {
     const total = item.quantity * item.unitPrice;
     csvContent += `"${item.product.replace(/"/g, '""')}",${item.quantity},${item.unitPrice},${total}\n`;

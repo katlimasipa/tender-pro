@@ -19,6 +19,7 @@ export interface PdfData {
   vatInclusive: boolean;
   vatRate: number;
   includeBankingDetails?: boolean;
+  columnNames?: { desc?: string; qty?: string; price?: string; total?: string };
   items: TenderItem[];
   company: {
     name: string;
@@ -315,7 +316,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     density === "normal" ? 10 : 10.5;
 
   autoTable(doc, {
-    head: [["No.", "DESCRIPTION", "QUANTITY", "UNIT PRICE (R)", "AMOUNT (R)"]],
+    head: [["No.", data.columnNames?.desc || "DESCRIPTION", data.columnNames?.qty || "QUANTITY", data.columnNames?.price || "UNIT PRICE (R)", data.columnNames?.total || "AMOUNT (R)"]],
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },

@@ -103,9 +103,11 @@ export default function TenderBuilder() {
   const [vatInclusive, setVatInclusive] = useState(false);
   const [includeBankingDetails, setIncludeBankingDetails] = useState(true);
   const [items, setItems] = useState<ItemWithId[]>([blankItem()]);
+  const [columns, setColumns] = useState({ desc: "Description", qty: "Quantity", price: "Unit Price (R)", total: "Total" });
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [previewExpanded, setPreviewExpanded] = useState(true);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
   const [extractingImage, setExtractingImage] = useState(false);
@@ -150,8 +152,19 @@ export default function TenderBuilder() {
       setNotes(data.notes || ""); setVatRate(Number(data.vat_rate));
       setVatInclusive(data.vat_inclusive); 
       
-      const loadedItems = (data.items as any) || [blankItem()];
-      setItems(loadedItems.map((it: any) => ({ ...it, id: it.id || crypto.randomUUID() })));
+      setVatInclusive(data.vat_inclusive); 
+      
+      const loadedItemsData = (data.items as any);
+      let loadedRows = [blankItem()];
+      if (loadedItemsData) {
+        if (Array.isArray(loadedItemsData)) {
+          loadedRows = loadedItemsData.length > 0 ? loadedItemsData : [blankItem()];
+        } else if (loadedItemsData.rows) {
+          loadedRows = loadedItemsData.rows.length > 0 ? loadedItemsData.rows : [blankItem()];
+          if (loadedItemsData.columns) setColumns(loadedItemsData.columns);
+        }
+      }
+      setItems(loadedRows.map((it: any) => ({ ...it, id: it.id || crypto.randomUUID() })));
     });
   }, [id, isNew]);
 
@@ -165,7 +178,7 @@ export default function TenderBuilder() {
       try {
         const blob = await generateTenderPDF({
           title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes,
-          vatInclusive, vatRate, items, company, includeBankingDetails
+          vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns
         });
         const url = URL.createObjectURL(blob);
         setPdfUrl(prev => {
@@ -177,7 +190,7 @@ export default function TenderBuilder() {
       }
     }, 800);
     return () => clearTimeout(timeout);
-  }, [title, documentType, customDocType, tenderNumber, quotationRef, clientName, clientAddressLine1, clientAddressLine2, clientSuburb, clientCity, clientPostalCode, notes, vatInclusive, vatRate, items, company, includeBankingDetails]);
+  }, [title, documentType, customDocType, tenderNumber, quotationRef, clientName, clientAddressLine1, clientAddressLine2, clientSuburb, clientCity, clientPostalCode, notes, vatInclusive, vatRate, items, columns, company, includeBankingDetails]);
 
 
   const totals = useMemo(() => computeTotals(items, vatRate, vatInclusive), [items, vatRate, vatInclusive]);
@@ -312,7 +325,7 @@ export default function TenderBuilder() {
       notes: notes || null,
       vat_rate: vatRate,
       vat_inclusive: vatInclusive,
-      items: items as any,
+      items: { columns, rows: items } as any,
       subtotal: totals.subtotal,
       vat_amount: totals.vatAmount,
       grand_total: totals.grandTotal,
@@ -338,7 +351,7 @@ export default function TenderBuilder() {
       await save();
       const blob = await generateTenderPDF({
         title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes,
-        vatInclusive, vatRate, items, company, includeBankingDetails
+        vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -355,19 +368,19 @@ export default function TenderBuilder() {
   const exportAsWord = async () => {
     if (!company) { toast.error("Set up your company first"); return; }
     await save();
-    await exportWord({ title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes, vatInclusive, vatRate, items, company, includeBankingDetails });
+    await exportWord({ title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes, vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns });
     toast.success("Word document generated");
   };
 
   const exportAsCSV = async () => {
     await save();
-    exportCSV({ title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes, vatInclusive, vatRate, items, company: company as any, includeBankingDetails });
+    exportCSV({ title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes, vatInclusive, vatRate, items, company: company as any, includeBankingDetails, columnNames: columns });
     toast.success("CSV generated");
   };
 
   return (
     <AppShell>
-      <div className="p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid grid-cols-1 xl:grid-cols-[1fr_500px] gap-8 items-start">
+      <div className={`p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid gap-8 items-start ${previewExpanded ? 'grid-cols-1 xl:grid-cols-[1fr_500px]' : 'grid-cols-1'}`}>
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 xl:h-[calc(100vh-96px)] xl:overflow-y-auto xl:pr-4">
           <button onClick={() => navigate("/tenders")} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-4">
             <ArrowLeft className="h-3 w-3" /> Back to tenders
@@ -381,6 +394,9 @@ export default function TenderBuilder() {
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <Button variant="outline" onClick={save} disabled={saving} className="flex-1 sm:flex-none">
                 <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save"}
+              </Button>
+              <Button onClick={() => setPreviewExpanded(!previewExpanded)} variant="outline" className="hidden xl:flex">
+                <FileText className="h-4 w-4 mr-1.5" /> {previewExpanded ? "Hide Preview" : "Show Preview"}
               </Button>
               <Button onClick={exportAsWord} variant="outline" title="Export Word">
                 <FileText className="h-4 w-4 mr-1.5" /> Word
@@ -493,10 +509,18 @@ export default function TenderBuilder() {
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>
                     <th className="w-8"></th>
-                    <th className="px-4 py-3 font-medium">Description</th>
-                    <th className="px-4 py-3 font-medium w-28 text-right">Quantity</th>
-                    <th className="px-4 py-3 font-medium w-40 text-right">Unit Price (R)</th>
-                    <th className="px-4 py-3 font-medium w-40 text-right">Total</th>
+                    <th className="px-4 py-3 font-medium">
+                      <Input value={columns.desc} onChange={e => setColumns({ ...columns, desc: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 -ml-2" />
+                    </th>
+                    <th className="px-4 py-3 font-medium w-28 text-right">
+                      <Input value={columns.qty} onChange={e => setColumns({ ...columns, qty: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 text-right -mr-2" />
+                    </th>
+                    <th className="px-4 py-3 font-medium w-40 text-right">
+                      <Input value={columns.price} onChange={e => setColumns({ ...columns, price: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 text-right -mr-2" />
+                    </th>
+                    <th className="px-4 py-3 font-medium w-40 text-right">
+                      <Input value={columns.total} onChange={e => setColumns({ ...columns, total: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 text-right -mr-2" />
+                    </th>
                     <th className="w-12" />
                   </tr>
                 </thead>
@@ -566,18 +590,20 @@ export default function TenderBuilder() {
         </motion.div>
         
         {/* Live Preview */}
-        <div className="hidden xl:block h-[calc(100vh-96px)] rounded-xl border border-border shadow-soft overflow-hidden bg-secondary">
-          <div className="p-3 border-b border-border bg-card flex items-center justify-between">
-            <h3 className="font-display text-sm">Live Preview</h3>
-          </div>
-          {pdfUrl ? (
-            <iframe src={`${pdfUrl}#toolbar=0`} className="w-full h-full" title="PDF Preview" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              Generating preview...
+        {previewExpanded && (
+          <div className="hidden xl:block h-[calc(100vh-96px)] rounded-xl border border-border shadow-soft overflow-hidden bg-secondary">
+            <div className="p-3 border-b border-border bg-card flex items-center justify-between">
+              <h3 className="font-display text-sm">Live Preview</h3>
             </div>
-          )}
-        </div>
+            {pdfUrl ? (
+              <iframe src={`${pdfUrl}#toolbar=0`} className="w-full h-full" title="PDF Preview" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                Generating preview...
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
