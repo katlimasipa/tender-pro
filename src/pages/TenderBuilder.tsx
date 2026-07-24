@@ -15,7 +15,7 @@ import { useCompany } from "@/lib/useCompany";
 import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { exportWord, exportCSV } from "@/lib/export";
-import { parseClipboard, ParsedRow } from "@/lib/parseTable";
+import { parseClipboard, ParsedRow, ParsedHeaders } from "@/lib/parseTable";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
