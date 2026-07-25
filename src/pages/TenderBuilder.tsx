@@ -30,16 +30,6 @@ const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", qua
 const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Auto-resize textarea height on content changes
-  useEffect(() => {
-    if (textareaRef.current) {
-      const el = textareaRef.current;
-      el.style.height = "auto";
-      el.style.height = el.scrollHeight + "px";
-    }
-  }, [it.product]);
 
   return (
     <tr ref={setNodeRef} style={style} className="border-t border-border bg-card align-top">
@@ -47,13 +37,12 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         <GripVertical className="h-4 w-4" />
       </td>
       <td className="px-2 py-2">
-        <textarea
-          ref={textareaRef}
+        <Input
+          type="text"
           value={it.product}
           onChange={e => updateItem(index, { product: e.target.value })}
           placeholder="Item description"
-          rows={1}
-          className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none overflow-hidden"
+          className="w-full border-0 bg-transparent focus-visible:bg-secondary/40"
         />
       </td>
       <td className="px-2 py-2">
@@ -228,13 +217,13 @@ export default function TenderBuilder() {
     e.preventDefault();
     const html = e.clipboardData.getData("text/html");
     const text = e.clipboardData.getData("text/plain");
-    const rows = parseClipboard(html, text);
-    if (!rows.length) {
+    const result = parseClipboard(html, text);
+    if (!result.rows.length) {
       toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
       return;
     }
     setPreviewSource("paste");
-    setPreviewRows(rows);
+    setPreviewRows(result.rows);
     setPasteOpen(false);
   };
 
