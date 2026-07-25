@@ -217,13 +217,13 @@ export default function TenderBuilder() {
     e.preventDefault();
     const html = e.clipboardData.getData("text/html");
     const text = e.clipboardData.getData("text/plain");
-    const rows = parseClipboard(html, text);
-    if (!rows.length) {
+    const result = parseClipboard(html, text);
+    if (!result.rows.length) {
       toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
       return;
     }
     setPreviewSource("paste");
-    setPreviewRows(rows);
+    setPreviewRows(result.rows);
     setPasteOpen(false);
   };
 
