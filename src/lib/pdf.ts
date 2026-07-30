@@ -20,6 +20,7 @@ export interface PdfData {
   vatRate: number;
   includeBankingDetails?: boolean;
   columnNames?: { desc?: string; qty?: string; price?: string; total?: string };
+  pdfFontSize?: number;
   items: TenderItem[];
   company: {
     name: string;
@@ -310,6 +311,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     density === "normal" ? 10 : 12;
 
   const tableFontSize =
+    data.pdfFontSize ? data.pdfFontSize :
     density === "ultra" ? 8 :
     density === "veryDense" ? 8.5 :
     density === "dense" ? 9 :
@@ -320,6 +322,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     body,
     startY: cursorY,
     margin: { left: margin, right: margin },
+    showHead: 'firstPage',
     theme: "grid",
     styles: {
       font: SANS,

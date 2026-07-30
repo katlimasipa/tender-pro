@@ -15,7 +15,7 @@ import { useCompany } from "@/lib/useCompany";
 import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { exportWord, exportCSV } from "@/lib/export";
-import { parseClipboard, ParsedRow } from "@/lib/parseTable";
+import { parseClipboard, ParsedRow, ParsedHeaders } from "@/lib/parseTable";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -30,19 +30,31 @@ const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", qua
 const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
+  const [descFocused, setDescFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea height on content changes
+  useEffect(() => {
+    if (textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.height = "auto";
+      el.style.height = Math.max(36, el.scrollHeight) + "px";
+    }
+  }, [it.product]);
 
   return (
     <tr ref={setNodeRef} style={style} className="border-t border-border bg-card align-top">
       <td className="px-2 py-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground pt-3" {...attributes} {...listeners}>
         <GripVertical className="h-4 w-4" />
       </td>
-      <td className="px-2 py-2">
-        <Input
-          type="text"
+      <td className="px-2 py-2 w-full">
+        <textarea
+          ref={textareaRef}
           value={it.product}
           onChange={e => updateItem(index, { product: e.target.value })}
           placeholder="Item description"
-          className="w-full border-0 bg-transparent focus-visible:bg-secondary/40"
+          rows={1}
+          className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none overflow-hidden min-h-[36px]"
         />
       </td>
       <td className="px-2 py-2">
@@ -52,7 +64,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         <Input type="number" min={0} step="0.01" value={it.unitPrice === 0 ? "" : it.unitPrice} placeholder="0.00" onChange={e => updateItem(index, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
       </td>
       <td className="px-4 py-3 text-right tabular-nums font-medium">
-        {formatZAR(it.quantity * it.unitPrice)}
+        {it.unitPrice > 0 ? formatZAR(it.quantity * it.unitPrice) : <span className="text-muted-foreground">—</span>}
       </td>
       <td className="pr-3">
         <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="text-muted-foreground hover:text-destructive">
@@ -89,6 +101,7 @@ export default function TenderBuilder() {
   const [includeBankingDetails, setIncludeBankingDetails] = useState(true);
   const [items, setItems] = useState<ItemWithId[]>([blankItem()]);
   const [columns, setColumns] = useState({ desc: "Description", qty: "Quantity", price: "Unit Price (R)", total: "Total" });
+  const [pdfFontSize, setPdfFontSize] = useState(0); // 0 = auto
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -97,6 +110,9 @@ export default function TenderBuilder() {
   const [pasteMode, setPasteMode] = useState<"append" | "replace">("append");
   const [extractingImage, setExtractingImage] = useState(false);
   const [previewRows, setPreviewRows] = useState<ParsedRow[] | null>(null);
+  const [previewHeaders, setPreviewHeaders] = useState<ParsedHeaders>({});
+  const [previewHasUnitPrice, setPreviewHasUnitPrice] = useState(true);
+  const [previewHasQuantity, setPreviewHasQuantity] = useState(true);
   const [previewSource, setPreviewSource] = useState<"paste" | "image">("paste");
   const pasteRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -134,8 +150,6 @@ export default function TenderBuilder() {
       setNotes(data.notes || ""); setVatRate(Number(data.vat_rate));
       setVatInclusive(data.vat_inclusive); 
       
-      setVatInclusive(data.vat_inclusive); 
-      
       const loadedItemsData = (data.items as any);
       let loadedRows = [blankItem()];
       if (loadedItemsData) {
@@ -160,7 +174,8 @@ export default function TenderBuilder() {
       try {
         const blob = await generateTenderPDF({
           title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes,
-          vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns
+          vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns,
+          ...(pdfFontSize > 0 ? { pdfFontSize } : {})
         });
         const url = URL.createObjectURL(blob);
         setPdfUrl(prev => {
@@ -172,7 +187,7 @@ export default function TenderBuilder() {
       }
     }, 800);
     return () => clearTimeout(timeout);
-  }, [title, documentType, customDocType, tenderNumber, quotationRef, clientName, clientAddressLine1, clientAddressLine2, clientSuburb, clientCity, clientPostalCode, notes, vatInclusive, vatRate, items, columns, company, includeBankingDetails]);
+  }, [title, documentType, customDocType, tenderNumber, quotationRef, clientName, clientAddressLine1, clientAddressLine2, clientSuburb, clientCity, clientPostalCode, notes, vatInclusive, vatRate, items, company, includeBankingDetails, columns, pdfFontSize]);
 
 
   const totals = useMemo(() => computeTotals(items, vatRate, vatInclusive), [items, vatRate, vatInclusive]);
@@ -217,13 +232,16 @@ export default function TenderBuilder() {
     e.preventDefault();
     const html = e.clipboardData.getData("text/html");
     const text = e.clipboardData.getData("text/plain");
-    const result = parseClipboard(html, text);
-    if (!result.rows.length) {
+    const res = parseClipboard(html, text);
+    if (!res.rows.length) {
       toast.error("Couldn't detect a table — try copying the table itself, or paste as tab/comma separated text");
       return;
     }
     setPreviewSource("paste");
-    setPreviewRows(result.rows);
+    setPreviewHeaders(res.headers);
+    setPreviewHasQuantity(res.hasQuantity);
+    setPreviewHasUnitPrice(res.hasUnitPrice);
+    setPreviewRows(res.rows);
     setPasteOpen(false);
   };
 
@@ -257,6 +275,14 @@ export default function TenderBuilder() {
         toast.error("No line items detected in that image");
         return;
       }
+      const h = data?.headers || {};
+      setPreviewHeaders({
+        description: h.description || undefined,
+        quantity: h.quantity || undefined,
+        unitPrice: h.unitPrice || undefined,
+      });
+      setPreviewHasQuantity(data?.hasQuantity !== false && (!!h.quantity || rows.some(r => r.quantity > 0)));
+      setPreviewHasUnitPrice(data?.hasUnitPrice !== false && (!!h.unitPrice || rows.some(r => r.unitPrice > 0)));
       setPreviewSource("image");
       setPreviewRows(rows);
     } catch (e: any) {
@@ -322,7 +348,8 @@ export default function TenderBuilder() {
       await save();
       const blob = await generateTenderPDF({
         title, documentType: effectiveDocType, tenderNumber, quotationRef, clientName, clientAddress: composedAddress, notes,
-        vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns
+        vatInclusive, vatRate, items, company, includeBankingDetails, columnNames: columns,
+        ...(pdfFontSize > 0 ? { pdfFontSize } : {})
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -480,7 +507,7 @@ export default function TenderBuilder() {
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>
                     <th className="w-8"></th>
-                    <th className="px-4 py-3 font-medium">
+                    <th className="px-4 py-3 font-medium w-full">
                       <Input value={columns.desc} onChange={e => setColumns({ ...columns, desc: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 -ml-2" />
                     </th>
                     <th className="px-4 py-3 font-medium w-28 text-right">
@@ -539,13 +566,33 @@ export default function TenderBuilder() {
             <Label>Notes / Terms</Label>
             <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} className="mt-1.5" placeholder="Payment terms, delivery schedule, validity period…" />
             
-            <div className="mt-6 pt-6 border-t border-border flex items-center gap-3">
-              <Switch
-                checked={includeBankingDetails}
-                onCheckedChange={setIncludeBankingDetails}
-                id="bank-inc"
-              />
-              <Label htmlFor="bank-inc" className="cursor-pointer text-sm">Include company banking details on PDF</Label>
+            <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={includeBankingDetails}
+                  onCheckedChange={setIncludeBankingDetails}
+                  id="bank-inc"
+                />
+                <Label htmlFor="bank-inc" className="cursor-pointer text-sm">Include company banking details on PDF</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="pdf-font" className="text-sm whitespace-nowrap">PDF font size</Label>
+                <select
+                  id="pdf-font"
+                  value={pdfFontSize}
+                  onChange={e => setPdfFontSize(Number(e.target.value))}
+                  className="flex h-9 rounded-sm border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value={0}>Auto</option>
+                  <option value={7}>7 pt (tiny)</option>
+                  <option value={8}>8 pt (small)</option>
+                  <option value={9}>9 pt</option>
+                  <option value={10}>10 pt (default)</option>
+                  <option value={11}>11 pt</option>
+                  <option value={12}>12 pt (large)</option>
+                  <option value={14}>14 pt (x-large)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -620,15 +667,25 @@ export default function TenderBuilder() {
               {previewSource === "image"
                 ? "These rows were read from your image. Edit anything that's off, delete rows you don't want, then add them to your tender."
                 : "These are the rows detected from what you pasted. Edit or delete any before adding them to your tender."}
+              {(previewHeaders.description || previewHeaders.quantity || previewHeaders.unitPrice) && (
+                <span className="block mt-2 text-xs">
+                  Detected columns:{" "}
+                  {[previewHeaders.description, previewHeaders.quantity, previewHeaders.unitPrice]
+                    .filter(Boolean)
+                    .map(h => `"${h}"`)
+                    .join(" · ")}
+                  {!previewHasUnitPrice && " — no unit-price column detected, totals will be left blank."}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[50vh] overflow-y-auto -mx-2 px-2">
             {previewRows && previewRows.length > 0 ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-[1fr_80px_100px_36px] gap-2 text-xs text-muted-foreground px-1">
-                  <div>Description</div>
-                  <div className="text-right">Qty</div>
-                  <div className="text-right">Unit price</div>
+                  <div>{previewHeaders.description || "Description"}</div>
+                  <div className="text-right">{previewHeaders.quantity || (previewHasQuantity ? "Qty" : "Qty (none)")}</div>
+                  <div className="text-right">{previewHeaders.unitPrice || (previewHasUnitPrice ? "Unit price" : "Unit price (none)")}</div>
                   <div />
                 </div>
                 {previewRows.map((r, i) => (
