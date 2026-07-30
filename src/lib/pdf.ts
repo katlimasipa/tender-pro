@@ -107,10 +107,10 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   // Adaptive density to fit one page when possible
   const rowCount = data.items.length;
   let density: "comfortable" | "normal" | "dense" | "veryDense" | "ultra";
-  if (rowCount <= 4) density = "comfortable";
-  else if (rowCount <= 7) density = "normal";
-  else if (rowCount <= 11) density = "dense";
-  else if (rowCount <= 15) density = "veryDense";
+  if (rowCount <= 5) density = "comfortable";
+  else if (rowCount <= 8) density = "normal";
+  else if (rowCount <= 12) density = "dense";
+  else if (rowCount <= 16) density = "veryDense";
   else density = "ultra";
 
   const drawFrame = () => {
@@ -344,11 +344,11 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       lineWidth: 0.5,
     },
     columnStyles: {
-      0: { cellWidth: 26, textColor: [0, 0, 0], fontStyle: "bold", halign: "center", cellPadding: { top: cellPadV, right: 5, bottom: cellPadV, left: 5 } as any },
-      1: { textColor: [0, 0, 0], fontStyle: "normal", cellPadding: { top: cellPadV, right: 12, bottom: cellPadV, left: 10 } as any },
-      2: { halign: "right", cellWidth: 52, textColor: [0, 0, 0], overflow: "visible", cellPadding: { top: cellPadV, right: 8, bottom: cellPadV, left: 6 } as any },
-      3: { halign: "right", cellWidth: 78, textColor: [0, 0, 0], overflow: "visible", cellPadding: { top: cellPadV, right: 10, bottom: cellPadV, left: 6 } as any },
-      4: { halign: "right", cellWidth: 86, fontStyle: "bold", textColor: [0, 0, 0], overflow: "visible", cellPadding: { top: cellPadV, right: 10, bottom: cellPadV, left: 6 } as any },
+      0: { cellWidth: "wrap", textColor: [0, 0, 0], fontStyle: "bold", halign: "center" },
+      1: { textColor: [0, 0, 0], fontStyle: "normal", cellPadding: { top: cellPadV, right: 24, bottom: cellPadV, left: 14 } as any },
+      2: { halign: "right", cellWidth: "wrap", textColor: [0, 0, 0] },
+      3: { halign: "right", cellWidth: "wrap", textColor: [0, 0, 0] },
+      4: { halign: "right", cellWidth: "wrap", fontStyle: "bold", textColor: [0, 0, 0] },
     },
     didParseCell: (d) => {
       if (d.column.index === 0) d.cell.styles.halign = "center";
@@ -358,6 +358,7 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
       if (d.section === "body" && d.column.index >= 2) {
         d.cell.styles.font = d.column.index >= 3 ? MONO : SANS;
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
+        d.cell.styles.cellPadding = { top: cellPadV, right: 14, bottom: cellPadV, left: 14 } as any;
       }
     },
     didDrawPage: () => {
