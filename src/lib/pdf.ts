@@ -6,7 +6,10 @@ export interface TenderItem {
   product: string;
   quantity: number;
   unitPrice: number;
+  /** Optional picture shown directly beneath the description text. */
+  image?: string | null;
 }
+
 
 export interface PdfData {
   title: string;
@@ -296,14 +299,6 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
   cursorY += density === "ultra" ? 10 : 14;
 
   // ========== TABLE ==========
-  const body = data.items.map((it, i) => [
-    String(i + 1).padStart(2, "0"),
-    it.product,
-    String(it.quantity),
-    formatPdfAmount(it.unitPrice),
-    formatPdfAmount(it.quantity * it.unitPrice),
-  ]);
-
   const cellPadV =
     density === "ultra" ? 4 :
     density === "veryDense" ? 5.5 :
@@ -317,9 +312,44 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
     density === "dense" ? 9 :
     density === "normal" ? 10 : 10.5;
 
+  // Row pictures: sized up-front so the description cell can reserve the
+  // vertical space beneath its text (drawn later in didDrawCell).
+  const imgMaxW = density === "ultra" ? 96 : density === "veryDense" ? 116 : 140;
+  const imgMaxH = density === "ultra" ? 64 : density === "veryDense" ? 76 : 96;
+  const rowImages: Record<number, { img: HTMLImageElement; w: number; h: number }> = {};
+  for (let i = 0; i < data.items.length; i++) {
+    const src = data.items[i]?.image;
+    if (!src) continue;
+    try {
+      const img = await loadImage(src);
+      const ratio = (img.width || 1) / (img.height || 1);
+      let w = imgMaxW;
+      let h = w / ratio;
+      if (h > imgMaxH) { h = imgMaxH; w = h * ratio; }
+      rowImages[i] = { img, w, h };
+    } catch { /* skip unreadable image */ }
+  }
+
+  const lineH = tableFontSize * 1.15;
+  const imgGap = 6;
+
+  const body = data.items.map((it, i) => {
+    const ri = rowImages[i];
+    // Blank lines reserve the picture's height inside the cell so nothing overlaps
+    const pad = ri ? "\n".repeat(Math.ceil((ri.h + imgGap) / lineH)) : "";
+    return [
+      String(i + 1).padStart(2, "0"),
+      (it.product || "") + pad,
+      String(it.quantity),
+      formatPdfAmount(it.unitPrice),
+      formatPdfAmount(it.quantity * it.unitPrice),
+    ];
+  });
+
   autoTable(doc, {
     head: [["No.", data.columnNames?.desc || "DESCRIPTION", data.columnNames?.qty || "QUANTITY", data.columnNames?.price || "UNIT PRICE (R)", data.columnNames?.total || "AMOUNT (R)"]],
     body,
+
     startY: cursorY,
     margin: { left: margin, right: margin },
     showHead: 'firstPage',
@@ -360,7 +390,24 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
         d.cell.styles.cellPadding = { top: cellPadV, right: 14, bottom: cellPadV, left: 14 } as any;
       }
+      if (d.section === "body" && d.column.index === 1 && rowImages[d.row.index]) {
+        d.cell.styles.valign = "top";
+      }
+      if (d.section === "body" && d.column.index !== 1 && rowImages[d.row.index]) {
+        d.cell.styles.valign = "top";
+      }
     },
+    didDrawCell: (d) => {
+      if (d.section !== "body" || d.column.index !== 1) return;
+      const ri = rowImages[d.row.index];
+      if (!ri) return;
+      const x = d.cell.x + 14;
+      const y = d.cell.y + d.cell.height - cellPadV - ri.h;
+      try {
+        doc.addImage(ri.img, "JPEG", x, y, ri.w, ri.h);
+      } catch { /* skip */ }
+    },
+
     didDrawPage: () => {
       drawFrame();
     },

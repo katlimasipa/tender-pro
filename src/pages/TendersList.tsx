@@ -9,10 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatZAR, formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import DocTypeMenu from "@/components/DocTypeMenu";
 
 interface Row {
   id: string; title: string; tender_number: string | null;
   grand_total: number; status: string; created_at: string; client_name: string | null;
+  document_type: string | null;
 }
 
 export default function TendersList() {
@@ -25,7 +27,7 @@ export default function TendersList() {
   const load = async () => {
     if (!user) return;
     const { data } = await supabase.from("tenders")
-      .select("id,title,tender_number,grand_total,status,created_at,client_name")
+      .select("id,title,tender_number,grand_total,status,created_at,client_name,document_type")
       .eq("user_id", user.id).order("created_at", { ascending: false });
     setRows((data as Row[]) || []);
     setLoading(false);
@@ -38,6 +40,9 @@ export default function TendersList() {
     (r.client_name || "").toLowerCase().includes(q.toLowerCase()) ||
     (r.tender_number || "").toLowerCase().includes(q.toLowerCase())
   );
+
+  const setType = (id: string, next: string) =>
+    setRows(prev => prev.map(r => r.id === id ? { ...r, document_type: next } : r));
 
   const remove = async (id: string) => {
     if (!confirm("Delete this tender?")) return;
@@ -93,6 +98,9 @@ export default function TendersList() {
                         <span className="tabular-nums font-medium text-sm">{formatZAR(Number(t.grand_total))}</span>
                       </div>
                     </button>
+                    <div className="shrink-0 pt-0.5">
+                      <DocTypeMenu tenderId={t.id} value={t.document_type || "Quotation"} onChanged={(v) => setType(t.id, v)} />
+                    </div>
                     <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -106,6 +114,7 @@ export default function TendersList() {
                   <thead className="bg-secondary/50 text-muted-foreground text-left">
                     <tr>
                       <th className="px-5 py-3 font-medium">Title</th>
+                      <th className="px-5 py-3 font-medium">Type</th>
                       <th className="px-5 py-3 font-medium">Client</th>
                       <th className="px-5 py-3 font-medium">Date</th>
                       <th className="px-5 py-3 font-medium text-right">Total</th>
@@ -118,6 +127,9 @@ export default function TendersList() {
                         <td className="px-5 py-4 cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>
                           <div className="font-medium">{t.title}</div>
                           {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                        </td>
+                        <td className="px-5 py-4">
+                          <DocTypeMenu tenderId={t.id} value={t.document_type || "Quotation"} onChanged={(v) => setType(t.id, v)} />
                         </td>
                         <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{t.client_name || "—"}</td>
                         <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatDate(t.created_at)}</td>

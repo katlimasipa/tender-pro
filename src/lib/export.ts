@@ -1,9 +1,32 @@
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, TextRun, HeadingLevel, AlignmentType, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, TextRun, HeadingLevel, AlignmentType, BorderStyle, ImageRun } from "docx";
+import { dataUrlToBytes } from "./rowImage";
 import { PdfData, computeTotals } from "./pdf";
 import { formatZAR } from "./format";
 
+const measureImage = (src: string) =>
+  new Promise<{ width: number; height: number }>((resolve) => {
+    const el = new Image();
+    el.onload = () => resolve({ width: el.width || 1, height: el.height || 1 });
+    el.onerror = () => resolve({ width: 0, height: 0 });
+    el.src = src;
+  });
+
 export async function exportWord(data: PdfData) {
   const totals = computeTotals(data.items, data.vatRate, data.vatInclusive);
+
+  // Pre-measure row pictures so they can be embedded at the right aspect ratio
+  const rowImages: Record<number, { bytes: Uint8Array; width: number; height: number }> = {};
+  for (let i = 0; i < data.items.length; i++) {
+    const src = data.items[i]?.image;
+    if (!src) continue;
+    try {
+      const { width, height } = await measureImage(src);
+      if (!width || !height) continue;
+      const w = 200;
+      const h = Math.round((height / width) * w);
+      rowImages[i] = { bytes: dataUrlToBytes(src), width: w, height: h };
+    } catch { /* skip */ }
+  }
 
   const doc = new Document({
     sections: [
@@ -46,7 +69,23 @@ export async function exportWord(data: PdfData) {
                   new TableRow({
                     children: [
                       new TableCell({ children: [new Paragraph({ text: String(index + 1).padStart(2, "0"), alignment: AlignmentType.CENTER })] }),
-                      new TableCell({ children: [new Paragraph(item.product)] }),
+                      new TableCell({
+                        children: [
+                          new Paragraph(item.product),
+                          ...(rowImages[index]
+                            ? [
+                                new Paragraph({
+                                  children: [
+                                    new ImageRun({
+                                      data: rowImages[index].bytes,
+                                      transformation: { width: rowImages[index].width, height: rowImages[index].height },
+                                    } as any),
+                                  ],
+                                }),
+                              ]
+                            : []),
+                        ],
+                      }),
                       new TableCell({ children: [new Paragraph({ text: String(item.quantity), alignment: AlignmentType.RIGHT })] }),
                       new TableCell({ children: [new Paragraph({ text: String(item.unitPrice), alignment: AlignmentType.RIGHT })] }),
                       new TableCell({ children: [new Paragraph({ text: String(item.quantity * item.unitPrice), alignment: AlignmentType.RIGHT })] }),
@@ -114,7 +153,8 @@ export function exportCSV(data: PdfData) {
   data.items.forEach((item, idx) => {
     const num = String(idx + 1).padStart(2, "0");
     const total = item.quantity * item.unitPrice;
-    csvContent += `"${num}",${escapeCSV(item.product)},${item.quantity},${item.unitPrice},${total}\n`;
+    const desc = item.image ? `${item.product} [image attached]` : item.product;
+    csvContent += `"${num}",${escapeCSV(desc)},${item.quantity},${item.unitPrice},${total}\n`;
   });
   
   // Totals
