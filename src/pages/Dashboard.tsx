@@ -8,10 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useCompany } from "@/lib/useCompany";
 import { formatZAR, formatDate } from "@/lib/format";
+import DocTypeMenu from "@/components/DocTypeMenu";
 
 interface TenderRow {
   id: string; title: string; tender_number: string | null;
   grand_total: number; status: string; created_at: string; client_name: string | null;
+  document_type: string | null;
 }
 
 export default function Dashboard() {
@@ -23,7 +25,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("tenders").select("id,title,tender_number,grand_total,status,created_at,client_name")
+    supabase.from("tenders").select("id,title,tender_number,grand_total,status,created_at,client_name,document_type")
       .eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => {
       setTenders((data as TenderRow[]) || []);
       setLoading(false);
@@ -33,6 +35,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (!companyLoading && !company) navigate("/onboarding");
   }, [company, companyLoading, navigate]);
+
+  const setType = (id: string, next: string) =>
+    setTenders(prev => prev.map(t => t.id === id ? { ...t, document_type: next } : t));
 
   const totalValue = tenders.reduce((s, t) => s + Number(t.grand_total), 0);
   const recent = tenders.slice(0, 5);
@@ -94,16 +99,20 @@ export default function Dashboard() {
                 {/* Mobile cards */}
                 <div className="grid grid-cols-1 gap-3 md:hidden">
                   {recent.map(t => (
-                    <button key={t.id} onClick={() => navigate(`/tenders/${t.id}`)}
-                      className="block w-full text-left bg-card border border-border rounded-xl p-4 shadow-soft overflow-hidden">
-                      <div className="font-medium truncate">{t.title}</div>
-                      {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
-                      <div className="mt-2 text-sm text-muted-foreground truncate">{t.client_name || "—"}</div>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="text-xs text-muted-foreground">{formatDate(t.created_at)}</span>
-                        <span className="tabular-nums font-medium text-sm">{formatZAR(Number(t.grand_total))}</span>
+                    <div key={t.id} className="bg-card border border-border rounded-xl p-4 shadow-soft overflow-hidden">
+                      <button onClick={() => navigate(`/tenders/${t.id}`)} className="block w-full text-left">
+                        <div className="font-medium truncate">{t.title}</div>
+                        {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                        <div className="mt-2 text-sm text-muted-foreground truncate">{t.client_name || "—"}</div>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">{formatDate(t.created_at)}</span>
+                          <span className="tabular-nums font-medium text-sm">{formatZAR(Number(t.grand_total))}</span>
+                        </div>
+                      </button>
+                      <div className="mt-3">
+                        <DocTypeMenu tenderId={t.id} value={t.document_type || "Quotation"} onChanged={(v) => setType(t.id, v)} />
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
 
@@ -113,6 +122,7 @@ export default function Dashboard() {
                     <thead className="bg-secondary/50 text-muted-foreground text-left">
                       <tr>
                         <th className="px-5 py-3 font-medium">Title</th>
+                        <th className="px-5 py-3 font-medium">Type</th>
                         <th className="px-5 py-3 font-medium">Client</th>
                         <th className="px-5 py-3 font-medium">Date</th>
                         <th className="px-5 py-3 font-medium text-right">Total</th>
@@ -124,6 +134,9 @@ export default function Dashboard() {
                           <td className="px-5 py-4">
                             <div className="font-medium">{t.title}</div>
                             {t.tender_number && <div className="text-xs text-muted-foreground">{t.tender_number}</div>}
+                          </td>
+                          <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
+                            <DocTypeMenu tenderId={t.id} value={t.document_type || "Quotation"} onChanged={(v) => setType(t.id, v)} />
                           </td>
                           <td className="px-5 py-4 text-muted-foreground">{t.client_name || "—"}</td>
                           <td className="px-5 py-4 text-muted-foreground">{formatDate(t.created_at)}</td>
