@@ -390,7 +390,24 @@ export async function generateTenderPDF(data: PdfData): Promise<Blob> {
         d.cell.styles.fontStyle = d.column.index === 4 ? "bold" : "normal";
         d.cell.styles.cellPadding = { top: cellPadV, right: 14, bottom: cellPadV, left: 14 } as any;
       }
+      if (d.section === "body" && d.column.index === 1 && rowImages[d.row.index]) {
+        d.cell.styles.valign = "top";
+      }
+      if (d.section === "body" && d.column.index !== 1 && rowImages[d.row.index]) {
+        d.cell.styles.valign = "top";
+      }
     },
+    didDrawCell: (d) => {
+      if (d.section !== "body" || d.column.index !== 1) return;
+      const ri = rowImages[d.row.index];
+      if (!ri) return;
+      const x = d.cell.x + 14;
+      const y = d.cell.y + d.cell.height - cellPadV - ri.h;
+      try {
+        doc.addImage(ri.img, "JPEG", x, y, ri.w, ri.h);
+      } catch { /* skip */ }
+    },
+
     didDrawPage: () => {
       drawFrame();
     },
