@@ -6,7 +6,10 @@ export interface TenderItem {
   product: string;
   quantity: number;
   unitPrice: number;
+  /** Optional picture shown directly beneath the description text. */
+  image?: string | null;
 }
+
 
 export interface PdfData {
   title: string;
