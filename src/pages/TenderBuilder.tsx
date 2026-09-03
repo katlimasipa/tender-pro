@@ -30,17 +30,31 @@ const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", qua
 const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
-  const [descFocused, setDescFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const rowImageInputRef = useRef<HTMLInputElement>(null);
+  const [attaching, setAttaching] = useState(false);
 
-  // Auto-resize textarea height on content changes
-  useEffect(() => {
-    if (textareaRef.current) {
-      const el = textareaRef.current;
-      el.style.height = "auto";
-      el.style.height = Math.max(36, el.scrollHeight) + "px";
+  const attachFile = async (file: File) => {
+    setAttaching(true);
+    try {
+      const dataUrl = await fileToRowImage(file);
+      updateItem(index, { image: dataUrl });
+      toast.success("Image added to row");
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't add that image");
+    } finally {
+      setAttaching(false);
+      if (rowImageInputRef.current) rowImageInputRef.current.value = "";
     }
-  }, [it.product]);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const file = imageFileFromClipboard(e.clipboardData);
+    if (file) {
+      e.preventDefault();
+      attachFile(file);
+    }
+  };
 
   return (
     <tr ref={setNodeRef} style={style} className="border-t border-border bg-card align-top">
@@ -48,15 +62,48 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
         <GripVertical className="h-4 w-4" />
       </td>
       <td className="px-2 py-2 w-full">
-        <textarea
-          ref={textareaRef}
-          value={it.product}
-          onChange={e => updateItem(index, { product: e.target.value })}
-          placeholder="Item description"
-          rows={1}
-          className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none overflow-hidden min-h-[36px]"
-        />
+        <div className="flex items-start gap-1">
+          <textarea
+            ref={textareaRef}
+            value={it.product}
+            onChange={e => updateItem(index, { product: e.target.value })}
+            onPaste={handlePaste}
+            placeholder="Item description"
+            rows={1}
+            wrap="off"
+            className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none overflow-x-auto whitespace-nowrap h-9"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground"
+            title="Add an image below this row's text (or paste one into the description)"
+            disabled={attaching}
+            onClick={() => rowImageInputRef.current?.click()}
+          >
+            {attaching ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+          </Button>
+          <input
+            ref={rowImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) attachFile(f); }}
+          />
+        </div>
+        {it.image && (
+          <div className="mt-2 ml-3 inline-flex flex-col gap-1">
+            <img src={it.image} alt="Row attachment" className="max-h-28 rounded-md border border-border object-contain bg-background" />
+            <button
+              onClick={() => updateItem(index, { image: null })}
+              className="text-xs text-muted-foreground hover:text-destructive text-left"
+            >
+              Remove image
+            </button>
+          </div>
+        )}
       </td>
+
       <td className="px-2 py-2">
         <Input type="number" min={0} value={it.quantity === 0 ? "" : it.quantity} placeholder="0" onChange={e => updateItem(index, { quantity: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
       </td>
