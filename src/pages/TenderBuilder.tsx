@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical, ClipboardPaste, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical, ClipboardPaste, Image as ImageIcon, ImagePlus, Loader2 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,8 @@ import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { exportWord, exportCSV } from "@/lib/export";
 import { parseClipboard, ParsedRow, ParsedHeaders } from "@/lib/parseTable";
+import { fileToRowImage, imageFileFromClipboard } from "@/lib/rowImage";
+import { DOC_TYPE_PRESETS } from "@/lib/docTypes";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -25,7 +27,7 @@ interface ItemWithId extends TenderItem {
   id: string;
 }
 
-const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", quantity: 0, unitPrice: 0 });
+const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", quantity: 0, unitPrice: 0, image: null });
 
 const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -180,8 +182,7 @@ export default function TenderBuilder() {
       if (!data) return;
       setTitle(data.title); setTenderNumber(data.tender_number || "");
       const dt = (data as any).document_type || "Quotation";
-      const presets = ["Quotation", "Specification", "Invoice", "Proposal", "Estimate"];
-      if (presets.includes(dt)) { setDocumentType(dt); setCustomDocType(""); }
+      if (DOC_TYPE_PRESETS.includes(dt as any)) { setDocumentType(dt); setCustomDocType(""); }
       else { setDocumentType("Other"); setCustomDocType(dt); }
       setQuotationRef((data as any).quotation_ref || "");
       setClientName(data.client_name || ""); 
@@ -468,11 +469,7 @@ export default function TenderBuilder() {
                 onChange={e => setDocumentType(e.target.value)}
                 className="mt-1.5 flex h-10 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <option>Quotation</option>
-                <option>Specification</option>
-                <option>Invoice</option>
-                <option>Proposal</option>
-                <option>Estimate</option>
+                {DOC_TYPE_PRESETS.map(t => <option key={t}>{t}</option>)}
                 <option value="Other">Other (custom)…</option>
               </select>
               {documentType === "Other" && (
