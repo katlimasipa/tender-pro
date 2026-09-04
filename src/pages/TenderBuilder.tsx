@@ -77,7 +77,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
       <td className="px-2 py-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground pt-3" {...attributes} {...listeners}>
         <GripVertical className="h-4 w-4" />
       </td>
-      <td className="px-2 py-2 w-full">
+      <td className="px-2 py-2">
         <div className="flex items-start gap-1">
           <textarea
             ref={textareaRef}
@@ -129,7 +129,7 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
       <td className="px-2 py-2">
         <Input type="number" min={0} step="0.01" value={it.unitPrice === 0 ? "" : it.unitPrice} placeholder="0.00" onChange={e => updateItem(index, { unitPrice: e.target.value === "" ? 0 : Number(e.target.value) })} className="text-right tabular-nums border-0 bg-transparent focus-visible:bg-secondary/40" />
       </td>
-      <td className="px-4 py-3 text-right tabular-nums font-medium">
+      <td className="px-2 py-3 text-right tabular-nums font-medium">
         {it.unitPrice > 0 ? formatZAR(it.quantity * it.unitPrice) : <span className="text-muted-foreground">—</span>}
       </td>
       <td className="pr-3">
@@ -564,20 +564,20 @@ export default function TenderBuilder() {
 
             {/* Table */}
             <div className="block overflow-x-auto">
-              <table className="w-full text-sm min-w-[560px]">
+              <table className="w-full text-sm min-w-[720px] table-fixed">
                 <thead className="bg-secondary/50 text-muted-foreground text-left">
                   <tr>
                     <th className="w-8"></th>
-                    <th className="px-4 py-3 font-medium w-full">
+                    <th className="px-4 py-3 font-medium">
                       <Input value={columns.desc} onChange={e => setColumns({ ...columns, desc: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 -ml-2" />
                     </th>
-                    <th className="px-4 py-3 font-medium w-28 text-right">
+                    <th className="px-2 py-3 font-medium w-[96px] text-right">
                       <Input value={columns.qty} onChange={e => setColumns({ ...columns, qty: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 text-right -mr-2" />
                     </th>
-                    <th className="px-4 py-3 font-medium w-40 text-right">
+                    <th className="px-2 py-3 font-medium w-[120px] text-right">
                       <Input value={columns.price} onChange={e => setColumns({ ...columns, price: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 text-right -mr-2" />
                     </th>
-                    <th className="px-4 py-3 font-medium w-40 text-right">
+                    <th className="px-2 py-3 font-medium w-[120px] text-right">
                       <Input value={columns.total} onChange={e => setColumns({ ...columns, total: e.target.value })} className="h-8 bg-transparent border-transparent hover:border-input focus-visible:bg-background px-2 text-right -mr-2" />
                     </th>
                     <th className="w-12" />
