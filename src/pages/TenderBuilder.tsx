@@ -35,6 +35,20 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const rowImageInputRef = useRef<HTMLInputElement>(null);
   const [attaching, setAttaching] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  // While focused, grow the field to fit every line of text
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    if (focused) {
+      el.style.height = "auto";
+      el.style.height = `${Math.max(el.scrollHeight, 36)}px`;
+    } else {
+      el.style.height = "";
+    }
+  }, [focused, it.product]);
+
 
   const attachFile = async (file: File) => {
     setAttaching(true);
