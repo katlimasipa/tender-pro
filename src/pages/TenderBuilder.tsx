@@ -84,10 +84,13 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
             value={it.product}
             onChange={e => updateItem(index, { product: e.target.value })}
             onPaste={handlePaste}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder="Item description"
             rows={1}
-            wrap="off"
-            className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none overflow-x-auto whitespace-nowrap h-9"
+            wrap={focused ? "soft" : "off"}
+            className={`flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none ${focused ? "whitespace-pre-wrap overflow-hidden leading-relaxed" : "overflow-x-auto whitespace-nowrap h-9"}`}
+
           />
           <Button
             variant="ghost"
