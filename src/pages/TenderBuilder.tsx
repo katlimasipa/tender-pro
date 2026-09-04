@@ -35,7 +35,6 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const rowImageInputRef = useRef<HTMLInputElement>(null);
   const [attaching, setAttaching] = useState(false);
-  const [focused, setFocused] = useState(false);
 
   // Always show the full wrapped text — grow to fit every line, even when not focused
   useEffect(() => {
@@ -80,8 +79,6 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
             value={it.product}
             onChange={e => updateItem(index, { product: e.target.value })}
             onPaste={handlePaste}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             placeholder="Item description"
             rows={1}
             wrap="soft"
