@@ -35,19 +35,14 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const rowImageInputRef = useRef<HTMLInputElement>(null);
   const [attaching, setAttaching] = useState(false);
-  const [focused, setFocused] = useState(false);
 
-  // While focused, grow the field to fit every line of text
+  // Always show the full wrapped text — grow to fit every line, even when not focused
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
-    if (focused) {
-      el.style.height = "auto";
-      el.style.height = `${Math.max(el.scrollHeight, 36)}px`;
-    } else {
-      el.style.height = "";
-    }
-  }, [focused, it.product]);
+    el.style.height = "auto";
+    el.style.height = `${Math.max(el.scrollHeight, 36)}px`;
+  }, [it.product]);
 
 
   const attachFile = async (file: File) => {
@@ -84,12 +79,10 @@ const SortableTableRow = ({ id, it, index, updateItem, removeItem, itemsLength }
             value={it.product}
             onChange={e => updateItem(index, { product: e.target.value })}
             onPaste={handlePaste}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             placeholder="Item description"
             rows={1}
-            wrap={focused ? "soft" : "off"}
-            className={`flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none ${focused ? "whitespace-pre-wrap overflow-hidden leading-relaxed" : "overflow-x-auto whitespace-nowrap h-9"}`}
+            wrap="soft"
+            className="flex w-full rounded-sm bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:bg-secondary/40 border-0 resize-none whitespace-pre-wrap overflow-hidden leading-relaxed min-h-[36px]"
 
           />
           <Button
