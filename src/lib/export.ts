@@ -35,7 +35,7 @@ export async function exportWord(data: PdfData) {
         children: [
           new Paragraph({ text: data.company.name, heading: HeadingLevel.HEADING_1 }),
           new Paragraph({ text: data.company.address }),
-          new Paragraph({ text: `Email: ${data.company.email || ""} | Phone: ${data.company.phone || ""}` }),
+          new Paragraph({ text: `Email: ${data.company.contact_email || ""} | Phone: ${data.company.contact_phone || ""}` }),
           new Paragraph({ text: "" }),
           
           new Paragraph({ text: data.documentType.toUpperCase(), heading: HeadingLevel.HEADING_2, alignment: AlignmentType.RIGHT }),
@@ -126,7 +126,7 @@ export function exportCSV(data: PdfData) {
   // Company Info
   csvContent += `${escapeCSV(data.company.name)}\n`;
   csvContent += `${escapeCSV(data.company.address.replace(/\n/g, ", "))}\n`;
-  csvContent += `${escapeCSV(`Email: ${data.company.email || ""} | Phone: ${data.company.phone || ""}`)}\n\n`;
+  csvContent += `${escapeCSV(`Email: ${data.company.contact_email || ""} | Phone: ${data.company.contact_phone || ""}`)}\n\n`;
   
   // Document Info
   csvContent += `${escapeCSV(data.documentType.toUpperCase())},${escapeCSV(data.title)}\n`;
