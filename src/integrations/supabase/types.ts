@@ -181,6 +181,7 @@ export type Database = {
           items: Json
           notes: string | null
           quotation_ref: string | null
+          share_token: string | null
           status: string
           subtotal: number
           tender_number: string | null
@@ -202,6 +203,7 @@ export type Database = {
           items?: Json
           notes?: string | null
           quotation_ref?: string | null
+          share_token?: string | null
           status?: string
           subtotal?: number
           tender_number?: string | null
@@ -223,6 +225,7 @@ export type Database = {
           items?: Json
           notes?: string | null
           quotation_ref?: string | null
+          share_token?: string | null
           status?: string
           subtotal?: number
           tender_number?: string | null
@@ -269,10 +272,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_shared_tender: { Args: { p_token: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      save_shared_tender: {
+        Args: {
+          p_client_address: string
+          p_client_name: string
+          p_grand_total: number
+          p_items: Json
+          p_notes: string
+          p_subtotal: number
+          p_title: string
+          p_token: string
+          p_vat_amount: number
+          p_vat_inclusive: boolean
+          p_vat_rate: number
         }
         Returns: boolean
       }

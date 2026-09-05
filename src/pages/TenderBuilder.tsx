@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical, ClipboardPaste, Image as ImageIcon, ImagePlus, Loader2 } from "lucide-react";
+import { Plus, Trash2, Download, Save, ArrowLeft, FileText, GripVertical, ClipboardPaste, Copy, Image as ImageIcon, ImagePlus, Loader2 } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ import { exportWord, exportCSV } from "@/lib/export";
 import { parseClipboard, ParsedRow, ParsedHeaders } from "@/lib/parseTable";
 import { fileToRowImage, imageFileFromClipboard } from "@/lib/rowImage";
 import { DOC_TYPE_PRESETS } from "@/lib/docTypes";
+import ShareMenu from "@/components/ShareMenu";
+import { duplicateTender } from "@/lib/duplicateTender";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -451,6 +453,20 @@ export default function TenderBuilder() {
               <Button variant="outline" onClick={save} disabled={saving} className="flex-1 sm:flex-none">
                 <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save"}
               </Button>
+              {!isNew && <ShareMenu tenderId={id!} variant="button" />}
+              {!isNew && (
+                <Button variant="outline" onClick={async () => {
+                  try {
+                    const newId = await duplicateTender(id!);
+                    toast.success("Copy created");
+                    navigate(`/tenders/${newId}`);
+                  } catch (e: any) {
+                    toast.error(e?.message || "Couldn't duplicate this document");
+                  }
+                }}>
+                  <Copy className="h-4 w-4 mr-1.5" /> Duplicate
+                </Button>
+              )}
               <Button onClick={() => setPreviewExpanded(!previewExpanded)} variant="outline" className="hidden xl:flex">
                 <FileText className="h-4 w-4 mr-1.5" /> {previewExpanded ? "Hide Preview" : "Show Preview"}
               </Button>
