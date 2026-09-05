@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard.tsx";
 import CompanyProfile from "./pages/CompanyProfile.tsx";
 import TendersList from "./pages/TendersList.tsx";
 import TenderBuilder from "./pages/TenderBuilder.tsx";
+import SharedTender from "./pages/SharedTender.tsx";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/tenders" element={<ProtectedRoute><TendersList /></ProtectedRoute>} />
             <Route path="/tenders/new" element={<ProtectedRoute><TenderBuilderRoute /></ProtectedRoute>} />
             <Route path="/tenders/:id" element={<ProtectedRoute><TenderBuilderRoute /></ProtectedRoute>} />
+            <Route path="/shared/:token" element={<SharedTender />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

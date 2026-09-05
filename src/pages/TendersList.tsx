@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, FileText, Trash2 } from "lucide-react";
+import { Plus, FileText, Trash2, Copy } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { formatZAR, formatDate } from "@/lib/format";
 import { toast } from "sonner";
 import DocTypeMenu from "@/components/DocTypeMenu";
+import ShareMenu from "@/components/ShareMenu";
+import { duplicateTender } from "@/lib/duplicateTender";
 
 interface Row {
   id: string; title: string; tender_number: string | null;
@@ -43,6 +45,16 @@ export default function TendersList() {
 
   const setType = (id: string, next: string) =>
     setRows(prev => prev.map(r => r.id === id ? { ...r, document_type: next } : r));
+
+  const duplicate = async (id: string) => {
+    try {
+      const newId = await duplicateTender(id);
+      toast.success("Copy created");
+      navigate(`/tenders/${newId}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't duplicate this document");
+    }
+  };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this tender?")) return;
@@ -101,9 +113,15 @@ export default function TendersList() {
                     <div className="shrink-0 pt-0.5">
                       <DocTypeMenu tenderId={t.id} value={t.document_type || "Quotation"} onChanged={(v) => setType(t.id, v)} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="shrink-0 flex flex-col">
+                      <ShareMenu tenderId={t.id} />
+                      <Button variant="ghost" size="icon" title="Duplicate" onClick={() => duplicate(t.id)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -118,7 +136,7 @@ export default function TendersList() {
                       <th className="px-5 py-3 font-medium">Client</th>
                       <th className="px-5 py-3 font-medium">Date</th>
                       <th className="px-5 py-3 font-medium text-right">Total</th>
-                      <th className="w-12" />
+                      <th className="w-36" />
                     </tr>
                   </thead>
                   <tbody>
@@ -135,9 +153,15 @@ export default function TendersList() {
                         <td className="px-5 py-4 text-muted-foreground cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatDate(t.created_at)}</td>
                         <td className="px-5 py-4 text-right tabular-nums font-medium cursor-pointer" onClick={() => navigate(`/tenders/${t.id}`)}>{formatZAR(Number(t.grand_total))}</td>
                         <td className="pr-3">
-                          <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center justify-end gap-0.5">
+                            <ShareMenu tenderId={t.id} />
+                            <Button variant="ghost" size="icon" title="Duplicate" onClick={() => duplicate(t.id)} className="text-muted-foreground hover:text-foreground">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => remove(t.id)} className="text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
