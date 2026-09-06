@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Plus, Trash2, Save, Download, Loader2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Plus, Trash2, Save, Download, Loader2, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,17 +11,25 @@ import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { toast } from "sonner";
 import logo from "@/assets/tender-desk-logo.svg";
+import { useAuth } from "@/lib/auth";
+import { useCompany } from "@/lib/useCompany";
 
 interface ItemWithId extends TenderItem { id: string }
 
 const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", quantity: 0, unitPrice: 0, image: null });
 
+
 export default function SharedTender() {
   const { token } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { company: myCompany } = useCompany();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [exporting, setExporting] = useState(false);
+
 
   const [company, setCompany] = useState<any>(null);
   const [meta, setMeta] = useState<any>({});
@@ -85,6 +93,42 @@ export default function SharedTender() {
     toast.success("Changes saved");
   };
 
+  const saveToMyAccount = async () => {
+    if (!user) {
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    setCopying(true);
+    const { data, error } = await supabase
+      .from("tenders")
+      .insert({
+        user_id: user.id,
+        company_id: myCompany?.id ?? null,
+        title: title || "Untitled document",
+        document_type: meta.document_type || "Quotation",
+        tender_number: meta.tender_number || null,
+        quotation_ref: meta.quotation_ref || null,
+        client_name: clientName || null,
+        client_address: clientAddress || null,
+        notes: notes || null,
+        items: { columns, rows: items } as any,
+        vat_rate: vatRate,
+        vat_inclusive: vatInclusive,
+        subtotal: totals.subtotal,
+        vat_amount: totals.vatAmount,
+        grand_total: totals.grandTotal,
+        status: "draft",
+      } as any)
+      .select("id")
+      .single();
+    setCopying(false);
+    if (error) return toast.error(error.message);
+    toast.success("Saved to your documents");
+    navigate(`/tenders/${(data as any).id}`);
+  };
+
+
+
   const exportPDF = async () => {
     if (!company) { toast.error("This document has no company details yet"); return; }
     setExporting(true);
@@ -133,14 +177,19 @@ export default function SharedTender() {
             <img src={logo} alt="Tender Desk" className="h-7 w-auto" />
             <span className="text-sm text-muted-foreground hidden sm:inline">Shared document</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <Button variant="outline" onClick={exportPDF} disabled={exporting}>
               <Download className="h-4 w-4 mr-1.5" /> {exporting ? "Creating…" : "PDF"}
+            </Button>
+            <Button variant="outline" onClick={saveToMyAccount} disabled={copying}>
+              <FolderPlus className="h-4 w-4 mr-1.5" />
+              {copying ? "Saving…" : user ? "Save to my documents" : "Sign in to keep a copy"}
             </Button>
             <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90">
               <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save"}
             </Button>
           </div>
+
         </div>
       </header>
 
