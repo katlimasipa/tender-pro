@@ -27,7 +27,11 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => { if (user) navigate("/dashboard", { replace: true }); }, [user, navigate]);
+  const redirect = params.get("redirect");
+  const safeRedirect = redirect && redirect.startsWith("/") ? redirect : null;
+
+  useEffect(() => { if (user) navigate(safeRedirect ?? "/dashboard", { replace: true }); }, [user, navigate, safeRedirect]);
+
 
   const handle = async (e: React.FormEvent) => {
     e.preventDefault();
