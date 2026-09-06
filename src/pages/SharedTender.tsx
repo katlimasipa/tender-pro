@@ -177,14 +177,19 @@ export default function SharedTender() {
             <img src={logo} alt="Tender Desk" className="h-7 w-auto" />
             <span className="text-sm text-muted-foreground hidden sm:inline">Shared document</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <Button variant="outline" onClick={exportPDF} disabled={exporting}>
               <Download className="h-4 w-4 mr-1.5" /> {exporting ? "Creating…" : "PDF"}
+            </Button>
+            <Button variant="outline" onClick={saveToMyAccount} disabled={copying}>
+              <FolderPlus className="h-4 w-4 mr-1.5" />
+              {copying ? "Saving…" : user ? "Save to my documents" : "Sign in to keep a copy"}
             </Button>
             <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90">
               <Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving…" : "Save"}
             </Button>
           </div>
+
         </div>
       </header>
 
