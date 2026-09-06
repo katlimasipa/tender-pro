@@ -21,10 +21,15 @@ const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", qua
 
 export default function SharedTender() {
   const { token } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { company: myCompany } = useCompany();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [exporting, setExporting] = useState(false);
+
 
   const [company, setCompany] = useState<any>(null);
   const [meta, setMeta] = useState<any>({});
