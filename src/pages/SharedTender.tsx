@@ -93,6 +93,42 @@ export default function SharedTender() {
     toast.success("Changes saved");
   };
 
+  const saveToMyAccount = async () => {
+    if (!user) {
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    setCopying(true);
+    const { data, error } = await supabase
+      .from("tenders")
+      .insert({
+        user_id: user.id,
+        company_id: myCompany?.id ?? null,
+        title: title || "Untitled document",
+        document_type: meta.document_type || "Quotation",
+        tender_number: meta.tender_number || null,
+        quotation_ref: meta.quotation_ref || null,
+        client_name: clientName || null,
+        client_address: clientAddress || null,
+        notes: notes || null,
+        items: { columns, rows: items } as any,
+        vat_rate: vatRate,
+        vat_inclusive: vatInclusive,
+        subtotal: totals.subtotal,
+        vat_amount: totals.vatAmount,
+        grand_total: totals.grandTotal,
+        status: "draft",
+      } as any)
+      .select("id")
+      .single();
+    setCopying(false);
+    if (error) return toast.error(error.message);
+    toast.success("Saved to your documents");
+    navigate(`/tenders/${(data as any).id}`);
+  };
+
+
+
   const exportPDF = async () => {
     if (!company) { toast.error("This document has no company details yet"); return; }
     setExporting(true);
