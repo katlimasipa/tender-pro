@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Plus, Trash2, Save, Download, Loader2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Plus, Trash2, Save, Download, Loader2, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,10 +11,13 @@ import { formatZAR } from "@/lib/format";
 import { computeTotals, generateTenderPDF, TenderItem } from "@/lib/pdf";
 import { toast } from "sonner";
 import logo from "@/assets/tender-desk-logo.svg";
+import { useAuth } from "@/lib/auth";
+import { useCompany } from "@/lib/useCompany";
 
 interface ItemWithId extends TenderItem { id: string }
 
 const blankItem = (): ItemWithId => ({ id: crypto.randomUUID(), product: "", quantity: 0, unitPrice: 0, image: null });
+
 
 export default function SharedTender() {
   const { token } = useParams();
