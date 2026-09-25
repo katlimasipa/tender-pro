@@ -43,7 +43,7 @@ const AuthPage = () => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -51,8 +51,13 @@ const AuthPage = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created. Welcome aboard.");
-        navigate("/onboarding");
+        if (data?.user && !data?.session) {
+          toast.info("Account created! Please check your email to confirm your account before signing in, or sign in if confirmation is not required.");
+          setMode("signin");
+        } else {
+          toast.success("Account created. Welcome aboard.");
+          navigate("/onboarding");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
