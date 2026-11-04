@@ -152,11 +152,11 @@ export default function Dashboard() {
 
           {/* Quick links */}
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Link to="/company" className="group bg-gradient-velvet text-primary-foreground rounded-xl p-7 flex items-center justify-between hover:shadow-elevated transition">
+            <Link to="/company" className="group bg-gradient-blush text-foreground rounded-2xl p-7 flex items-center justify-between hover:shadow-elevated transition">
               <div>
                 <Building2 className="h-5 w-5 text-accent" />
                 <div className="font-display text-xl mt-3">Company profile</div>
-                <div className="text-primary-foreground/70 text-sm mt-1">Update letterhead, VAT, contact details.</div>
+                <div className="text-foreground/60 text-sm mt-1">Update letterhead, VAT, contact details.</div>
               </div>
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition" />
             </Link>

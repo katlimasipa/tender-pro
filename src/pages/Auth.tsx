@@ -74,19 +74,19 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
       {/* Left — brand panel */}
-      <div className="hidden lg:flex relative bg-gradient-velvet text-primary-foreground p-12 flex-col justify-between overflow-hidden grain">
+      <div className="hidden lg:flex relative bg-gradient-blush text-foreground p-12 flex-col justify-between overflow-hidden">
         <Link to="/" className="flex items-center relative z-10">
           <img src={logo} alt="Tender Desk" className="h-9 w-auto" />
         </Link>
         <div className="relative z-10">
           <h2 className="font-display text-5xl leading-tight text-balance">
-            "Cut my tender prep from <em className="text-accent not-italic">two hours to twelve minutes.</em>"
+            "Cut my tender prep from <em className="text-accent not-italic font-bold">two hours to twelve minutes.</em>"
           </h2>
-          <p className="mt-6 text-primary-foreground/70 max-w-md">
+          <p className="mt-6 text-foreground/60 max-w-md">
             — Thandi M., Procurement Manager, Cape Town
           </p>
         </div>
-        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-lilac/60 blur-3xl" />
       </div>
 
       {/* Right — form */}
