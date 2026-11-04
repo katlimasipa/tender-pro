@@ -51,11 +51,11 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-background grain">
+    <div className="min-h-screen">
       <div className="container max-w-2xl py-10 sm:py-16">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-2 mb-8">
-            <div className="h-8 w-8 rounded-md bg-gradient-velvet grid place-items-center">
+            <div className="h-8 w-8 rounded-full bg-primary grid place-items-center">
               <FileCheck2 className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="font-display text-xl">Tender Desk</span>
