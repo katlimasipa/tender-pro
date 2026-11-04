@@ -12,8 +12,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Quicksand', 'system-ui', 'sans-serif'],
+        body: ['Nunito Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -69,6 +69,8 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
       },
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
