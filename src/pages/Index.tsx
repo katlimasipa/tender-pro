@@ -70,12 +70,12 @@ const Index = () => {
             className="mt-12 sm:mt-20 mx-auto max-w-4xl"
           >
             <div className="relative rounded-xl bg-card shadow-elevated border border-border overflow-hidden">
-              <div className="bg-gradient-velvet px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-3 text-primary-foreground">
+              <div className="bg-gradient-blush text-foreground px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-3 border-b border-border/60">
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">Tender</div>
+                  <div className="text-[10px] sm:text-xs uppercase tracking-widest opacity-60">Tender</div>
                   <div className="font-display text-base sm:text-xl truncate">Mthembu Construction (Pty) Ltd</div>
                 </div>
-                <div className="text-right text-[10px] sm:text-xs opacity-80 shrink-0">
+                <div className="text-right text-[10px] sm:text-xs opacity-70 shrink-0">
                   <div>TEN-2026-0142</div>
                   <div>21 Apr 2026</div>
                 </div>
