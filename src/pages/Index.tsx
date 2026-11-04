@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, FileText, Calculator, ShieldCheck, Building2 } from "lucide-react";
+import { ArrowRight, FileText, Calculator, ShieldCheck, Building2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/tender-desk-logo.svg";
 import ContactSection from "@/components/ContactSection";
@@ -14,7 +14,7 @@ const features = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background grain">
+    <div className="min-h-screen">
       {/* Nav */}
       <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
         <div className="container flex h-16 items-center justify-between gap-2">
@@ -48,7 +48,7 @@ const Index = () => {
 
             <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-semibold leading-[1.02] sm:leading-[0.95] text-balance">
               Tender documents,<br/>
-              <span className="italic text-primary">beautifully</span> done.
+              <span className="text-accent font-bold">beautifully</span> done.
             </h1>
             <p className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl text-pretty">
               Stop wrestling with Excel. Tender Desk turns your line items into compliant,
@@ -70,12 +70,12 @@ const Index = () => {
             className="mt-12 sm:mt-20 mx-auto max-w-4xl"
           >
             <div className="relative rounded-xl bg-card shadow-elevated border border-border overflow-hidden">
-              <div className="bg-gradient-velvet px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-3 text-primary-foreground">
+              <div className="bg-gradient-blush text-foreground px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between gap-3 border-b border-border/60">
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">Tender</div>
+                  <div className="text-[10px] sm:text-xs uppercase tracking-widest opacity-60">Tender</div>
                   <div className="font-display text-base sm:text-xl truncate">Mthembu Construction (Pty) Ltd</div>
                 </div>
-                <div className="text-right text-[10px] sm:text-xs opacity-80 shrink-0">
+                <div className="text-right text-[10px] sm:text-xs opacity-70 shrink-0">
                   <div>TEN-2026-0142</div>
                   <div>21 Apr 2026</div>
                 </div>
@@ -167,7 +167,7 @@ const Index = () => {
                 <span className="text-muted-foreground text-sm">/ {p.per}</span>
               </div>
               <ul className="mt-6 space-y-2 text-sm">
-                {p.features.map(ft => <li key={ft} className="flex gap-2"><span className="text-accent">✓</span>{ft}</li>)}
+                {p.features.map(ft => <li key={ft} className="flex gap-2 items-center"><Check className="h-4 w-4 text-accent shrink-0" />{ft}</li>)}
               </ul>
               <Button asChild className={`mt-6 w-full ${p.featured ? "bg-primary hover:bg-primary/90" : ""}`} variant={p.featured ? "default" : "outline"}>
                 <Link to="/auth?mode=signup">{p.cta}</Link>
