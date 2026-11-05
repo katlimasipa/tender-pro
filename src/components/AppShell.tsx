@@ -190,6 +190,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
         <main className="pb-[env(safe-area-inset-bottom)]">
           {children}
+          <footer className="py-6 text-center text-xs text-muted-foreground">
+            Built by{" "}
+            <a
+              href="https://architeq.co.za"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground font-medium hover:text-accent transition"
+            >
+              Architeq Web Agency
+            </a>
+          </footer>
         </main>
       </div>
     </div>
