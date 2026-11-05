@@ -29,7 +29,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <Button
         onClick={() => { setOpen(false); navigate("/tenders/new"); }}
         size="icon"
-        className="h-11 w-11 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-ochre"
+        className="h-11 w-11 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft"
         title="New Tender"
         aria-label="New Tender"
       >

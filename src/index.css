@@ -4,91 +4,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Soft Pastel Dashboard
- * Palette: blush pink + lavender gradient backdrop, white cards,
- * near-black pill buttons, rose accents. Generous rounding, diffuse shadows.
+/* Monochrome Dashboard
+ * Palette: near-white backdrop, white cards, near-black pill buttons,
+ * neutral gray accents. Generous rounding, diffuse shadows.
+ * Colour lives only in the generated documents and the settings where
+ * the user picks their brand colour — never in the app chrome.
  */
 
 @layer base {
   :root {
-    --background: 340 50% 97%;          /* blush-tinted off-white */
-    --foreground: 250 25% 15%;          /* deep plum-slate ink */
+    --background: 0 0% 97%;             /* neutral off-white */
+    --foreground: 0 0% 10%;             /* near-black ink */
 
     --card: 0 0% 100%;
-    --card-foreground: 250 25% 15%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 250 25% 15%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 250 15% 12%;             /* near-black pill buttons */
+    --primary: 0 0% 10%;                /* near-black pill buttons */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 40% 96%;           /* soft pink-gray */
-    --secondary-foreground: 250 25% 15%;
+    --secondary: 0 0% 95%;              /* soft gray */
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 340 35% 94%;
-    --muted-foreground: 250 10% 45%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 340 65% 52%;              /* rose for icons and highlights */
+    --accent: 0 0% 12%;                 /* neutral ink for highlights */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 80% 55%;
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 340 30% 90%;              /* soft hairline */
-    --input: 340 25% 88%;
-    --ring: 340 65% 52%;
+    --border: 0 0% 90%;                 /* soft hairline */
+    --input: 0 0% 87%;
+    --ring: 0 0% 12%;
 
     --radius: 1rem;                     /* generous rounding */
 
-    /* Editorial extras (compatibility mappings) */
-    --ochre: 340 65% 52%;
-    --velvet: 250 15% 12%;
+    /* Compatibility mappings (kept neutral) */
+    --ochre: 0 0% 12%;
+    --velvet: 0 0% 10%;
     --bone: 0 0% 100%;
-    --paper: 340 40% 96%;
-    --ink: 250 25% 15%;
-    --blush: 350 85% 92%;               /* pastel pink panel */
-    --lilac: 255 70% 91%;               /* pastel lavender panel */
+    --paper: 0 0% 95%;
+    --ink: 0 0% 10%;
+    --blush: 0 0% 93%;                  /* neutral light panel */
+    --lilac: 0 0% 91%;                  /* neutral light panel */
 
-    --shadow-soft: 0 10px 30px -12px hsl(340 45% 70% / 0.35);
-    --shadow-elevated: 0 24px 50px -20px hsl(340 45% 65% / 0.45);
-    --shadow-ochre: 0 10px 30px -12px hsl(340 55% 68% / 0.4);
+    --shadow-soft: 0 10px 30px -12px hsl(0 0% 45% / 0.25);
+    --shadow-elevated: 0 24px 50px -20px hsl(0 0% 45% / 0.3);
+    --shadow-ochre: 0 10px 30px -12px hsl(0 0% 45% / 0.25);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 250 15% 30%;
-    --sidebar-primary: 250 15% 12%;
+    --sidebar-foreground: 0 0% 35%;
+    --sidebar-primary: 0 0% 10%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 60% 95%;
-    --sidebar-accent-foreground: 250 25% 15%;
-    --sidebar-border: 340 30% 90%;
-    --sidebar-ring: 340 65% 52%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 0 0% 12%;
   }
 
   .dark {
-    --background: 255 30% 9%;
-    --foreground: 340 40% 92%;
-    --card: 255 28% 12%;
-    --card-foreground: 340 40% 92%;
-    --popover: 255 28% 12%;
-    --popover-foreground: 340 40% 92%;
-    --primary: 340 80% 75%;
-    --primary-foreground: 255 30% 10%;
-    --secondary: 255 22% 17%;
-    --secondary-foreground: 340 40% 92%;
-    --muted: 255 22% 15%;
-    --muted-foreground: 340 20% 65%;
-    --accent: 340 70% 62%;
-    --accent-foreground: 255 30% 10%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 0 0% 93%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 62%;
+    --accent: 0 0% 80%;
+    --accent-foreground: 0 0% 10%;
     --destructive: 0 70% 55%;
-    --destructive-foreground: 340 40% 92%;
-    --border: 255 22% 20%;
-    --input: 255 22% 20%;
-    --ring: 340 70% 62%;
+    --destructive-foreground: 0 0% 93%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
   }
 
   body {
     background-color: hsl(var(--background));
-    background-image: linear-gradient(160deg, hsl(348 90% 95%) 0%, hsl(310 55% 95%) 45%, hsl(255 70% 94%) 100%);
+    background-image: linear-gradient(160deg, hsl(0 0% 98%) 0%, hsl(0 0% 96%) 55%, hsl(0 0% 94%) 100%);
     background-attachment: fixed;
   }
 }
@@ -116,10 +118,10 @@
   .shadow-ochre { box-shadow: var(--shadow-ochre); }
 
   .bg-gradient-velvet {
-    background-image: linear-gradient(135deg, hsl(348 85% 90%) 0%, hsl(255 70% 90%) 100%);
+    background-image: linear-gradient(135deg, hsl(0 0% 94%) 0%, hsl(0 0% 90%) 100%);
   }
   .bg-gradient-blush {
-    background-image: linear-gradient(135deg, hsl(350 85% 91%) 0%, hsl(255 70% 91%) 100%);
+    background-image: linear-gradient(135deg, hsl(0 0% 94%) 0%, hsl(0 0% 90%) 100%);
   }
   .bg-gradient-paper {
     background-image: linear-gradient(180deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%);
