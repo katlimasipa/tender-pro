@@ -20,57 +20,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const isActive = (to: string) =>
     loc.pathname === to || (to !== "/dashboard" && loc.pathname.startsWith(to));
 
-  const RailBody = (
-    <>
-      <div className="h-11 w-11 rounded-2xl bg-primary text-primary-foreground grid place-items-center shadow-soft">
-        <Printer className="h-5 w-5" />
-      </div>
-
-      <Button
-        onClick={() => { setOpen(false); navigate("/tenders/new"); }}
-        size="icon"
-        className="h-11 w-11 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft"
-        title="New Tender"
-        aria-label="New Tender"
-      >
-        <Plus className="h-5 w-5" />
-      </Button>
-
-      <div className="h-px w-8 bg-sidebar-border my-1" />
-
-      <nav className="flex flex-col items-center gap-2">
-        {nav.map(item => {
-          const active = isActive(item.to);
-          return (
-            <Link key={item.to} to={item.to} onClick={() => setOpen(false)}
-              title={item.label}
-              aria-label={item.label}
-              className={cn(
-                "h-11 w-11 rounded-2xl grid place-items-center transition-colors",
-                active
-                  ? "bg-primary text-primary-foreground shadow-soft"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto">
-        <Button variant="ghost" size="icon"
-          onClick={async () => { await signOut(); navigate("/"); }}
-          title="Sign out"
-          aria-label="Sign out"
-          className="h-11 w-11 rounded-2xl text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/70"
-        >
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </div>
-    </>
-  );
-
   const DrawerBody = (
     <>
       <div className="flex items-center px-6 h-16 border-b border-sidebar-border">
@@ -133,11 +82,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </Button>
       </header>
 
-      {/* Desktop floating icon rail */}
-      <aside className="hidden md:flex fixed left-5 top-1/2 -translate-y-1/2 z-40 w-[76px] flex-col items-center gap-3 rounded-3xl bg-card border border-sidebar-border shadow-elevated py-4 px-2.5">
-        {RailBody}
-      </aside>
-
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden fixed inset-0 z-50 flex">
@@ -155,10 +99,26 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <div className="flex-1 min-w-0 md:pl-[104px]">
-        {/* Desktop top bar with pill tabs */}
-        <header className="hidden md:flex items-center justify-between gap-4 px-8 pt-5">
-          <div className="w-40" />
+      <div className="flex-1 min-w-0">
+        {/* Desktop top navigation */}
+        <header className="hidden md:flex items-center justify-between gap-3 px-4 lg:px-8 pt-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Link to="/dashboard" aria-label="Tender Desk home" className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground grid place-items-center">
+                <Printer className="h-5 w-5" />
+              </div>
+              <span className="hidden lg:inline font-display text-lg">Tender Desk</span>
+            </Link>
+            <Button
+              onClick={() => navigate("/tenders/new")}
+              size="icon"
+              className="h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft"
+              title="New Tender"
+              aria-label="New Tender"
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
           <nav className="flex items-center gap-1 rounded-full bg-card border border-border/70 shadow-soft p-1.5">
             {nav.map(item => {
               const active = isActive(item.to);
@@ -176,15 +136,25 @@ export default function AppShell({ children }: { children: ReactNode }) {
               );
             })}
           </nav>
-          <div className="w-40 flex justify-end">
+          <div className="flex items-center justify-end gap-2 min-w-0 shrink-0">
             <div className="flex items-center gap-2 min-w-0">
               <div className="h-9 w-9 rounded-full bg-gradient-blush border border-border/60 grid place-items-center text-xs font-bold text-foreground shrink-0">
                 {(user?.email || "?").slice(0, 1).toUpperCase()}
               </div>
-              <div className="text-xs text-muted-foreground truncate max-w-[7rem]" title={user?.email}>
+              <div className="hidden lg:block text-xs text-muted-foreground truncate max-w-[7rem]" title={user?.email}>
                 {user?.email}
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={async () => { await signOut(); navigate("/"); }}
+              title="Sign out"
+              aria-label="Sign out"
+              className="h-10 w-10 rounded-full text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/70"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
         </header>
 
