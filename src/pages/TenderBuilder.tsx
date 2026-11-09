@@ -438,7 +438,7 @@ export default function TenderBuilder() {
 
   return (
     <AppShell>
-      <div className={`p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid gap-8 items-start ${previewExpanded ? 'grid-cols-1 xl:grid-cols-[1fr_500px]' : 'grid-cols-1'}`}>
+      <div className={`p-4 sm:p-8 md:p-12 max-w-[1600px] mx-auto grid gap-8 items-start ${previewExpanded ? 'grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(400px,480px)]' : 'grid-cols-1'}`}>
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 xl:h-[calc(100vh-96px)] xl:overflow-y-auto xl:pr-4">
           <button onClick={() => navigate("/tenders")} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-4">
             <ArrowLeft className="h-3 w-3" /> Back to tenders
